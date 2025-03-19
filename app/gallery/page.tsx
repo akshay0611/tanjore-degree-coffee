@@ -290,32 +290,41 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Submit Your Photos */}
-      <section className="py-20 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
-        <div className="container px-4 mx-auto">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block mb-6">
-              <ImageIcon className="h-12 w-12 text-amber-400 mx-auto mb-2" />
-              <div className="h-1 w-16 bg-amber-400 mx-auto"></div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold custom-serif mb-6">Share Your Coffee Moments</h2>
-            <p className="text-xl text-amber-200 mb-10 italic">
-              Tag us in your photos or use #TanjoreDegreeCoffee for a chance to be featured in our gallery
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg">
-                Upload Your Photo
-              </Button>
-              <Button
-                variant="outline"
-                className="text-amber-200 border-amber-400 hover:bg-amber-800 px-8 py-6 text-lg rounded-full transition-all duration-300"
-              >
-                Learn More
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+     {/* Submit Your Photos */}
+<section className="py-20 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
+  <div className="container px-4 mx-auto">
+    <div className="max-w-4xl mx-auto text-center">
+     
+      <div className="inline-block mb-6 animate-bounce">
+        <ImageIcon className="h-12 w-12 text-amber-400 mx-auto mb-2" />
+        <div className="h-1 w-16 bg-amber-400 mx-auto rounded-full" />
+      </div>
+
+     
+      <h2 className="text-3xl md:text-4xl font-bold custom-serif mb-6 animate-fade-in-up">
+        Share Your Coffee Moments
+      </h2>
+
+   
+      <p className="text-xl text-amber-200 mb-10 italic animate-fade-in-up delay-100">
+        Tag us in your photos or use #TanjoreDegreeCoffee for a chance to be featured in our gallery
+      </p>
+
+      
+      <div className="flex flex-col sm:flex-row justify-center gap-4">
+        <Button className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105">
+          Upload Your Photo
+        </Button>
+        <Button
+          variant="outline"
+          className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
+        >
+          Learn More
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
     </div>
   )
 }
