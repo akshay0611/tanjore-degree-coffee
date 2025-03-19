@@ -214,83 +214,89 @@ export default function ContactPage() {
       </div>
     </div>
 
-            <div className="lg:w-1/2">
-              <div className="text-left mb-10">
-                <div className="inline-flex items-center mb-4 bg-amber-800/10 px-4 py-1 rounded-full">
-                  <Mail className="h-5 w-5 text-amber-800 mr-2" />
-                  <span className="text-amber-800 font-medium">Get in Touch</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-amber-900 custom-serif mb-4">Send Us a Message</h2>
-                <p className="text-lg text-amber-800/80">Have questions or feedback? We&apos;d love to hear from you.</p>
-              </div>
+    <div className="lg:w-1/2">
+      {/* Contact Header */}
+      <div className="text-left mb-10">
+        <div className="inline-flex items-center mb-4 bg-amber-800/10 px-4 py-1 rounded-full transition-all duration-300 hover:bg-amber-800/20">
+          <Mail className="h-5 w-5 text-amber-800 mr-2" />
+          <span className="text-amber-800 font-medium">Get in Touch</span>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-amber-900 custom-serif mb-4">
+          Send Us a Message
+        </h2>
+        <p className="text-lg text-amber-800/80">
+          Have questions or feedback? We&apos;d love to hear from you.
+        </p>
+      </div>
 
-              <form className="bg-white p-8 rounded-xl shadow-lg">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-amber-800 mb-2">
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                </div>
+      {/* Contact Form */}
+      <form className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-amber-800 mb-2">
+              Your Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-amber-900 placeholder-amber-800/50 transition-all duration-300 hover:border-amber-300"
+              placeholder="John Doe"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-amber-900 placeholder-amber-800/50 transition-all duration-300 hover:border-amber-300"
+              placeholder="john@example.com"
+            />
+          </div>
+        </div>
 
-                <div className="mb-6">
-                  <label htmlFor="phone" className="block text-sm font-medium text-amber-800 mb-2">
-                    Phone Number (Optional)
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
+        <div className="mb-6">
+          <label htmlFor="phone" className="block text-sm font-medium text-amber-800 mb-2">
+            Phone Number (Optional)
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-amber-900 placeholder-amber-800/50 transition-all duration-300 hover:border-amber-300"
+            placeholder="+91 98765 43210"
+          />
+        </div>
 
-                <div className="mb-6">
-                  <label htmlFor="subject" className="block text-sm font-medium text-amber-800 mb-2">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    id="subject"
-                    className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                    placeholder="How can we help?"
-                  />
-                </div>
+        <div className="mb-6">
+          <label htmlFor="subject" className="block text-sm font-medium text-amber-800 mb-2">
+            Subject
+          </label>
+          <input
+            type="text"
+            id="subject"
+            className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-amber-900 placeholder-amber-800/50 transition-all duration-300 hover:border-amber-300"
+            placeholder="How can we help?"
+          />
+        </div>
 
-                <div className="mb-6">
-                  <label htmlFor="message" className="block text-sm font-medium text-amber-800 mb-2">
-                    Your Message
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={5}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                    placeholder="Tell us what you'd like to know..."
-                  ></textarea>
-                </div>
+        <div className="mb-6">
+          <label htmlFor="message" className="block text-sm font-medium text-amber-800 mb-2">
+            Your Message
+          </label>
+          <textarea
+            id="message"
+            rows={5}
+            className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-amber-900 placeholder-amber-800/50 transition-all duration-300 hover:border-amber-300"
+            placeholder="Tell us what you'd like to know..."
+          ></textarea>
+        </div>
 
-                <Button className="w-full bg-amber-800 hover:bg-amber-900 text-amber-50 py-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-amber-900/20 text-lg">
-                  Send Message
-                </Button>
-              </form>
-            </div>
+        <Button className="w-full bg-amber-800 hover:bg-amber-900 text-amber-50 py-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-amber-900/20 text-lg transform hover:scale-105">
+          Send Message
+        </Button>
+      </form>
+    </div>
           </div>
         </div>
       </section>
