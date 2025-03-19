@@ -108,21 +108,21 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-gradient-to-b from-amber-50 to-amber-100 relative overflow-hidden">
-  {/* Decorative Elements */}
+{/* Featured Collections */}
+<section className="py-24 bg-gradient-to-b from-amber-50 to-amber-100 relative overflow-hidden">
+
   <div className="absolute inset-0 pointer-events-none">
     <div className="absolute top-0 right-0 w-64 h-64 bg-amber-200 rounded-full opacity-20 blur-3xl -translate-y-1/2 translate-x-1/4"></div>
     <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-300 rounded-full opacity-20 blur-3xl translate-y-1/3 -translate-x-1/3"></div>
   </div>
 
   <div className="container px-4 mx-auto relative z-10 text-center">
-    {/* Camera Icon at the Top */}
+
     <div className="inline-flex flex-col items-center mb-6">
       <div className="p-3 bg-white rounded-full shadow-md shadow-amber-200/50 mb-3">
         <Camera className="h-10 w-10 text-amber-700" />
       </div>
 
-      {/* Decorative Lines & Pulse Dot */}
       <div className="flex items-center justify-center gap-2">
         <div className="h-0.5 w-12 bg-gradient-to-r from-transparent to-amber-700"></div>
         <div className="h-2 w-2 rounded-full bg-amber-700 animate-pulse"></div>
@@ -130,7 +130,7 @@ export default function GalleryPage() {
       </div>
     </div>
 
-    {/* Featured Collections Heading */}
+   
     <div className="mb-16">
       <h2 className="text-3xl md:text-5xl font-bold text-amber-900 mb-4">
         Featured Collections
@@ -140,9 +140,8 @@ export default function GalleryPage() {
       </p>
     </div>
 
-    {/* Collections Grid */}
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-      {/* Collection Items Here */}
+      
       {[
         {
           title: "The Art of Coffee Making",
@@ -171,7 +170,7 @@ export default function GalleryPage() {
           className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 group transform hover:-translate-y-2"
         >
           <div className="relative h-64 overflow-hidden">
-            {/* Fixed Image component usage */}
+         
             <img
               src={collection.image}
               alt={collection.title}
@@ -179,20 +178,20 @@ export default function GalleryPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-amber-900/90 via-amber-800/50 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-300"></div>
             
-            {/* Enhanced Photo Count Badge */}
+         
             <div className="absolute bottom-4 left-4 bg-white text-amber-900 px-4 py-1.5 rounded-full text-sm font-medium shadow-md flex items-center space-x-2 transform group-hover:translate-y-0 translate-y-12 transition-transform duration-300 delay-100">
               <Camera className="h-4 w-4 text-amber-700 mr-1" />
               <span>{collection.count} Photos</span>
             </div>
             
-            {/* Hover Overlay Icon */}
+           
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300">
               <Images className="h-8 w-8 text-amber-700" />
             </div>
           </div>
           
           <div className="p-6 relative">
-            {/* Title with underline effect */}
+          
             <div className="group/title mb-3">
               <h3 className="text-xl font-bold text-amber-900 inline-block">
                 {collection.title}
@@ -202,7 +201,7 @@ export default function GalleryPage() {
             
             <p className="text-gray-600 mb-6 line-clamp-2">{collection.description}</p>
             
-            {/* Enhanced Button */}
+           
             <button className="flex items-center text-amber-700 font-medium hover:text-amber-900 transition-colors group/btn">
               <span>View Collection</span>
               <div className="ml-2 w-6 h-6 rounded-full flex items-center justify-center bg-amber-100 group-hover/btn:bg-amber-200 transition-colors">
@@ -210,7 +209,7 @@ export default function GalleryPage() {
               </div>
             </button>
             
-            {/* Decorative Corner */}
+           
             <div className="absolute top-0 right-0 w-12 h-12">
               <div className="absolute top-0 right-0 w-0 h-0 border-t-[48px] border-r-[48px] border-t-transparent border-r-white"></div>
               <div className={`absolute top-0 right-0 w-6 h-6 bg-gradient-to-br ${collection.accent} rounded-bl-lg`}></div>
@@ -220,7 +219,7 @@ export default function GalleryPage() {
       ))}
     </div>
     
-    {/* View All Collections Button */}
+   
     <div className="mt-12 text-center">
       <button className="px-8 py-3 bg-white text-amber-800 border-2 border-amber-700 rounded-full shadow-md hover:shadow-lg hover:bg-amber-50 transition-all duration-300 hover:scale-105 flex items-center mx-auto">
         <span>Browse All Collections</span>
