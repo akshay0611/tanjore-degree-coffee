@@ -1,5 +1,7 @@
 import { Coffee, MapPin, Clock, Phone, Mail, MessageSquare, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+
 
 export default function ContactPage() {
   return (
@@ -276,29 +278,34 @@ export default function ContactPage() {
 
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
-        <div className="container px-4 mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div>
-              <h2 className="text-3xl font-bold custom-serif mb-4">Connect With Us on Social Media</h2>
-              <p className="text-amber-200 max-w-2xl">
-                Follow us on social media to stay updated with our latest offerings and events.
-              </p>
-            </div>
-            <div className="flex gap-4">
-              {["facebook", "twitter", "instagram", "youtube"].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="bg-amber-800/50 hover:bg-amber-700 p-3 rounded-full transition-colors duration-300"
-                >
-                  <span className="sr-only">{social}</span>
-                  <div className="h-6 w-6 text-amber-200"></div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+  <div className="container px-4 mx-auto">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+      <div>
+        <h2 className="text-3xl font-bold custom-serif mb-4">Connect With Us on Social Media</h2>
+        <p className="text-amber-200 max-w-2xl">
+          Follow us on social media to stay updated with our latest offerings and events.
+        </p>
+      </div>
+      <div className="flex gap-4">
+        {[
+          { name: "facebook", icon: <Facebook className="h-6 w-6 text-amber-200" /> },
+          { name: "twitter", icon: <Twitter className="h-6 w-6 text-amber-200" /> },
+          { name: "instagram", icon: <Instagram className="h-6 w-6 text-amber-200" /> },
+          { name: "youtube", icon: <Youtube className="h-6 w-6 text-amber-200" /> }
+        ].map((social) => (
+          <a
+            key={social.name}
+            href="#"
+            className="bg-amber-800/50 hover:bg-amber-700 p-3 rounded-full transition-colors duration-300"
+          >
+            <span className="sr-only">{social.name}</span>
+            {social.icon}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
     </div>
   )
 }
