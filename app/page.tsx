@@ -4,6 +4,7 @@ import Image from "next/image";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import MenuSection from "@/components/MenuSection";
+import GallerySection from '@/components/GallerySection'; // Adjust path based on your folder structure
 
 
 export default function Home() {
@@ -234,41 +235,9 @@ export default function Home() {
     </div>
   </div>
 </section>
-
-      {/* Gallery Section */}
-      <section className="py-24 bg-amber-900">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block mb-4">
-              <Coffee className="h-10 w-10 text-amber-400 mx-auto mb-2" />
-              <div className="h-1 w-16 bg-amber-400 mx-auto"></div>
-            </div>
-            <h2 className="text-4xl font-bold text-amber-50 custom-serif mb-4">Coffee Gallery</h2>
-            <p className="max-w-2xl mx-auto text-lg text-amber-200 italic">
-              A glimpse into our coffee-making process and ambiance
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-  {[...Array(8)].map((_, index) => (
-    <div
-      key={index}
-      className={`overflow-hidden rounded-lg ${
-        index === 0 || index === 7 ? "col-span-2 row-span-2" : ""
-      }`}
-    >
-      <Image
-        src={`/placeholder.svg`}
-        alt={`Gallery image ${index + 1}`}
-        width={index === 0 || index === 7 ? 600 : 300}
-        height={index === 0 || index === 7 ? 600 : 300}
-        className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-      />
-    </div>
-  ))}
-</div>
-        </div>
-      </section>
+     
+     
+<GallerySection />
 
       {/* Call to Action */}
       <section className="py-20 bg-gradient-to-r from-amber-800 to-amber-900 text-white relative overflow-hidden">
