@@ -189,7 +189,7 @@ export default function GalleryPage() {
     <div className="text-center mb-16">
 
       <div className="inline-block mb-6">
-       <div className="p-3 bg-gradient-to-br from-amber-800 to-amber-900 rounded-full shadow-lg mb-3 transform hover:rotate-12 transition-transform duration-300 flex items-center justify-center">
+      <div className="p-3 bg-gradient-to-br from-amber-800 to-amber-900 rounded-full shadow-lg mb-3 flex items-center justify-center">
   <Play className="h-10 w-10 text-amber-400" />
 </div>
 
