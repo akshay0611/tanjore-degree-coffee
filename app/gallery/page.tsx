@@ -1,4 +1,4 @@
-import { Coffee, ImageIcon, Play, ChevronRight } from "lucide-react"
+import { Coffee, ImageIcon, Play, ChevronRight, Instagram } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image";
 
@@ -248,49 +248,60 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Instagram Feed */}
-      <section className="py-20 bg-amber-50">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block mb-4">
-              <Coffee className="h-10 w-10 text-amber-800 mx-auto mb-2" />
-              <div className="h-1 w-16 bg-amber-800 mx-auto"></div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-amber-900 custom-serif mb-4">Follow Us on Instagram</h2>
-            <p className="max-w-2xl mx-auto text-lg text-amber-800/80 italic">@TanjoreDegreeCoffee</p>
-          </div>
+{/* Instagram Feed */}
+<section className="py-20 bg-gradient-to-b from-amber-50 to-amber-100">
+  <div className="container px-4 mx-auto">
+    <div className="text-center mb-16">
+      <div className="inline-block mb-4 transform transition-transform duration-500 hover:scale-110">
+        <Coffee className="h-10 w-10 text-amber-800 mx-auto mb-2" />
+        <div className="h-1 w-16 bg-amber-800 mx-auto rounded-full"></div>
+      </div>
+      <h2 className="text-3xl md:text-4xl font-bold text-amber-900 custom-serif mb-4 animate-fade-in">
+        Follow Us on Instagram
+      </h2>
+      <p className="max-w-2xl mx-auto text-lg text-amber-800/80 italic animate-fade-in delay-100">
+        @TanjoreDegreeCoffee
+      </p>
+    </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...Array(6)].map((_, index) => (
-              <div
-                key={index}
-                className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-              >
-               <Image
-  src="/placeholder.svg"
-  alt={`Instagram post ${index + 1}`}
-  width={300}
-  height={300}
-  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-/>
-                <div className="absolute inset-0 bg-gradient-to-t from-amber-950 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <p className="text-amber-100 text-sm">#TanjoreCoffee #CoffeeLovers</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <Button className="bg-amber-800 hover:bg-amber-900 text-amber-50 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20">
-              Follow Us on Instagram
-            </Button>
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {[...Array(6)].map((_, index) => (
+        <div
+          key={index}
+          className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+        >
+          <Image
+            src="/placeholder.svg"
+            alt={`Instagram post ${index + 1}`}
+            width={300}
+            height={300}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-amber-950/90 via-amber-950/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center p-4">
+            <p className="text-amber-100 text-sm text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              #TanjoreCoffee #CoffeeLovers
+            </p>
           </div>
         </div>
-      </section>
+      ))}
+    </div>
 
-     {/* Submit Your Photos */}
+   
+    <div className="text-center mt-10 animate-fade-in delay-200">
+      <a
+        href="https://www.instagram.com/TanjoreDegreeCoffee/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 bg-amber-800 hover:bg-amber-900 text-amber-50 px-8 py-4 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/30 transform hover:scale-105"
+      >
+        <Instagram className="h-6 w-6 text-amber-50" />
+        Follow Us on Instagram
+      </a>
+    </div>
+  </div>
+</section>
+
+{/* Submit Your Photos */}
 <section className="py-20 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
   <div className="container px-4 mx-auto">
     <div className="max-w-4xl mx-auto text-center">
