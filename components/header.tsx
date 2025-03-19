@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Menu, X, Coffee, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { usePathname } from "next/navigation"
+import { AuthModal } from "@/components/auth-modal" // Import the AuthModal component
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -116,15 +117,8 @@ export default function Header() {
                   3
                 </span>
               </Button>
-              <Button
-                className={`transition-all duration-300 
-                  ${isScrolled
-                    ? "bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-amber-50 shadow-md"
-                    : "bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-amber-50 shadow-lg"
-                  } hover:scale-105`}
-              >
-                Order Online
-              </Button>
+              {/* Replace the Button with AuthModal */}
+              <AuthModal />
             </div>
           </nav>
 
@@ -180,12 +174,8 @@ export default function Header() {
                     3
                   </span>
                 </Button>
-                <Button 
-                  className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 
-                    text-amber-50 flex-1 shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  Order Online
-                </Button>
+                {/* Replace the Button with AuthModal */}
+                <AuthModal />
               </div>
             </div>
           </nav>
