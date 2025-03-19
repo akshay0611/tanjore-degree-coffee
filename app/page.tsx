@@ -48,19 +48,19 @@ export default function Home() {
                 text: "The most authentic degree coffee I&apos;ve had outside of Thanjavur. The aroma and taste take me back to my childhood.",
                 name: "Ramesh Kumar",
                 location: "Chennai",
-                image: "/placeholder.svg?height=100&width=100",
+                image: "/test1.jpeg",
               },
               {
                 text: "Their filter coffee is exceptional! The perfect balance of strong decoction and creamy milk. I visit every weekend.",
                 name: "Priya Venkatesh",
                 location: "Bangalore",
-                image: "/placeholder.svg?height=100&width=100",
+                image: "/test2.jpeg",
               },
               {
                 text: "Not just the coffee, their traditional snacks are amazing too. The perfect place to experience South Indian coffee culture.",
                 name: "Arun Nair",
                 location: "Mumbai",
-                image: "/placeholder.svg?height=100&width=100",
+                image: "/test3.jpeg",
               },
             ].map((testimonial, index) => (
               <div

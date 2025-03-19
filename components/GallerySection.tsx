@@ -3,6 +3,18 @@ import Image from 'next/image';
 import { Coffee } from 'lucide-react';
 
 const GallerySection = () => {
+  // Array of 8 different image paths
+  const images = [
+    '/cg1.jpeg',
+    '/cg2.jpeg',
+    '/cg3.jpeg',
+    '/cg4.jpeg',
+    '/cg5.jpeg',
+    '/cg6.jpeg',
+    '/cg7.jpeg',
+    '/cg8.jpeg',
+  ];
+
   return (
     <section className="py-24 bg-gradient-to-b from-amber-900 to-amber-800 overflow-hidden">
       <div className="container px-4 mx-auto">
@@ -21,7 +33,7 @@ const GallerySection = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, index) => (
+          {images.map((src, index) => (
             <div
               key={index}
               className={`relative overflow-hidden rounded-xl shadow-lg group ${
@@ -29,7 +41,7 @@ const GallerySection = () => {
               } transition-all duration-700 ease-out`}
             >
               <Image
-                src={`/placeholder.svg`}
+                src={src}
                 alt={`Gallery image ${index + 1}`}
                 width={index === 0 || index === 7 ? 600 : 300}
                 height={index === 0 || index === 7 ? 600 : 300}

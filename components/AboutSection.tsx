@@ -24,7 +24,7 @@ export default function AboutSection() {
             <div className="absolute top-0 left-0 w-full h-full p-4 -m-4 border border-amber-700/20 rounded-lg transform rotate-3 z-0"></div>
             <div className="relative rounded-lg shadow-2xl overflow-hidden z-10 hover:shadow-amber-900/40 transition-shadow duration-300">
               <Image
-                src="/coffee.jpg"
+                src="/aboutsection.jpeg"
                 alt="Traditional coffee preparation"
                 width={800}
                 height={600}

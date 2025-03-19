@@ -67,7 +67,7 @@ export default function MenuPage() {
                 description:
                   "Our signature coffee made with traditional decoction and farm-fresh milk heated to the perfect 'degree'.",
                 price: "₹80",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp1.jpeg",
                 popular: true,
               },
               {
@@ -75,13 +75,13 @@ export default function MenuPage() {
                 description:
                   "A special blend inspired by the royal courts of Mysore, with a hint of cardamom and chicory.",
                 price: "₹90",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp2.jpeg",
               },
               {
                 name: "Kumbakonam Degree Coffee",
                 description: "A tribute to the famous Kumbakonam style, with a stronger decoction and creamy milk.",
                 price: "₹85",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp3.jpeg",
                 popular: true,
               },
               {
@@ -89,7 +89,7 @@ export default function MenuPage() {
                 description:
                   "A unique blend that pays homage to the temple towns of Tamil Nadu, with a rich aroma and smooth finish.",
                 price: "₹95",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp4.jpeg",
               },
             ].map((item, index) => (
               <div
@@ -146,37 +146,37 @@ export default function MenuPage() {
                 name: "Filter Coffee",
                 description: "Classic South Indian filter coffee served in traditional davara-tumbler.",
                 price: "₹60",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp5.jpeg",
               },
               {
                 name: "Chukku Kaapi",
                 description: "Traditional coffee with dry ginger and warming spices.",
                 price: "₹75",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp6.jpeg",
               },
               {
                 name: "Bella Coffee",
                 description: "Coffee sweetened with jaggery instead of sugar for a rich flavor.",
                 price: "₹70",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp7.jpeg",
               },
               {
                 name: "Sukku Coffee",
                 description: "Medicinal coffee with dry ginger, pepper and palm jaggery.",
                 price: "₹80",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp8.jpeg",
               },
               {
                 name: "Paruthi Paal Coffee",
                 description: "A unique coffee made with cotton seed milk, a traditional Tamil delicacy.",
                 price: "₹85",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp9.jpeg",
               },
               {
                 name: "Inji Kaapi",
                 description: "Ginger-infused coffee that's perfect for rainy days.",
                 price: "₹75",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp10.jpeg",
               },
             ].map((item, index) => (
               <div
@@ -229,27 +229,27 @@ export default function MenuPage() {
                 name: "Coconut Cold Brew",
                 description: "Cold brewed coffee with coconut water and a hint of cardamom.",
                 price: "₹120",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp11.jpeg",
                 new: true,
               },
               {
                 name: "Spiced Mocha",
                 description: "Our signature coffee blended with chocolate and traditional Indian spices.",
                 price: "₹130",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp12.jpeg",
               },
               {
                 name: "Rose Cardamom Latte",
                 description: "A fragrant latte infused with rose petals and cardamom.",
                 price: "₹140",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp13.jpeg",
                 new: true,
               },
               {
                 name: "Mango Coffee Smoothie",
                 description: "Seasonal delight with fresh mangoes and our cold brew coffee.",
                 price: "₹150",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp14.jpeg",
               },
             ].map((item, index) => (
               <div
@@ -309,37 +309,37 @@ export default function MenuPage() {
                 name: "Crispy Vada",
                 description: "Traditional savory donut made with urad dal, served with coconut chutney.",
                 price: "₹60",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp15.jpeg",
               },
               {
                 name: "Butter Mysore Pak",
                 description: "Melt-in-your-mouth sweet made with gram flour, ghee and sugar.",
                 price: "₹70",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp16.jpeg",
               },
               {
                 name: "Mini Idli Sambar",
                 description: "Bite-sized steamed rice cakes served with flavorful lentil soup.",
                 price: "₹80",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp17.jpeg",
               },
               {
                 name: "Crispy Masala Dosa",
                 description: "Thin rice crepe filled with spiced potato filling, served with chutneys.",
                 price: "₹90",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp18.jpeg",
               },
               {
                 name: "Chettinad Bun Parotta",
                 description: "Flaky layered bread served with aromatic Chettinad curry.",
                 price: "₹100",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp19.jpeg",
               },
               {
                 name: "Filter Coffee Cookies",
                 description: "Our signature cookies infused with our special coffee blend.",
                 price: "₹65",
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp20.jpeg",
               },
             ].map((item, index) => (
               <div
@@ -392,27 +392,27 @@ export default function MenuPage() {
                 name: "Coffee Payasam",
                 description: "Traditional South Indian pudding infused with our signature coffee blend.",
                 price: "₹110",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp21.jpeg",
                 chef: true,
               },
               {
                 name: "Cardamom Coffee Cake",
                 description: "Moist cake with hints of cardamom and our special coffee.",
                 price: "₹95",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp22.jpeg",
               },
               {
                 name: "Coffee Jaggery Ice Cream",
                 description: "Handcrafted ice cream made with our coffee and palm jaggery.",
                 price: "₹120",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp23.jpeg",
                 chef: true,
               },
               {
                 name: "Coconut Coffee Ladoo",
                 description: "Traditional coconut sweet balls infused with our coffee.",
                 price: "₹85",
-                image: "/placeholder.svg?height=300&width=400",
+                image: "/mp24.jpeg",
               },
             ].map((item, index) => (
               <div
@@ -469,19 +469,19 @@ export default function MenuPage() {
                 name: "Tanjore Degree Coffee",
                 rating: 4.9,
                 reviews: 245,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp25.jpeg",
               },
               {
                 name: "Crispy Masala Dosa",
                 rating: 4.8,
                 reviews: 189,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp26.jpeg",
               },
               {
                 name: "Coffee Jaggery Ice Cream",
                 rating: 4.7,
                 reviews: 156,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/mp27.jpeg",
               },
             ].map((item, index) => (
               <div
