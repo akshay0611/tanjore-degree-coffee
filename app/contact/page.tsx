@@ -101,7 +101,7 @@ export default function ContactPage() {
           <div
             className="w-full h-full bg-cover bg-fixed"
             style={{
-              backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
+              backgroundImage: "url('/herocontact.jpeg')",
               backgroundPosition: "center",
             }}
           />

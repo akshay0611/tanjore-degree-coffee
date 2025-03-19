@@ -11,7 +11,7 @@ export default function GalleryPage() {
           <div
             className="w-full h-full bg-cover bg-fixed"
             style={{
-              backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
+              backgroundImage: "url('/herogallery.jpeg')",
               backgroundPosition: "center",
             }}
           />
@@ -29,55 +29,72 @@ export default function GalleryPage() {
       </section>
 
 
-      {/* Main Gallery */}
-      <section className="py-20 bg-white bg-opacity-90 backdrop-blur-md">
-        <div className="container px-4 mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(16)].map((_, index) => {
-              // Determine if this should be a featured image (larger size)
-              const isFeatured = [0, 7, 10, 15].includes(index)
-              // Determine if this should be a video thumbnail
-              const isVideo = [3, 11].includes(index)
+     {/* Main Gallery */}
+<section className="py-20 bg-white bg-opacity-90 backdrop-blur-md">
+  <div className="container px-4 mx-auto">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {[
+        '/mg1.jpeg',
+        '/mg2.jpeg',
+        '/mg3.jpeg',
+        '/mg4.jpeg',
+        '/mg5.jpeg',
+        '/mg6.jpeg',
+        '/mg7.jpeg',
+        '/mg8.jpeg',
+        '/mg9.jpeg',
+        '/mg10.jpeg',
+        '/mg11.jpeg',
+        '/mg12.jpeg',
+        '/mg13.jpeg',
+        '/mg14.jpeg',
+        '/mg15.jpeg',
+        '/mg16.jpeg',
+      ].map((src, index) => {
+       
+        const isFeatured = [0, 7, 10, 15].includes(index);
+       
+        const isVideo = [3, 11].includes(index);
 
-              return (
-                <div
-                  key={index}
-                  className={`group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ${
-                    isFeatured ? "col-span-2 row-span-2" : ""
-                  }`}
-                >
-                 <Image
-  src="/placeholder.svg"
-  alt={`Gallery image ${index + 1}`}
-  width={isFeatured ? 600 : 300}
-  height={isFeatured ? 600 : 300}
-  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-amber-950 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="text-center p-4 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300">
-                      {isVideo ? (
-                        <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
-                          <Play className="h-8 w-8" />
-                        </button>
-                      ) : (
-                        <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
-                          <ImageIcon className="h-8 w-8" />
-                        </button>
-                      )}
-                      <h3 className="text-white font-bold text-lg mb-1">
-                        {isVideo ? "Coffee Making Process" : "Tanjore Degree Coffee"}
-                      </h3>
-                      <p className="text-amber-200 text-sm">
-                        {isVideo ? "Watch our traditional brewing method" : "Experience the authentic taste"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+        return (
+          <div
+            key={index}
+            className={`group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ${
+              isFeatured ? 'col-span-2 row-span-2' : ''
+            }`}
+          >
+            <Image
+              src={src}
+              alt={`Gallery image ${index + 1}`}
+              width={isFeatured ? 600 : 300}
+              height={isFeatured ? 600 : 300}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-amber-950 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 flex items-center justify-center">
+              <div className="text-center p-4 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300">
+                {isVideo ? (
+                  <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
+                    <Play className="h-8 w-8" />
+                  </button>
+                ) : (
+                  <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
+                    <ImageIcon className="h-8 w-8" />
+                  </button>
+                )}
+                <h3 className="text-white font-bold text-lg mb-1">
+                  {isVideo ? 'Coffee Making Process' : 'Tanjore Degree Coffee'}
+                </h3>
+                <p className="text-amber-200 text-sm">
+                  {isVideo ? 'Watch our traditional brewing method' : 'Experience the authentic taste'}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        );
+      })}
+    </div>
+  </div>
+</section>
 
 {/* Featured Collections */}
 <section className="py-24 bg-gradient-to-b from-amber-50 to-amber-100 relative overflow-hidden">
@@ -118,21 +135,21 @@ export default function GalleryPage() {
           title: "The Art of Coffee Making",
           description: "A step-by-step visual journey through our traditional coffee brewing process.",
           count: 12,
-          image: "/placeholder.svg?height=400&width=600",
+          image: "/fc1.jpeg",
           accent: "from-amber-400 to-amber-600",
         },
         {
           title: "Our Cafe Through the Seasons",
           description: "Experience the changing ambiance of our cafe throughout the year.",
           count: 18,
-          image: "/placeholder.svg?height=400&width=600",
+          image: "/fc2.jpeg",
           accent: "from-amber-500 to-amber-700",
         },
         {
           title: "Coffee Farm to Cup",
           description: "Follow the journey of our coffee beans from the plantations to your cup.",
           count: 15,
-          image: "/placeholder.svg?height=400&width=600",
+          image: "/fc3.jpeg",
           accent: "from-amber-600 to-amber-800",
         },
       ].map((collection, index) => (
@@ -243,25 +260,25 @@ export default function GalleryPage() {
           title: "The Art of Brewing Tanjore Degree Coffee",
           duration: "3:45",
           views: "12K",
-          image: "/placeholder.svg?height=400&width=700",
+          image: "/cj1.jpeg",
         },
         {
           title: "Behind the Scenes: Our Coffee Roasting Process",
           duration: "5:20",
           views: "8.5K",
-          image: "/placeholder.svg?height=400&width=700",
+          image: "/cj2.jpeg",
         },
         {
           title: "Meet Our Master Brewer: An Interview",
           duration: "7:15",
           views: "6.2K",
-          image: "/placeholder.svg?height=400&width=700",
+          image: "/cj3.jpeg",
         },
         {
           title: "A Day at Tanjore Degree Coffee",
           duration: "4:30",
           views: "9.8K",
-          image: "/placeholder.svg?height=400&width=700",
+          image: "/cj4.jpeg",
         },
       ].map((video, index) => (
         <div
@@ -351,13 +368,20 @@ export default function GalleryPage() {
     </div>
 
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      {[...Array(6)].map((_, index) => (
+      {[
+        '/insta1.jpeg',
+        '/insta2.jpeg',
+        '/insta3.jpeg',
+        '/insta4.jpeg',
+        '/insta5.jpeg',
+        '/insta6.jpeg',
+      ].map((src, index) => (
         <div
           key={index}
           className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
         >
           <Image
-            src="/placeholder.svg"
+            src={src}
             alt={`Instagram post ${index + 1}`}
             width={300}
             height={300}
@@ -372,7 +396,6 @@ export default function GalleryPage() {
       ))}
     </div>
 
-   
     <div className="text-center mt-10 animate-fade-in delay-200">
       <a
         href="https://www.instagram.com/TanjoreDegreeCoffee/"

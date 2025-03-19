@@ -12,7 +12,7 @@ export default function AboutPage() {
           <div
             className="w-full h-full bg-cover bg-fixed"
             style={{
-              backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
+              backgroundImage: "url('/heroabout.jpeg')",
               backgroundPosition: "center",
             }}
           />
