@@ -1,12 +1,66 @@
-import { Coffee, ImageIcon, Play, ChevronRight, Instagram, ArrowRight, Eye, Clock, Camera, Images } from "lucide-react"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { Coffee, ImageIcon, Play, ChevronRight, Instagram, ArrowRight, Eye, Clock, Camera, Images, X, ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function GalleryPage() {
+
+  const images = [
+    '/mg1.jpeg',
+    '/mg2.jpeg',
+    '/mg3.jpeg',
+    '/mg4.jpeg',
+    '/mg5.jpeg',
+    '/mg6.jpeg',
+    '/mg7.jpeg',
+    '/mg8.jpeg',
+    '/mg9.jpeg',
+    '/mg10.jpeg',
+    '/mg11.jpeg',
+    '/mg12.jpeg',
+    '/mg13.jpeg',
+    '/mg14.jpeg',
+    '/mg15.jpeg',
+    '/mg16.jpeg',
+  ];
+
+
+  const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+ 
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+
+  const openModal = (src: string, index: number) => {
+    setSelectedMedia(src);
+    setCurrentIndex(index);
+  };
+
+  
+  const closeModal = () => {
+    setSelectedMedia(null);
+    setCurrentIndex(0);
+  };
+
+  
+  const goToPrevious = () => {
+    const newIndex = (currentIndex - 1 + images.length) % images.length;
+    setSelectedMedia(images[newIndex]);
+    setCurrentIndex(newIndex);
+  };
+
+ 
+  const goToNext = () => {
+    const newIndex = (currentIndex + 1) % images.length;
+    setSelectedMedia(images[newIndex]);
+    setCurrentIndex(newIndex);
+  };
+
   return (
     <div className="pt-20">
-{/* Hero Section */}
-<section className="relative py-24 bg-amber-950">
+      {/* Hero Section */}
+      <section className="relative py-24 bg-amber-950">
         <div className="absolute inset-0 z-0 opacity-20">
           <div
             className="w-full h-full bg-cover bg-fixed"
@@ -23,79 +77,108 @@ export default function GalleryPage() {
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white custom-serif mb-6">Our Gallery</h1>
           <p className="max-w-2xl mx-auto text-xl text-amber-200 italic">
-          A visual journey through our coffee heritage and cafe experience
+            A visual journey through our coffee heritage and cafe experience
           </p>
         </div>
       </section>
 
+      {/* Main Gallery */}
+      <section className="py-20 bg-white bg-opacity-90 backdrop-blur-md">
+        <div className="container px-4 mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {images.map((src, index) => {
+              const isFeatured = [0, 7, 10, 15].includes(index);
+              const isVideo = [3, 11].includes(index);
 
-     {/* Main Gallery */}
-<section className="py-20 bg-white bg-opacity-90 backdrop-blur-md">
-  <div className="container px-4 mx-auto">
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {[
-        '/mg1.jpeg',
-        '/mg2.jpeg',
-        '/mg3.jpeg',
-        '/mg4.jpeg',
-        '/mg5.jpeg',
-        '/mg6.jpeg',
-        '/mg7.jpeg',
-        '/mg8.jpeg',
-        '/mg9.jpeg',
-        '/mg10.jpeg',
-        '/mg11.jpeg',
-        '/mg12.jpeg',
-        '/mg13.jpeg',
-        '/mg14.jpeg',
-        '/mg15.jpeg',
-        '/mg16.jpeg',
-      ].map((src, index) => {
-       
-        const isFeatured = [0, 7, 10, 15].includes(index);
-       
-        const isVideo = [3, 11].includes(index);
-
-        return (
-          <div
-            key={index}
-            className={`group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ${
-              isFeatured ? 'col-span-2 row-span-2' : ''
-            }`}
-          >
-            <Image
-              src={src}
-              alt={`Gallery image ${index + 1}`}
-              width={isFeatured ? 600 : 300}
-              height={isFeatured ? 600 : 300}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-amber-950 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 flex items-center justify-center">
-              <div className="text-center p-4 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300">
-                {isVideo ? (
-                  <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
-                    <Play className="h-8 w-8" />
-                  </button>
-                ) : (
-                  <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
-                    <ImageIcon className="h-8 w-8" />
-                  </button>
-                )}
-                <h3 className="text-white font-bold text-lg mb-1">
-                  {isVideo ? 'Coffee Making Process' : 'Tanjore Degree Coffee'}
-                </h3>
-                <p className="text-amber-200 text-sm">
-                  {isVideo ? 'Watch our traditional brewing method' : 'Experience the authentic taste'}
-                </p>
-              </div>
-            </div>
+              return (
+                <div
+                  key={index}
+                  className={`group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ${
+                    isFeatured ? 'col-span-2 row-span-2' : ''
+                  }`}
+                  onClick={() => openModal(src, index)}
+                >
+                  <Image
+                    src={src}
+                    alt={`Gallery image ${index + 1}`}
+                    width={isFeatured ? 600 : 300}
+                    height={isFeatured ? 600 : 300}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-amber-950 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="text-center p-4 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300">
+                      {isVideo ? (
+                        <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
+                          <Play className="h-8 w-8" />
+                        </button>
+                      ) : (
+                        <button className="bg-amber-600 text-white rounded-full p-4 mb-4">
+                          <ImageIcon className="h-8 w-8" />
+                        </button>
+                      )}
+                      <h3 className="text-white font-bold text-lg mb-1">
+                        {isVideo ? 'Coffee Making Process' : 'Tanjore Degree Coffee'}
+                      </h3>
+                      <p className="text-amber-200 text-sm">
+                        {isVideo ? 'Watch our traditional brewing method' : 'Experience the authentic taste'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
+      {/* Modal */}
+      {selectedMedia && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+          <div className="relative max-w-4xl w-full max-h-[90vh] overflow-hidden rounded-lg">
+            {/* Previous Button */}
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-amber-800 text-amber-50 rounded-full hover:bg-amber-700 transition-colors duration-300 z-20"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-amber-800 text-amber-50 rounded-full hover:bg-amber-700 transition-colors duration-300 z-20"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 p-2 bg-amber-800 text-amber-50 rounded-full hover:bg-amber-700 transition-colors duration-300 z-20"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            {/* Selected Media */}
+            {[3, 11].includes(currentIndex) ? (
+              <video
+                src={selectedMedia}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <Image
+                src={selectedMedia}
+                alt="Selected Gallery Image"
+                width={800}
+                height={600}
+                className="w-full h-full object-contain"
+              />
+            )}
+          </div>
+        </div>
+      )}
 {/* Featured Collections */}
 <section className="py-24 bg-gradient-to-b from-amber-50 to-amber-100 relative overflow-hidden">
 
