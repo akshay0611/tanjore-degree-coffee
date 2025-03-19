@@ -1,6 +1,6 @@
 "use client";
 
-import { Coffee, MapPin, Clock, Phone, Mail, MessageSquare, ChevronDown } from "lucide-react"
+import { Coffee, MapPin, Clock, Phone, Mail, MessageSquare, ChevronDown , Train, Car} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 import { useState } from 'react'; 
@@ -190,28 +190,29 @@ export default function ContactPage() {
 
       {/* Getting Here Section */}
       <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <h3 className="text-xl font-bold text-amber-900 mb-4">Getting Here</h3>
-        <ul className="space-y-3">
-          <li className="flex items-start">
-            <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
-              <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
-            </div>
-            <span className="text-gray-700">5 minute walk from Brihadeeswarar Temple</span>
-          </li>
-          <li className="flex items-start">
-            <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
-              <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
-            </div>
-            <span className="text-gray-700">10 minute drive from Thanjavur Railway Station</span>
-          </li>
-          <li className="flex items-start">
-            <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
-              <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
-            </div>
-            <span className="text-gray-700">Ample parking available for customers</span>
-          </li>
-        </ul>
+  <h3 className="text-xl font-bold text-amber-900 mb-4">Getting Here</h3>
+  <ul className="space-y-3">
+    <li className="flex items-center">
+      <div className="bg-amber-200 rounded-full p-2 mr-3">
+        <MapPin className="h-5 w-5 text-amber-800" />
       </div>
+      <span className="text-gray-700">5-minute walk from Brihadeeswarar Temple</span>
+    </li>
+    <li className="flex items-center">
+      <div className="bg-amber-200 rounded-full p-2 mr-3">
+        <Train className="h-5 w-5 text-amber-800" />
+      </div>
+      <span className="text-gray-700">10-minute drive from Thanjavur Railway Station</span>
+    </li>
+    <li className="flex items-center">
+      <div className="bg-amber-200 rounded-full p-2 mr-3">
+        <Car className="h-5 w-5 text-amber-800" />
+      </div>
+      <span className="text-gray-700">Ample parking available for customers</span>
+    </li>
+  </ul>
+</div>
+
     </div>
 
     <div className="lg:w-1/2">
