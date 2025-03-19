@@ -1,6 +1,7 @@
 import { Coffee, Award, Users, Leaf, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image"; 
+import Link from 'next/link';
 
 export default function AboutPage() {
   return (
@@ -274,16 +275,22 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg">
-                Visit Us
-              </Button>
-              <Button
-                variant="outline"
-               className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
-              >
-                View Menu
-              </Button>
-            </div>
+  <Link href="/visit" passHref>
+    <Button 
+      className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg"
+    >
+      Visit Us
+    </Button>
+  </Link>
+  <Link href="/menu" passHref>
+    <Button
+      variant="outline"
+      className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
+    >
+      View Menu
+    </Button>
+  </Link>
+</div>
           </div>
         </div>
       </section>
