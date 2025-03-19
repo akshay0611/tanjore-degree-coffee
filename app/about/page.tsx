@@ -279,7 +279,7 @@ export default function AboutPage() {
               </Button>
               <Button
                 variant="outline"
-                className="text-amber-200 border-amber-400 hover:bg-amber-800 px-8 py-6 text-lg rounded-full transition-all duration-300"
+               className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
               >
                 View Menu
               </Button>

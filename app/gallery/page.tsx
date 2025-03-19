@@ -6,39 +6,27 @@ export default function GalleryPage() {
   return (
     <div className="pt-20">
 {/* Hero Section */}
-<section className="relative py-24 bg-amber-950 overflow-hidden">
-  
-  <div className="absolute inset-0 z-0">
-    <div
-      className="w-full h-full bg-cover bg-fixed"
-      style={{
-        backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
-        backgroundPosition: "center",
-      }}
-    />
-   
-    <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-amber-950 via-amber-900 to-amber-950" />
-  </div>
-
-
-  <div className="container relative z-10 px-4 mx-auto text-center">
-  
-    <div className="inline-block mb-6 animate-bounce">
-      <ImageIcon className="h-12 w-12 text-amber-400 mx-auto mb-2" />
-      <div className="h-1 w-16 bg-amber-400 mx-auto rounded-full" />
-    </div>
-
-  
-    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white custom-serif mb-6 animate-fade-in-up">
-      Our Gallery
-    </h1>
-
-    
-    <p className="max-w-2xl mx-auto text-xl text-amber-200 italic animate-fade-in-up delay-100">
-      A visual journey through our coffee heritage and cafe experience
-    </p>
-  </div>
-</section>
+<section className="relative py-24 bg-amber-950">
+        <div className="absolute inset-0 z-0 opacity-20">
+          <div
+            className="w-full h-full bg-cover bg-fixed"
+            style={{
+              backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
+              backgroundPosition: "center",
+            }}
+          />
+        </div>
+        <div className="container relative z-10 px-4 mx-auto text-center">
+          <div className="inline-block mb-6">
+            <ImageIcon className="h-12 w-12 text-amber-400 mx-auto mb-2" />
+            <div className="h-1 w-16 bg-amber-400 mx-auto"></div>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white custom-serif mb-6">Our Gallery</h1>
+          <p className="max-w-2xl mx-auto text-xl text-amber-200 italic">
+          A visual journey through our coffee heritage and cafe experience
+          </p>
+        </div>
+      </section>
 
 
       {/* Main Gallery */}

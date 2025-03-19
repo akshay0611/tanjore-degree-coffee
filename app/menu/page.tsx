@@ -28,7 +28,6 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
       <section className="sticky top-20 z-30 bg-amber-900 shadow-md">
         <div className="container px-4 mx-auto">
           <div className="flex overflow-x-auto py-4 gap-4 no-scrollbar">
@@ -47,7 +46,6 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
       <section id="coffee-specialties" className="py-20 bg-amber-50">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -525,7 +523,7 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
+      {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
         <div className="container px-4 mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
@@ -541,10 +539,10 @@ export default function MenuPage() {
               </Button>
               <Button
                 variant="outline"
-                className="text-amber-200 border-amber-400 hover:bg-amber-800 px-8 py-6 text-lg rounded-full transition-all duration-300"
+               className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
               >
                 Book a Table
-              </Button>
+              </Button> 
             </div>
           </div>
         </div>

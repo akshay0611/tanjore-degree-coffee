@@ -96,39 +96,27 @@ export default function ContactPage() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="relative py-24 bg-amber-950 overflow-hidden">
-      {/* Background Image with Gradient Overlay */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="w-full h-full bg-cover bg-fixed"
-          style={{
-            backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
-            backgroundPosition: "center",
-          }}
-        />
-        {/* Extracted Gradient */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-amber-950 via-amber-900 to-amber-950" />
-      </div>
-
-      {/* Content */}
-      <div className="container relative z-10 px-4 mx-auto text-center">
-        {/* Icon and Divider */}
-        <div className="inline-block mb-6 animate-bounce">
-          <MessageSquare className="h-12 w-12 text-amber-400 mx-auto mb-2" />
-          <div className="h-1 w-16 bg-amber-400 mx-auto rounded-full" />
+      <section className="relative py-24 bg-amber-950">
+        <div className="absolute inset-0 z-0 opacity-20">
+          <div
+            className="w-full h-full bg-cover bg-fixed"
+            style={{
+              backgroundImage: "url('/placeholder.svg?height=1080&width=1920')",
+              backgroundPosition: "center",
+            }}
+          />
         </div>
-
-        {/* Heading */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white custom-serif mb-6 animate-fade-in-up">
-          Contact Us
-        </h1>
-
-        {/* Subheading */}
-        <p className="max-w-2xl mx-auto text-xl text-amber-200 italic animate-fade-in-up delay-100">
+        <div className="container relative z-10 px-4 mx-auto text-center">
+          <div className="inline-block mb-6">
+            <MessageSquare className="h-12 w-12 text-amber-400 mx-auto mb-2" />
+            <div className="h-1 w-16 bg-amber-400 mx-auto"></div>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white custom-serif mb-6">Contact Us</h1>
+          <p className="max-w-2xl mx-auto text-xl text-amber-200 italic">
           We&apos;d love to hear from you. Reach out to us with any questions or feedback.
-        </p>
-      </div>
-    </section>
+          </p>
+        </div>
+      </section>
 
 {/* Contact information section */}
 <section className="py-20 bg-amber-50">
