@@ -1,7 +1,96 @@
+"use client";
+
 import { Coffee, MapPin, Clock, Phone, Mail, MessageSquare, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { useState } from 'react'; 
 
+
+// FAQ Section Component
+function FAQSection() {
+    // State to track which FAQ is open
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+  
+    // Function to toggle FAQ open/close
+    const toggleFAQ = (index: number) => {
+      setOpenIndex(openIndex === index ? null : index);
+    };
+  
+    return (
+      <section className="py-20 bg-amber-900 text-white">
+        <div className="container px-4 mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-block mb-4">
+              <MessageSquare className="h-10 w-10 text-amber-400 mx-auto mb-2 animate-pulse" />
+              <div className="h-1 w-16 bg-amber-400 mx-auto rounded-full"></div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold custom-serif mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="max-w-2xl mx-auto text-lg text-amber-200 italic">
+              Find answers to common questions about our coffee and services
+            </p>
+          </div>
+  
+          {/* FAQ Items */}
+          <div className="max-w-3xl mx-auto">
+            {[
+              {
+                question: "What makes Tanjore Degree Coffee special?",
+                answer:
+                  "Tanjore Degree Coffee is special because of its traditional brewing method where fresh milk is heated to a specific 'degree' before being mixed with coffee decoction. We use high-quality Arabica and Robusta beans sourced from the Western Ghats, and follow time-honored techniques passed down through generations.",
+              },
+              {
+                question: "Do you offer coffee beans for home brewing?",
+                answer:
+                  "Yes, we sell our signature coffee bean blends in our cafe. You can purchase them in various quantities, and we also offer coffee brewing equipment like traditional South Indian coffee filters.",
+              },
+              {
+                question: "Can I book your space for private events?",
+                answer:
+                  "We offer our space for private events such as coffee tastings, small gatherings, and corporate meetings. Please contact us at least two weeks in advance to check availability and discuss your requirements.",
+              },
+              {
+                question: "Do you offer vegetarian and vegan food options?",
+                answer:
+                  "We have a wide range of vegetarian South Indian snacks and desserts. We also offer some vegan options and are happy to accommodate dietary restrictions when possible. Just ask our staff for recommendations.",
+              },
+              {
+                question: "Is there Wi-Fi available at your cafe?",
+                answer:
+                  "Yes, we provide complimentary high-speed Wi-Fi for all our customers. Simply ask our staff for the password when you visit.",
+              },
+            ].map((faq, index) => (
+              <div
+                key={index}
+                className="mb-6 bg-amber-800/50 rounded-xl overflow-hidden transition-all duration-300 hover:bg-amber-800/70 hover:shadow-lg"
+              >
+                {/* Question */}
+                <div
+                  className="p-6 flex justify-between items-center cursor-pointer"
+                  onClick={() => toggleFAQ(index)} // Toggle open/close state
+                >
+                  <h3 className="text-xl font-bold text-amber-100">{faq.question}</h3>
+                  <ChevronDown
+                    className={`h-6 w-6 text-amber-400 transform transition-transform duration-300 ${
+                      openIndex === index ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+                {/* Answer */}
+                {openIndex === index && ( // Conditionally render the answer
+                  <div className="px-6 pb-6">
+                    <p className="text-amber-200">{faq.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
 export default function ContactPage() {
   return (
@@ -195,61 +284,8 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 bg-amber-900 text-white">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block mb-4">
-              <MessageSquare className="h-10 w-10 text-amber-400 mx-auto mb-2" />
-              <div className="h-1 w-16 bg-amber-400 mx-auto"></div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold custom-serif mb-4">Frequently Asked Questions</h2>
-            <p className="max-w-2xl mx-auto text-lg text-amber-200 italic">
-              Find answers to common questions about our coffee and services
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            {[
-              {
-                question: "What makes Tanjore Degree Coffee special?",
-                answer:
-                  "Tanjore Degree Coffee is special because of its traditional brewing method where fresh milk is heated to a specific 'degree' before being mixed with coffee decoction. We use high-quality Arabica and Robusta beans sourced from the Western Ghats, and follow time-honored techniques passed down through generations.",
-              },
-              {
-                question: "Do you offer coffee beans for home brewing?",
-                answer:
-                  "Yes, we sell our signature coffee bean blends in our cafe. You can purchase them in various quantities, and we also offer coffee brewing equipment like traditional South Indian coffee filters.",
-              },
-              {
-                question: "Can I book your space for private events?",
-                answer:
-                  "We offer our space for private events such as coffee tastings, small gatherings, and corporate meetings. Please contact us at least two weeks in advance to check availability and discuss your requirements.",
-              },
-              {
-                question: "Do you offer vegetarian and vegan food options?",
-                answer:
-                  "We have a wide range of vegetarian South Indian snacks and desserts. We also offer some vegan options and are happy to accommodate dietary restrictions when possible. Just ask our staff for recommendations.",
-              },
-              {
-                question: "Is there Wi-Fi available at your cafe?",
-                answer:
-                  "Yes, we provide complimentary high-speed Wi-Fi for all our customers. Simply ask our staff for the password when you visit.",
-              },
-            ].map((faq, index) => (
-              <div key={index} className="mb-6 bg-amber-800/50 rounded-xl overflow-hidden">
-                <div className="p-6 flex justify-between items-center cursor-pointer">
-                  <h3 className="text-xl font-bold text-amber-100">{faq.question}</h3>
-                  <ChevronDown className="h-6 w-6 text-amber-400" />
-                </div>
-                <div className="px-6 pb-6">
-                  <p className="text-amber-200">{faq.answer}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    {/* Faq section */}
+    <FAQSection />
 
       {/* Newsletter */}
       <section className="py-20 bg-amber-50">
@@ -284,6 +320,8 @@ export default function ContactPage() {
     </div>
   </div>
 </section>
+
+
 
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
