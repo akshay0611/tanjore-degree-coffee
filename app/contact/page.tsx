@@ -118,41 +118,63 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Information */}
-      <section className="py-20 bg-amber-50">
-        <div className="container px-4 mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Visit Us",
-                description: "123 Temple Street, Thanjavur, Tamil Nadu, India - 613001",
-                icon: <MapPin className="h-8 w-8 text-amber-800" />,
-              },
-              {
-                title: "Opening Hours",
-                description: "Monday - Sunday: 6:00 AM - 10:00 PM\nPublic Holidays: 7:00 AM - 9:00 PM",
-                icon: <Clock className="h-8 w-8 text-amber-800" />,
-              },
-              {
-                title: "Get in Touch",
-                description: "Phone: +91 98765 43210\nEmail: info@tanjorecoffee.com",
-                icon: <Phone className="h-8 w-8 text-amber-800" />,
-              },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
+{/* Contact information section */}
+<section className="py-20 bg-amber-50">
+  <div className="container px-4 mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {[
+        {
+          title: "Visit Us",
+          description: "123 Temple Street, Thanjavur, Tamil Nadu, India - 613001",
+          icon: <MapPin className="h-8 w-8 text-amber-800" />,
+        },
+        {
+          title: "Opening Hours",
+          description: "Monday - Sunday: 6:00 AM - 10:00 PM\nPublic Holidays: 7:00 AM - 9:00 PM",
+          icon: <Clock className="h-8 w-8 text-amber-800" />,
+        },
+        {
+          title: "Get in Touch",
+          description: (
+            <>
+              Phone:{" "}
+              <a
+                href="tel:+919876543210"
+                className="text-gray-600 hover:text-amber-900 transition-colors"
               >
-                <div className="bg-amber-100 rounded-full p-4 w-20 h-20 flex items-center justify-center mb-6 group-hover:bg-amber-200 transition-colors duration-300">
-                  {item.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-amber-900 mb-4">{item.title}</h3>
-                <p className="text-gray-600 whitespace-pre-line">{item.description}</p>
-              </div>
-            ))}
+                +91 98765 43210
+              </a>
+              {"\n"}
+              Email:{" "}
+              <a
+                href="mailto:info@tanjorecoffee.com"
+                className="text-gray-600 hover:text-amber-900 transition-colors"
+              >
+                info@tanjorecoffee.com
+              </a>
+            </>
+          ),
+          icon: <Phone className="h-8 w-8 text-amber-800" />,
+        },
+      ].map((item, index) => (
+        <div
+          key={index}
+          className="bg-gradient-to-br from-white to-amber-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group hover:scale-105"
+        >
+          {/* Icon Container */}
+          <div className="bg-amber-100 rounded-full p-4 w-20 h-20 flex items-center justify-center mb-6 group-hover:bg-amber-200 transition-colors duration-300">
+            {item.icon}
           </div>
+          {/* Title */}
+          <h3 className="text-2xl font-bold text-amber-900 mb-4">{item.title}</h3>
+          {/* Description */}
+          <p className="text-gray-600 whitespace-pre-line">{item.description}</p>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
 
       {/* Map and Contact Form */}
       <section className="py-20 bg-white">
