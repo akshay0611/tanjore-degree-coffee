@@ -5,9 +5,45 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { supabase } from "@/lib/supabase/client"
+import { AuthError } from "@supabase/supabase-js"
 
 export function AuthModal() {
   const [isSignIn, setIsSignIn] = useState(true)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+
+  const handleAuth = async () => {
+    setError(null)
+
+    // Validate confirm password for sign-up
+    if (!isSignIn && password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    try {
+      if (isSignIn) {
+        // Sign in
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) throw error
+        alert("Signed in successfully!")
+      } else {
+        // Sign up
+        const { error } = await supabase.auth.signUp({ email, password })
+        if (error) throw error
+        alert("Check your email for the confirmation link!")
+      }
+    } catch (error) {
+      if (error instanceof AuthError) {
+        setError(error.message)
+      } else {
+        setError("An unknown error occurred")
+      }
+    }
+  }
 
   return (
     <Dialog>
@@ -35,6 +71,8 @@ export function AuthModal() {
               id="email"
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="col-span-3 rounded-lg border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
             />
           </div>
@@ -46,6 +84,8 @@ export function AuthModal() {
               id="password"
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="col-span-3 rounded-lg border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
             />
           </div>
@@ -58,10 +98,13 @@ export function AuthModal() {
                 id="confirmPassword"
                 type="password"
                 placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="col-span-3 rounded-lg border-gray-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               />
             </div>
           )}
+          {error && <p className="text-red-500 text-sm col-span-4 text-center">{error}</p>}
         </div>
         <div className="flex justify-between mt-6">
           <Button
@@ -72,7 +115,7 @@ export function AuthModal() {
             {isSignIn ? "Need an account? Sign Up" : "Already have an account? Sign In"}
           </Button>
           <Button
-            type="submit"
+            onClick={handleAuth}
             className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 
               text-amber-50 shadow-md hover:shadow-lg transition-all duration-300"
           >
