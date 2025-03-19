@@ -158,50 +158,61 @@ export default function ContactPage() {
       <section className="py-20 bg-white">
         <div className="container px-4 mx-auto">
           <div className="flex flex-col lg:flex-row gap-12">
-            <div className="lg:w-1/2">
-              <div className="text-left mb-10">
-                <div className="inline-flex items-center mb-4 bg-amber-800/10 px-4 py-1 rounded-full">
-                  <MapPin className="h-5 w-5 text-amber-800 mr-2" />
-                  <span className="text-amber-800 font-medium">Find Us</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-amber-900 custom-serif mb-4">Our Location</h2>
-                <p className="text-lg text-amber-800/80">
-                  We&apos;re located in the heart of Thanjavur, near the historic Brihadeeswarar Temple.
-                </p>
-              </div>
+          <div className="lg:w-1/2">
+      {/* Location Header */}
+      <div className="text-left mb-10">
+        <div className="inline-flex items-center mb-4 bg-amber-800/10 px-4 py-1 rounded-full transition-all duration-300 hover:bg-amber-800/20">
+          <MapPin className="h-5 w-5 text-amber-800 mr-2" />
+          <span className="text-amber-800 font-medium">Find Us</span>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-amber-900 custom-serif mb-4">
+          Our Location
+        </h2>
+        <p className="text-lg text-amber-800/80">
+          We&apos;re located in the heart of Thanjavur, near the historic Brihadeeswarar Temple.
+        </p>
+      </div>
 
-              <div className="aspect-square md:aspect-video lg:aspect-square bg-amber-100 rounded-xl overflow-hidden relative shadow-xl mb-8">
-                {/* Map placeholder */}
-                <div className="w-full h-full flex items-center justify-center bg-amber-100 text-amber-800">
-                  <MapPin className="h-12 w-12 mr-2" />
-                  Interactive Map
-                </div>
-              </div>
+      {/* Google Map iframe */}
+      <div className="aspect-square md:aspect-video lg:aspect-square bg-amber-100 rounded-xl overflow-hidden relative shadow-xl mb-8 hover:shadow-2xl transition-shadow duration-300">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3915.8392532559095!2d79.13110881532896!3d10.782755792319806!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3baab89cea453039%3A0x92c818a1e1a151b!2sBrihadeeswarar%20Temple!5e0!3m2!1sen!2sin!4v1616000000000!5m2!1sen!2sin"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen={true}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Tanjore Degree Coffee Location"
+          className="absolute inset-0"
+        />
+      </div>
 
-              <div className="bg-amber-50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-amber-900 mb-4">Getting Here</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
-                      <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
-                    </div>
-                    <span className="text-gray-700">5 minute walk from Brihadeeswarar Temple</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
-                      <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
-                    </div>
-                    <span className="text-gray-700">10 minute drive from Thanjavur Railway Station</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
-                      <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
-                    </div>
-                    <span className="text-gray-700">Ample parking available for customers</span>
-                  </li>
-                </ul>
-              </div>
+      {/* Getting Here Section */}
+      <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-xl font-bold text-amber-900 mb-4">Getting Here</h3>
+        <ul className="space-y-3">
+          <li className="flex items-start">
+            <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
+              <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
             </div>
+            <span className="text-gray-700">5 minute walk from Brihadeeswarar Temple</span>
+          </li>
+          <li className="flex items-start">
+            <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
+              <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
+            </div>
+            <span className="text-gray-700">10 minute drive from Thanjavur Railway Station</span>
+          </li>
+          <li className="flex items-start">
+            <div className="bg-amber-200 rounded-full p-1 mr-3 mt-1">
+              <span className="block h-2 w-2 bg-amber-800 rounded-full"></span>
+            </div>
+            <span className="text-gray-700">Ample parking available for customers</span>
+          </li>
+        </ul>
+      </div>
+    </div>
 
             <div className="lg:w-1/2">
               <div className="text-left mb-10">
