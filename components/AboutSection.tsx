@@ -14,36 +14,38 @@ export default function AboutSection() {
       {/* Content Container */}
       <div className="container px-4 mx-auto relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-16">
-          {/* Image Section */}
-          <div className="md:w-1/2 relative">
-            {/* Floating Borders */}
-            <div className="absolute -top-8 -left-8 w-32 h-32 border-t-2 border-l-2 border-amber-800 z-0 rounded-tl-lg animate-float"></div>
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 border-b-2 border-r-2 border-amber-800 z-0 rounded-br-lg animate-float-delay"></div>
+         {/* Image Section */}
+<div className="md:w-1/2 relative">
+  {/* Floating Borders */}
+  <div className="absolute -top-8 -left-8 w-32 h-32 border-t-2 border-l-2 border-amber-800 z-0 rounded-tl-lg animate-float"></div>
+  <div className="absolute -bottom-8 -right-8 w-32 h-32 border-b-2 border-r-2 border-amber-800 z-0 rounded-br-lg animate-float-delay"></div>
 
-            {/* Image with Overlay */}
-            <div className="absolute top-0 left-0 w-full h-full p-4 -m-4 border border-amber-700/20 rounded-lg transform rotate-3 z-0"></div>
-            <div className="relative rounded-lg shadow-2xl overflow-hidden z-10 hover:shadow-amber-900/40 transition-shadow duration-300">
-              <Image
-                src="/aboutsection.jpeg"
-                alt="Traditional coffee preparation"
-                width={800}
-                height={600}
-                className="transition-transform duration-700 hover:scale-110 rounded-lg"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/50 to-transparent"></div>
+  {/* Image Container */}
+  <div className="relative rounded-lg shadow-2xl overflow-hidden z-10 hover:shadow-amber-900/40 transition-shadow duration-300">
+    {/* Image with Overlay */}
+    <div className="relative">
+      <Image
+        src="/aboutsection.jpeg"
+        alt="Traditional coffee preparation"
+        width={800}
+        height={600}
+        className="transition-transform duration-700 hover:scale-110 rounded-lg"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-amber-900/50 to-transparent"></div>
+    </div>
 
-              {/* Image Caption */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-amber-900/80 to-amber-900/0">
-                <p className="text-amber-50 text-sm font-medium">Traditional coffee preparation in Thanjavur, Tamil Nadu</p>
-              </div>
-            </div>
+    {/* Image Caption */}
+    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-amber-900/80 to-amber-900/0">
+      <p className="text-amber-50 text-sm font-medium">Traditional coffee preparation in Thanjavur, Tamil Nadu</p>
+    </div>
+  </div>
 
-            {/* Location Badge */}
-            <div className="absolute -bottom-4 -right-4 bg-amber-800 text-amber-50 px-6 py-3 rounded-full shadow-lg z-20 flex items-center hover:scale-105 transition-transform duration-300">
-              <MapPin className="h-4 w-4 mr-2" />
-              <span className="font-medium">Thanjavur, India</span>
-            </div>
-          </div>
+  {/* Location Badge */}
+  <div className="absolute -bottom-4 -right-4 bg-amber-800 text-amber-50 px-6 py-3 rounded-full shadow-lg z-20 flex items-center hover:scale-105 transition-transform duration-300">
+    <MapPin className="h-4 w-4 mr-2" />
+    <span className="font-medium">Thanjavur, India</span>
+  </div>
+</div>
 
           {/* Text Section */}
           <div className="md:w-1/2">
@@ -85,21 +87,20 @@ export default function AboutSection() {
                   <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-
-              {/* Community Section */}
-              <div className="flex items-center space-x-2 text-amber-800">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="w-10 h-10 rounded-full bg-amber-200 border-2 border-white flex items-center justify-center text-amber-800 font-bold text-xs hover:scale-110 transition-transform duration-300"
-                    >
-                      TD
-                    </div>
-                  ))}
-                </div>
-                <span className="font-medium text-sm">Join our community</span>
-              </div>
+{/* Community Section */}
+<div className="flex items-center space-x-2 text-amber-800">
+  <div className="flex -space-x-2">
+    {["AK", "DS", "TR"].map((name, index) => (
+      <div
+        key={index}
+        className="w-10 h-10 rounded-full bg-amber-200 border-2 border-white flex items-center justify-center text-amber-800 font-bold text-xs hover:scale-110 transition-transform duration-300"
+      >
+        {name}
+      </div>
+    ))}
+  </div>
+  <span className="font-medium text-sm">Join our community</span>
+</div>
             </div>
           </div>
         </div>
