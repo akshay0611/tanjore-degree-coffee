@@ -140,10 +140,10 @@ const Footer = () => {
         <div className="mt-16 pt-8 border-t border-amber-800/30 flex flex-col md:flex-row justify-between items-center">
           <p className="text-amber-400/80 mb-4 md:mb-0">&copy; {new Date().getFullYear()} Tanjore Degree Coffee. All rights reserved.</p>
           <div className="flex space-x-6">
-            <Link href="#" className="text-amber-300/70 hover:text-amber-200 transition-colors">
+            <Link href="/privacy-policy" className="text-amber-300/70 hover:text-amber-200 transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="text-amber-300/70 hover:text-amber-200 transition-colors">
+            <Link href="/terms-of-service" className="text-amber-300/70 hover:text-amber-200 transition-colors">
               Terms of Service
             </Link>
           </div>
