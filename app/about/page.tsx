@@ -39,7 +39,7 @@ export default function AboutPage() {
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 border-b-2 border-r-2 border-amber-800 z-0"></div>
                 <div className="relative z-10 rounded-lg overflow-hidden shadow-xl">
                   <Image
-                    src="/placeholder.svg?height=600&width=800"
+                    src="/about.png"
                     alt="Tanjore Degree Coffee History"
                     width={800}
                     height={600}
@@ -99,25 +99,25 @@ export default function AboutPage() {
                 title: "Bean Selection",
                 description: "We carefully select premium Arabica and Robusta beans from the hills of Western Ghats.",
                 icon: <Leaf className="h-8 w-8 text-amber-50" />,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/bean.jpeg",
               },
               {
                 title: "Traditional Roasting",
                 description: "Our beans are slow-roasted in small batches to bring out their unique flavor profiles.",
                 icon: <Coffee className="h-8 w-8 text-amber-50" />,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/roasting.jpeg",
               },
               {
                 title: "Decoction Brewing",
                 description: "We use traditional South Indian filter coffee makers to extract the perfect decoction.",
                 icon: <Coffee className="h-8 w-8 text-amber-50" />,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/brewing.jpeg",
               },
               {
                 title: "The Perfect Mix",
                 description: "Fresh milk is heated to the right 'degree' and mixed with our decoction in golden ratio.",
                 icon: <Coffee className="h-8 w-8 text-amber-50" />,
-                image: "/placeholder.svg?height=300&width=300",
+                image: "/perfectmix.jpeg",
               },
             ].map((step, index) => (
               <div key={index} className="group relative overflow-hidden rounded-xl shadow-lg">
@@ -217,25 +217,25 @@ export default function AboutPage() {
                 name: "Rajesh Iyer",
                 role: "Master Brewer",
                 bio: "With 25 years of experience, Rajesh oversees our coffee brewing process, ensuring every cup meets our high standards.",
-                image: "/placeholder.svg?height=400&width=400",
+                image: "/team1.jpeg",
               },
               {
                 name: "Priya Venkatesh",
                 role: "Head of Operations",
                 bio: "Priya ensures that our cafe runs smoothly while maintaining the traditional values we hold dear.",
-                image: "/placeholder.svg?height=400&width=400",
+                image: "/team2.jpeg",
               },
               {
                 name: "Karthik Subramanian",
                 role: "Bean Sourcing Specialist",
                 bio: "Karthik travels across South India to find the perfect coffee beans for our signature blends.",
-                image: "/placeholder.svg?height=400&width=400",
+                image: "/team3.jpeg",
               },
               {
                 name: "Lakshmi Narayan",
                 role: "Customer Experience Manager",
                 bio: "Lakshmi ensures that every customer leaves with a smile and a memorable coffee experience.",
-                image: "/placeholder.svg?height=400&width=400",
+                image: "/team4.jpeg",
               },
             ].map((member, index) => (
               <div
