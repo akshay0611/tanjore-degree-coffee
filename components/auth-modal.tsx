@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +15,22 @@ export function AuthModal() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+
+  const createProfile = async (userId: string, userEmail: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .insert([
+          { id: userId, email: userEmail }
+        ])
+      
+      if (error) throw error;
+      console.log("Profile created successfully");
+    } catch (error) {
+      console.error("Error creating profile:", error);
+    }
+  }
 
   const handleAuth = async () => {
     setError(null)
@@ -29,11 +46,26 @@ export function AuthModal() {
         // Sign in
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        alert("Signed in successfully!")
+        router.push("/auth") // Redirect to the auth page after sign-in
       } else {
         // Sign up
-        const { error } = await supabase.auth.signUp({ email, password })
+        const { data, error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: {
+              email: email,
+            }
+          }
+        })
+        
         if (error) throw error
+        
+        // Create profile for the new user
+        if (data.user) {
+          await createProfile(data.user.id, email)
+        }
+        
         alert("Check your email for the confirmation link!")
       }
     } catch (error) {
