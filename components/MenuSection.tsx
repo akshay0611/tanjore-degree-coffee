@@ -2,6 +2,7 @@
 import { Coffee, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function MenuSection() {
   const menuItems = [
@@ -109,13 +110,15 @@ export default function MenuSection() {
 
       
         <div className="text-center mt-16">
-          <Button
-            size="lg"
-            className="bg-amber-700 hover:bg-amber-800 text-amber-50 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 animate-pulse"
-          >
-            View Full Menu
-          </Button>
-        </div>
+  <Link href="/menu" passHref>
+    <Button
+      size="lg"
+      className="bg-amber-700 hover:bg-amber-800 text-amber-50 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 animate-pulse"
+    >
+      View Full Menu
+    </Button>
+  </Link>
+</div>
       </div>
 
      
