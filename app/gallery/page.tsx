@@ -1,4 +1,4 @@
-import { Coffee, ImageIcon, Play, ChevronRight, Instagram } from "lucide-react"
+import { Coffee, ImageIcon, Play, ChevronRight, Instagram, ArrowRight, Eye, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image";
 
@@ -173,80 +173,139 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Video Gallery */}
-      <section className="py-20 bg-amber-900 text-white">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block mb-4">
-              <Play className="h-10 w-10 text-amber-400 mx-auto mb-2" />
-              <div className="h-1 w-16 bg-amber-400 mx-auto"></div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold custom-serif mb-4">Video Gallery</h2>
-            <p className="max-w-2xl mx-auto text-lg text-amber-200 italic">
-              Watch our coffee making process and cafe experiences come to life
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                title: "The Art of Brewing Tanjore Degree Coffee",
-                duration: "3:45",
-                views: "12K",
-                image: "/placeholder.svg?height=400&width=700",
-              },
-              {
-                title: "Behind the Scenes: Our Coffee Roasting Process",
-                duration: "5:20",
-                views: "8.5K",
-                image: "/placeholder.svg?height=400&width=700",
-              },
-              {
-                title: "Meet Our Master Brewer: An Interview",
-                duration: "7:15",
-                views: "6.2K",
-                image: "/placeholder.svg?height=400&width=700",
-              },
-              {
-                title: "A Day at Tanjore Degree Coffee",
-                duration: "4:30",
-                views: "9.8K",
-                image: "/placeholder.svg?height=400&width=700",
-              },
-            ].map((video, index) => (
-              <div
-                key={index}
-                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-               <div className="relative aspect-video overflow-hidden group">
-  <Image
-    src={video.image || "/placeholder.svg"}
-    alt={video.title}
-    layout="fill"
-    objectFit="cover"
-    className="transition-transform duration-700 group-hover:scale-110"
-  />
-  <div className="absolute inset-0 bg-gradient-to-t from-amber-950 to-transparent opacity-70"></div>
-
-  {/* Play button */}
-  <button className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amber-600 hover:bg-amber-500 text-white rounded-full p-5 transition-transform duration-300 group-hover:scale-110">
-    <Play className="h-8 w-8" />
-  </button>
-
-  {/* Video details */}
-  <div className="absolute bottom-4 left-4 right-4">
-    <h3 className="text-xl font-bold text-white mb-2">{video.title}</h3>
-    <div className="flex items-center text-amber-300 text-sm">
-      <span className="mr-4">{video.duration}</span>
-      <span>{video.views} views</span>
-    </div>
+{/* Video Gallery */}
+<section className="py-24 bg-gradient-to-b from-amber-900 to-amber-950 text-white relative overflow-hidden">
+ 
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-amber-400 blur-3xl"></div>
+    <div className="absolute bottom-1/4 left-1/4 w-48 h-48 rounded-full bg-amber-600 blur-3xl"></div>
   </div>
+  
+
+  <div className="absolute inset-0 opacity-5 bg-repeat" 
+       style={{ backgroundImage: "url('/placeholder.svg?height=100&width=100')" }}></div>
+  
+  <div className="container px-4 mx-auto relative z-10">
+    <div className="text-center mb-16">
+
+      <div className="inline-block mb-6">
+       <div className="p-3 bg-gradient-to-br from-amber-800 to-amber-900 rounded-full shadow-lg mb-3 transform hover:rotate-12 transition-transform duration-300 flex items-center justify-center">
+  <Play className="h-10 w-10 text-amber-400" />
 </div>
+
+        <div className="flex items-center justify-center gap-2">
+          <div className="h-0.5 w-8 bg-gradient-to-r from-transparent to-amber-400"></div>
+          <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></div>
+          <div className="h-0.5 w-8 bg-gradient-to-l from-transparent to-amber-400"></div>
+        </div>
+      </div>
+      
+      <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-100 to-amber-300">
+        Experience Our Coffee Journey
+      </h2>
+      
+      <p className="max-w-2xl mx-auto text-lg text-amber-200 mb-8">
+        Watch our coffee making process and cafe experiences come to life through our curated video collection
+      </p>
+    </div>
+
+  
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+      {[
+        {
+          title: "The Art of Brewing Tanjore Degree Coffee",
+          duration: "3:45",
+          views: "12K",
+          image: "/placeholder.svg?height=400&width=700",
+        },
+        {
+          title: "Behind the Scenes: Our Coffee Roasting Process",
+          duration: "5:20",
+          views: "8.5K",
+          image: "/placeholder.svg?height=400&width=700",
+        },
+        {
+          title: "Meet Our Master Brewer: An Interview",
+          duration: "7:15",
+          views: "6.2K",
+          image: "/placeholder.svg?height=400&width=700",
+        },
+        {
+          title: "A Day at Tanjore Degree Coffee",
+          duration: "4:30",
+          views: "9.8K",
+          image: "/placeholder.svg?height=400&width=700",
+        },
+      ].map((video, index) => (
+        <div
+          key={index}
+          className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+        >
+          <div className="relative aspect-video overflow-hidden">
+        
+            <img
+              src={video.image}
+              alt={video.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            
+           
+            <div className="absolute inset-0 bg-gradient-to-t from-amber-950 via-amber-900/70 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-300"></div>
+
+         
+            <button className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amber-600 hover:bg-amber-500 text-white rounded-full p-4 transition-all duration-300 group-hover:scale-125 shadow-lg group-hover:shadow-amber-500/50">
+              <Play className="h-8 w-8" />
+              <span className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping"></span>
+            </button>
+
+          
+            <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+              <h3 className="text-xl font-bold text-white mb-3 group-hover:text-amber-200 transition-colors duration-300">{video.title}</h3>
+              <div className="flex items-center text-amber-300 text-sm">
+                <span className="flex items-center mr-4">
+                  <Clock className="h-4 w-4 mr-1 opacity-70" />
+                  {video.duration}
+                </span>
+                <span className="flex items-center">
+                  <Eye className="h-4 w-4 mr-1 opacity-70" />
+                  {video.views} views
+                </span>
               </div>
-            ))}
+            </div>
+            
+           
+            <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-amber-400/50 rounded-tr-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-amber-400/50 rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+    
+   
+    <div className="mt-12 text-center">
+      <button className="px-8 py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-full text-amber-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-amber-900">
+        <span className="flex items-center justify-center">
+          View More Videos
+          <ArrowRight className="ml-2 h-5 w-5" />
+        </span>
+      </button>
+    </div>
+  </div>
+  
+
+  <div className="absolute top-0 left-0 w-full overflow-hidden">
+    <svg className="relative block w-full h-12 text-amber-900" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" className="fill-amber-900"></path>
+    </svg>
+  </div>
+  
+  
+  <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+    <svg className="relative block w-full h-12 text-amber-950" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.11,130.83,141.14,214.34,115.3,287.11,93.81,342.79,70.29,401.28,56.44Z" className="fill-amber-950"></path>
+    </svg>
+  </div>
+</section>
 
 {/* Instagram Feed */}
 <section className="py-20 bg-gradient-to-b from-amber-50 to-amber-100">
