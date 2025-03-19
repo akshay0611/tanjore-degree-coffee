@@ -253,28 +253,37 @@ export default function ContactPage() {
 
       {/* Newsletter */}
       <section className="py-20 bg-amber-50">
-        <div className="container px-4 mx-auto">
-          <div className="max-w-4xl mx-auto bg-gradient-to-r from-amber-800 to-amber-900 rounded-2xl overflow-hidden shadow-xl">
-            <div className="p-12 text-center">
-              <Coffee className="h-12 w-12 text-amber-400 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-white custom-serif mb-4">Subscribe to Our Newsletter</h2>
-              <p className="text-amber-200 mb-8 max-w-2xl mx-auto">
-                Stay updated with our latest offerings, events, and coffee tips. We promise not to spam your inbox!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="flex-grow px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-400"
-                />
-                <Button className="bg-amber-400 hover:bg-amber-300 text-amber-900 px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20">
-                  Subscribe
-                </Button>
-              </div>
-            </div>
+  <div className="container px-4 mx-auto">
+    <div className="max-w-4xl mx-auto bg-gradient-to-r from-amber-800 to-amber-900 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
+      <div className="p-12 text-center">
+       
+        <Coffee className="h-12 w-12 text-amber-400 mx-auto mb-6 animate-bounce" />
+       
+        <h2 className="text-3xl font-bold text-white custom-serif mb-4">
+          Subscribe to Our Newsletter
+        </h2>
+       
+        <p className="text-amber-200 mb-8 max-w-2xl mx-auto">
+          Stay updated with our latest offerings, events, and coffee tips. We promise not to spam your inbox!
+        </p>
+       
+        <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto items-center">
+          <input
+            type="email"
+            placeholder="Your email address"
+            className="flex-grow px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white/10 backdrop-blur-sm text-white placeholder-amber-200 transition-all duration-300 hover:bg-white/20"
+          />
+          <div className="mt-1 sm:mt-0">
+            <Button className="bg-amber-400 hover:bg-amber-300 text-amber-900 px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105">
+              Subscribe
+            </Button>
           </div>
         </div>
-      </section>
+        
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
