@@ -59,7 +59,7 @@ export default function GalleryPage() {
       </section>
 
       {/* Main Gallery */}
-      <section className="py-20 bg-amber-50">
+      <section className="py-20 bg-white bg-opacity-90 backdrop-blur-md">
         <div className="container px-4 mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(16)].map((_, index) => {
