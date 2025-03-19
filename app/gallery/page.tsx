@@ -40,23 +40,6 @@ export default function GalleryPage() {
   </div>
 </section>
 
-      {/* Gallery Filter */}
-      <section className="sticky top-20 z-30 bg-amber-900 shadow-md">
-        <div className="container px-4 mx-auto">
-          <div className="flex overflow-x-auto py-4 gap-4 no-scrollbar">
-            {["All", "Coffee Making", "Cafe Ambiance", "Traditional Methods", "Our Team", "Customer Moments"].map(
-              (category, index) => (
-                <button
-                  key={index}
-                  className={`px-6 py-3 ${index === 0 ? "bg-amber-700" : "bg-amber-800"} hover:bg-amber-700 text-amber-100 rounded-full whitespace-nowrap transition-colors duration-300 flex-shrink-0`}
-                >
-                  {category}
-                </button>
-              ),
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* Main Gallery */}
       <section className="py-20 bg-white bg-opacity-90 backdrop-blur-md">
