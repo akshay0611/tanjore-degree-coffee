@@ -71,36 +71,42 @@ const Footer = () => {
 
          
           <div>
-            <h4 className="text-xl font-semibold mb-6 text-amber-100 relative inline-block after:content-[''] after:absolute after:w-12 after:h-1 after:bg-amber-500 after:left-0 after:-bottom-2 after:rounded-full">
-              Contact Us
-            </h4>
-            <ul className="space-y-5 mt-8">
-              <li className="flex items-start group">
-                <span className="bg-amber-800/30 p-2 rounded mr-3 mt-1 transition-all duration-300 group-hover:bg-amber-700/50">
-                  <MapPin className="h-5 w-5 text-amber-300" />
-                </span>
-                <span className="text-amber-200/80 group-hover:text-amber-100 transition-colors">
-                  123 Temple Street, Thanjavur, Tamil Nadu, India - 613001
-                </span>
-              </li>
-              <li className="flex items-start group">
-                <span className="bg-amber-800/30 p-2 rounded mr-3 mt-1 transition-all duration-300 group-hover:bg-amber-700/50">
-                  <Phone className="h-5 w-5 text-amber-300" />
-                </span>
-                <span className="text-amber-200/80 group-hover:text-amber-100 transition-colors">
-                  +91 98765 43210
-                </span>
-              </li>
-              <li className="flex items-start group">
-                <span className="bg-amber-800/30 p-2 rounded mr-3 mt-1 transition-all duration-300 group-hover:bg-amber-700/50">
-                  <Mail className="h-5 w-5 text-amber-300" />
-                </span>
-                <span className="text-amber-200/80 group-hover:text-amber-100 transition-colors">
-                  info@tanjorecoffee.com
-                </span>
-              </li>
-            </ul>
-          </div>
+  <h4 className="text-xl font-semibold mb-6 text-amber-100 relative inline-block after:content-[''] after:absolute after:w-12 after:h-1 after:bg-amber-500 after:left-0 after:-bottom-2 after:rounded-full">
+    Contact Us
+  </h4>
+  <ul className="space-y-5 mt-8">
+    <li className="flex items-start group">
+      <span className="bg-amber-800/30 p-2 rounded mr-3 mt-1 transition-all duration-300 group-hover:bg-amber-700/50">
+        <MapPin className="h-5 w-5 text-amber-300" />
+      </span>
+      <span className="text-amber-200/80 group-hover:text-amber-100 transition-colors">
+        123 Temple Street, Thanjavur, Tamil Nadu, India - 613001
+      </span>
+    </li>
+    <li className="flex items-start group">
+      <span className="bg-amber-800/30 p-2 rounded mr-3 mt-1 transition-all duration-300 group-hover:bg-amber-700/50">
+        <Phone className="h-5 w-5 text-amber-300" />
+      </span>
+      <a
+        href="tel:+919876543210"
+        className="text-amber-200/80 group-hover:text-amber-100 transition-colors no-underline"
+      >
+        +91 98765 43210
+      </a>
+    </li>
+    <li className="flex items-start group">
+      <span className="bg-amber-800/30 p-2 rounded mr-3 mt-1 transition-all duration-300 group-hover:bg-amber-700/50">
+        <Mail className="h-5 w-5 text-amber-300" />
+      </span>
+      <a
+        href="mailto:info@tanjorecoffee.com"
+        className="text-amber-200/80 group-hover:text-amber-100 transition-colors no-underline"
+      >
+        info@tanjorecoffee.com
+      </a>
+    </li>
+  </ul>
+</div>
 
          
           <div>

@@ -1,6 +1,7 @@
 import { Coffee, Utensils, Cake, ChevronRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image";
+import Link from 'next/link';
 
 export default function MenuPage() {
   return (
@@ -534,16 +535,22 @@ export default function MenuPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg">
-                Order Online
-              </Button>
-              <Button
-                variant="outline"
-               className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
-              >
-                Book a Table
-              </Button> 
-            </div>
+  <Link href="/order" passHref>
+    <Button 
+      className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg"
+    >
+      Order Online
+    </Button>
+  </Link>
+  <Link href="/book" passHref>
+    <Button
+      variant="outline"
+      className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
+    >
+      Book a Table
+    </Button>
+  </Link>
+</div>
           </div>
         </div>
       </section>
