@@ -1,9 +1,10 @@
-// components/GallerySection.tsx
+"use client";
 import Image from 'next/image';
-import { Coffee } from 'lucide-react';
+import { Coffee, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 const GallerySection = () => {
-  // Array of 8 different image paths
+ 
   const images = [
     '/cg1.jpeg',
     '/cg2.jpeg',
@@ -14,6 +15,37 @@ const GallerySection = () => {
     '/cg7.jpeg',
     '/cg8.jpeg',
   ];
+
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+
+  const openModal = (src: string, index: number) => {
+    setSelectedImage(src);
+    setCurrentIndex(index);
+  };
+
+
+  const closeModal = () => {
+    setSelectedImage(null);
+    setCurrentIndex(0);
+  };
+
+
+  const goToPrevious = () => {
+    const newIndex = (currentIndex - 1 + images.length) % images.length;
+    setSelectedImage(images[newIndex]);
+    setCurrentIndex(newIndex);
+  };
+
+ 
+  const goToNext = () => {
+    const newIndex = (currentIndex + 1) % images.length;
+    setSelectedImage(images[newIndex]);
+    setCurrentIndex(newIndex);
+  };
 
   return (
     <section className="py-24 bg-gradient-to-b from-amber-900 to-amber-800 overflow-hidden">
@@ -32,13 +64,15 @@ const GallerySection = () => {
           </p>
         </div>
 
+        {/* Gallery Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {images.map((src, index) => (
             <div
               key={index}
               className={`relative overflow-hidden rounded-xl shadow-lg group ${
                 index === 0 || index === 7 ? 'col-span-2 row-span-2' : ''
-              } transition-all duration-700 ease-out`}
+              } transition-all duration-700 ease-out cursor-pointer`}
+              onClick={() => openModal(src, index)}
             >
               <Image
                 src={src}
@@ -54,6 +88,46 @@ const GallerySection = () => {
             </div>
           ))}
         </div>
+
+        {/* Modal */}
+        {selectedImage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+            <div className="relative max-w-4xl w-full max-h-[90vh] overflow-hidden rounded-lg">
+              {/* Previous Button */}
+              <button
+                onClick={goToPrevious}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-amber-800 text-amber-50 rounded-full hover:bg-amber-700 transition-colors duration-300 z-20"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+
+              {/* Next Button */}
+              <button
+                onClick={goToNext}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-amber-800 text-amber-50 rounded-full hover:bg-amber-700 transition-colors duration-300 z-20"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+
+              {/* Close Button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 p-2 bg-amber-800 text-amber-50 rounded-full hover:bg-amber-700 transition-colors duration-300 z-20"
+              >
+                <X className="h-6 w-6" />
+              </button>
+
+              {/* Selected Image */}
+              <Image
+                src={selectedImage}
+                alt="Selected Gallery Image"
+                width={800}
+                height={600}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
