@@ -93,128 +93,147 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Location & Contact */}
-      <section className="py-24 bg-amber-50">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block mb-4">
-              <MapPin className="h-10 w-10 text-amber-800 mx-auto mb-2" />
-              <div className="h-1 w-16 bg-amber-800 mx-auto"></div>
+     {/* Location & Contact */}
+<section className="py-24 bg-amber-50">
+  <div className="container px-4 mx-auto">
+    <div className="text-center mb-16">
+      <div className="inline-block mb-4">
+        <MapPin className="h-10 w-10 text-amber-800 mx-auto mb-2" />
+        <div className="h-1 w-16 bg-amber-800 mx-auto"></div>
+      </div>
+      <h2 className="text-4xl font-bold text-amber-900 custom-serif mb-4">Visit Us</h2>
+      <p className="max-w-2xl mx-auto text-lg text-amber-800/80 italic">
+        Come experience the authentic taste of Tanjore Degree Coffee at our location
+      </p>
+    </div>
+
+    <div className="flex flex-col md:flex-row gap-8">
+      <div className="md:w-1/2 bg-white p-8 rounded-xl shadow-xl">
+        <h3 className="text-2xl font-semibold text-amber-900 mb-6 custom-serif">Our Location</h3>
+
+        <div className="mb-8 aspect-video bg-amber-100 rounded-lg overflow-hidden relative group">
+          {/* Google Map Embed */}
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.6304190077656!2d79.13149731480196!3d10.786999992311!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3baab89e7d8b1d4f%3A0xe2e8b8e72a9e4e55!2sThanjavur%2C%20Tamil%20Nadu%2C%20India!5e0!3m2!1sen!2sus!4v1677654321987!5m2!1sen!2sus"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen={true}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="w-full h-full"
+          ></iframe>
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex items-start">
+            <div className="bg-amber-100 p-3 rounded-full mr-4">
+              <MapPin className="h-6 w-6 text-amber-800" />
             </div>
-            <h2 className="text-4xl font-bold text-amber-900 custom-serif mb-4">Visit Us</h2>
-            <p className="max-w-2xl mx-auto text-lg text-amber-800/80 italic">
-              Come experience the authentic taste of Tanjore Degree Coffee at our location
-            </p>
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-1">Address</h4>
+              <p className="text-amber-700">123 Temple Street, Thanjavur, Tamil Nadu, India - 613001</p>
+            </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="md:w-1/2 bg-white p-8 rounded-xl shadow-xl">
-              <h3 className="text-2xl font-semibold text-amber-900 mb-6 custom-serif">Our Location</h3>
-
-              <div className="mb-8 aspect-video bg-amber-100 rounded-lg overflow-hidden relative group">
-                {/* Map placeholder */}
-                <div className="w-full h-full flex items-center justify-center bg-amber-100 text-amber-800">
-                  <MapPin className="h-8 w-8 mr-2" />
-                  Interactive Map
-                </div>
-                <div className="absolute inset-0 bg-amber-800/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="bg-amber-100 p-3 rounded-full mr-4">
-                    <MapPin className="h-6 w-6 text-amber-800" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-amber-900 mb-1">Address</h4>
-                    <p className="text-amber-700">123 Temple Street, Thanjavur, Tamil Nadu, India - 613001</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="bg-amber-100 p-3 rounded-full mr-4">
-                    <Clock className="h-6 w-6 text-amber-800" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-amber-900 mb-1">Opening Hours</h4>
-                    <p className="text-amber-700">Monday - Sunday: 6:00 AM - 10:00 PM</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="bg-amber-100 p-3 rounded-full mr-4">
-                    <Phone className="h-6 w-6 text-amber-800" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-amber-900 mb-1">Contact</h4>
-                    <p className="text-amber-700">+91 98765 43210</p>
-                    <p className="text-amber-700">info@tanjorecoffee.com</p>
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-start">
+            <div className="bg-amber-100 p-3 rounded-full mr-4">
+              <Clock className="h-6 w-6 text-amber-800" />
             </div>
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-1">Opening Hours</h4>
+              <p className="text-amber-700">Monday - Sunday: 6:00 AM - 10:00 PM</p>
+            </div>
+          </div>
 
-            <div className="md:w-1/2 bg-white p-8 rounded-xl shadow-xl">
-              <h3 className="text-2xl font-semibold text-amber-900 mb-6 custom-serif">Send Us a Message</h3>
-
-              <form className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-amber-800 mb-1">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                      placeholder="Your name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-amber-800 mb-1">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    id="subject"
-                    className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                    placeholder="How can we help?"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-amber-800 mb-1">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={4}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
-                    placeholder="Your message here..."
-                  ></textarea>
-                </div>
-
-                <Button className="w-full bg-amber-800 hover:bg-amber-900 text-amber-50 py-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-amber-900/20">
-                  Send Message
-                </Button>
-              </form>
+          <div className="flex items-start">
+            <div className="bg-amber-100 p-3 rounded-full mr-4">
+              <Phone className="h-6 w-6 text-amber-800" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-1">Contact</h4>
+              <p>
+                <a 
+                  href="tel:+919876543210" 
+                  className="text-amber-700 hover:text-amber-600 transition-colors duration-200"
+                >
+                  +91 98765 43210
+                </a>
+              </p>
+              <p>
+                <a 
+                  href="mailto:info@tanjorecoffee.com" 
+                  className="text-amber-700 hover:text-amber-600 transition-colors duration-200"
+                >
+                  info@tanjorecoffee.com
+                </a>
+              </p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+
+      <div className="md:w-1/2 bg-white p-8 rounded-xl shadow-xl">
+        <h3 className="text-2xl font-semibold text-amber-900 mb-6 custom-serif">Send Us a Message</h3>
+
+        <form className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-amber-800 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
+                placeholder="Your name"
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
+                placeholder="your@email.com"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="subject" className="block text-sm font-medium text-amber-800 mb-1">
+              Subject
+            </label>
+            <input
+              type="text"
+              id="subject"
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
+              placeholder="How can we help?"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="message" className="block text-sm font-medium text-amber-800 mb-1">
+              Message
+            </label>
+            <textarea
+              id="message"
+              rows={4}
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50 text-amber-900"
+              placeholder="Your message here..."
+            ></textarea>
+          </div>
+
+          <Button className="w-full bg-amber-800 hover:bg-amber-900 text-amber-50 py-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-amber-900/20">
+            Send Message
+          </Button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Gallery Section */}
       <section className="py-24 bg-amber-900">
@@ -270,7 +289,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-amber-200 border-amber-400 hover:bg-amber-800 px-8 py-6 text-lg rounded-full transition-all duration-300"
+                className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
               >
                 Book a Table
               </Button>
