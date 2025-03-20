@@ -115,6 +115,17 @@ export default function ProfileView() {
     }
   };
 
+  // Function to compute initials from fullName
+  const getInitials = (fullName: string) => {
+    if (!fullName) return ""; // Return empty string if no name
+    const names = fullName.trim().split(" ");
+    const initials = names
+      .map((name) => name.charAt(0).toUpperCase())
+      .join("")
+      .slice(0, 2); // Limit to 2 characters
+    return initials || ""; // Return initials or empty string if none
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-amber-900">Profile</h1>
@@ -128,11 +139,10 @@ export default function ProfileView() {
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24 border-2 border-amber-300">
                   <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                  <AvatarFallback className="bg-amber-700 text-amber-50 text-xl">JD</AvatarFallback>
+                  <AvatarFallback className="bg-amber-700 text-amber-50 text-xl">
+                    {getInitials(profile.fullName)}
+                  </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" className="text-amber-700 border-amber-300">
-                  Change Photo
-                </Button>
               </div>
               <div className="flex-1 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
