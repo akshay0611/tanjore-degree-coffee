@@ -70,9 +70,7 @@ export default function Menu() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Get the current authenticated user
         const { data: { user } } = await supabase.auth.getUser();
-        
         if (user) {
           const { data, error } = await supabase
             .from("profiles")
@@ -199,7 +197,6 @@ export default function Menu() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-700"></div>
@@ -305,14 +302,18 @@ export default function Menu() {
 
         <TabsContent value="all" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <MenuItemCard
-                key={item.id}
-                item={item}
-                onAddToCart={addToCart}
-                onViewDetails={() => setSelectedItem(item)}
-              />
-            ))}
+            {filteredItems.map((item) => {
+              const cartItem = cartItems.find((ci) => ci.item.id === item.id);
+              return (
+                <MenuItemCard
+                  key={item.id}
+                  item={item}
+                  onAddToCart={addToCart}
+                  onViewDetails={() => setSelectedItem(item)}
+                  quantity={cartItem ? cartItem.quantity : 0} // Pass quantity from cartItems
+                />
+              );
+            })}
           </div>
         </TabsContent>
 
@@ -322,14 +323,18 @@ export default function Menu() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredItems
                   .filter((item) => item.category === category)
-                  .map((item) => (
-                    <MenuItemCard
-                      key={item.id}
-                      item={item}
-                      onAddToCart={addToCart}
-                      onViewDetails={() => setSelectedItem(item)}
-                    />
-                  ))}
+                  .map((item) => {
+                    const cartItem = cartItems.find((ci) => ci.item.id === item.id);
+                    return (
+                      <MenuItemCard
+                        key={item.id}
+                        item={item}
+                        onAddToCart={addToCart}
+                        onViewDetails={() => setSelectedItem(item)}
+                        quantity={cartItem ? cartItem.quantity : 0} // Pass quantity from cartItems
+                      />
+                    );
+                  })}
               </div>
             </TabsContent>
           )

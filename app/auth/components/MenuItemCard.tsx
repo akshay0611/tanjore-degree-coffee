@@ -22,9 +22,10 @@ interface MenuItemCardProps {
   item: MenuItem;
   onAddToCart: (item: MenuItem) => void;
   onViewDetails: () => void;
+  quantity?: number; // Add quantity prop
 }
 
-export default function MenuItemCard({ item, onAddToCart, onViewDetails }: MenuItemCardProps) {
+export default function MenuItemCard({ item, onAddToCart, onViewDetails, quantity = 0 }: MenuItemCardProps) {
   return (
     <Card className="overflow-hidden border-amber-200 transition-all hover:shadow-md">
       <div className="relative h-48 w-full overflow-hidden">
@@ -57,9 +58,14 @@ export default function MenuItemCard({ item, onAddToCart, onViewDetails }: MenuI
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex justify-between items-center">
         <span className="text-lg font-bold text-amber-900">₹{item.price}</span>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {quantity > 0 && (
+            <Badge variant="secondary" className="bg-amber-100 text-amber-900">
+              +{quantity}
+            </Badge>
+          )}
           <Button variant="outline" size="sm" className="border-amber-300 text-amber-700" onClick={onViewDetails}>
             Details
           </Button>
