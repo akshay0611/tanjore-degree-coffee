@@ -37,7 +37,7 @@ export default function ProfileView() {
         // Fetch profile data from the `profiles` table
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("email, full_name, phone, member_since")
+          .select("email, full_name, phone")
           .eq("id", userData.user.id)
           .single();
 
@@ -48,11 +48,13 @@ export default function ProfileView() {
             email: userData.user?.email || "",
           }));
         } else {
+          // Use the `created_at` timestamp from the authenticated user
+          const memberSince = new Date(userData.user.created_at).getFullYear().toString();
           setProfile({
             fullName: profileData.full_name || "",
             email: profileData.email || "",
             phone: profileData.phone || "",
-            memberSince: profileData.member_since || "",
+            memberSince: memberSince,
           });
         }
       } catch (e) {
@@ -93,9 +95,7 @@ export default function ProfileView() {
         .from("profiles")
         .update({
           full_name: profile.fullName,
-          email: profile.email,
-          phone: profile.phone,
-          member_since: profile.memberSince,
+          phone: profile.phone, // Only updating name and phone
         })
         .eq("id", userData.user.id);
 
@@ -153,18 +153,10 @@ export default function ProfileView() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-amber-700">Email</label>
-                    {isEditing ? (
-                      <Input
-                        name="email"
-                        value={profile.email}
-                        onChange={handleInputChange}
-                        className="mt-1 border-amber-200 bg-amber-50"
-                      />
-                    ) : (
-                      <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
-                        {profile.email}
-                      </p>
-                    )}
+                    {/* Always read-only email */}
+                    <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
+                      {profile.email}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-amber-700">Phone</label>
@@ -183,18 +175,9 @@ export default function ProfileView() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-amber-700">Member Since</label>
-                    {isEditing ? (
-                      <Input
-                        name="memberSince"
-                        value={profile.memberSince}
-                        onChange={handleInputChange}
-                        className="mt-1 border-amber-200 bg-amber-50"
-                      />
-                    ) : (
-                      <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
-                        {profile.memberSince}
-                      </p>
-                    )}
+                    <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
+                      {profile.memberSince}
+                    </p>
                   </div>
                 </div>
                 {isEditing ? (
