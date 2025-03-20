@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { CoffeeIcon, Search, ShoppingBag, Star, X } from "lucide-react";
+import { CoffeeIcon, Search, ShoppingBag, Star, Trash2} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,9 +96,11 @@ export default function Menu() {
     }
   };
 
-  // Remove item from cart
-  const removeFromCart = (itemId: number) => {
-    setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
+ // Remove item from cart with confirmation
+ const removeFromCart = (itemId: number) => {
+    if (window.confirm("Are you sure you want to remove this item from your cart?")) {
+      setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
+    }
   };
 
   // Update item quantity in cart
@@ -110,6 +112,14 @@ export default function Menu() {
     setCartItems(
       cartItems.map((cartItem) => (cartItem.item.id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem)),
     );
+  };
+
+  // Clear entire cart
+  const clearCart = () => {
+    if (cartItems.length === 0) return;
+    if (window.confirm("Are you sure you want to clear your entire cart?")) {
+      setCartItems([]);
+    }
   };
 
   // Calculate total price
@@ -156,64 +166,73 @@ export default function Menu() {
                 </DialogDescription>
               </DialogHeader>
               {cartItems.length > 0 ? (
-                <div className="space-y-4">
-                  {cartItems.map(({ item, quantity }) => (
-                    <div key={item.id} className="flex items-center justify-between border-b border-amber-100 pb-3">
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.name}
-                          width={40}
-                          height={40}
-                          className="rounded-md object-cover"
-                        />
-                        <div>
-                          <p className="font-medium text-amber-900">{item.name}</p>
-                          <p className="text-sm text-amber-700">₹{item.price}</p>
+                <div className="space-y-6">
+                  <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2">
+                    {cartItems.map(({ item, quantity }) => (
+                      <div key={item.id} className="flex items-center justify-between border-b border-amber-100 pb-3">
+                        <div className="flex items-center gap-3 flex-1">
+                          <Image
+                            src={item.image || "/placeholder.svg"}
+                            alt={item.name}
+                            width={40}
+                            height={40}
+                            className="rounded-md object-cover"
+                          />
+                          <div className="flex-1">
+                            <p className="font-medium text-amber-900">{item.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm text-amber-700">₹{item.price} × {quantity}</p>
+                              <p className="text-sm font-medium text-amber-900">= ₹{item.price * quantity}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                            className="w-16 h-8 text-center border-amber-300"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-amber-700 hover:text-amber-900"
+                            onClick={() => removeFromCart(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6 rounded-full border-amber-300"
-                          onClick={() => updateQuantity(item.id, quantity - 1)}
-                        >
-                          <span>-</span>
-                        </Button>
-                        <span className="w-6 text-center">{quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6 rounded-full border-amber-300"
-                          onClick={() => updateQuantity(item.id, quantity + 1)}
-                        >
-                          <span>+</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-amber-700 hover:text-amber-900"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <X className="h-4 w-4" />
+                    ))}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between pt-2">
+                      <span className="font-medium text-amber-900">Total</span>
+                      <span className="font-bold text-amber-900">₹{totalPrice}</span>
+                    </div>
+
+                    <div className="flex justify-between gap-2">
+                      <Button
+                        variant="outline"
+                        className="border-amber-300 text-amber-700"
+                        onClick={clearCart}
+                        disabled={cartItems.length === 0}
+                      >
+                        Clear Cart
+                      </Button>
+                      <div className="flex gap-2">
+                        <DialogClose asChild>
+                          <Button variant="outline" className="border-amber-300 text-amber-700">
+                            Continue Shopping
+                          </Button>
+                        </DialogClose>
+                        <Button className="bg-amber-700 hover:bg-amber-800 text-white" disabled={cartItems.length === 0}>
+                          Checkout
                         </Button>
                       </div>
                     </div>
-                  ))}
-
-                  <div className="flex justify-between pt-2">
-                    <span className="font-medium text-amber-900">Total</span>
-                    <span className="font-bold text-amber-900">₹{totalPrice}</span>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <DialogClose asChild>
-                      <Button variant="outline" className="border-amber-300 text-amber-700">
-                        Continue Shopping
-                      </Button>
-                    </DialogClose>
-                    <Button className="bg-amber-700 hover:bg-amber-800 text-white">Checkout</Button>
                   </div>
                 </div>
               ) : (
