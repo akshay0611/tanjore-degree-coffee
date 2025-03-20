@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Search, ShoppingBag, Star } from "lucide-react";
+import { Search, ShoppingBag, Star , MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -397,6 +397,16 @@ export default function Menu() {
           </DialogContent>
         </Dialog>
       )}
+      {/* WhatsApp Support*/}
+      <a
+        href="https://wa.me/1234567890"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 right-4 bg-amber-700 text-white p-3 rounded-full shadow-lg hover:bg-amber-800 transition-colors"
+        aria-label="Contact us on WhatsApp"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </a>
     </div>
   );
 }
