@@ -1,0 +1,200 @@
+[
+    {
+      "id": 1,
+      "name": "Tanjore Degree Coffee",
+      "description": "Our signature coffee made with traditional decoction and farm-fresh milk heated to the perfect 'degree'.",
+      "price": 80,
+      "image": "/mp1.jpeg",
+      "category": "coffee-specialties",
+      "popular": true
+    },
+    {
+      "id": 2,
+      "name": "Royal Mysore Coffee",
+      "description": "A special blend inspired by the royal courts of Mysore, with a hint of cardamom and chicory.",
+      "price": 90,
+      "image": "/mp2.jpeg",
+      "category": "coffee-specialties"
+    },
+    {
+      "id": 3,
+      "name": "Kumbakonam Degree Coffee",
+      "description": "A tribute to the famous Kumbakonam style, with a stronger decoction and creamy milk.",
+      "price": 85,
+      "image": "/mp3.jpeg",
+      "category": "coffee-specialties",
+      "popular": true
+    },
+    {
+      "id": 4,
+      "name": "Temple Town Special",
+      "description": "A unique blend that pays homage to the temple towns of Tamil Nadu, with a rich aroma and smooth finish.",
+      "price": 95,
+      "image": "/mp4.jpeg",
+      "category": "coffee-specialties"
+    },
+    {
+      "id": 5,
+      "name": "Filter Coffee",
+      "description": "Classic South Indian filter coffee served in traditional davara-tumbler.",
+      "price": 60,
+      "image": "/mp5.jpeg",
+      "category": "traditional-brews"
+    },
+    {
+      "id": 6,
+      "name": "Chukku Kaapi",
+      "description": "Traditional coffee with dry ginger and warming spices.",
+      "price": 75,
+      "image": "/mp6.jpeg",
+      "category": "traditional-brews"
+    },
+    {
+      "id": 7,
+      "name": "Bella Coffee",
+      "description": "Coffee sweetened with jaggery instead of sugar for a rich flavor.",
+      "price": 70,
+      "image": "/mp7.jpeg",
+      "category": "traditional-brews"
+    },
+    {
+      "id": 8,
+      "name": "Sukku Coffee",
+      "description": "Medicinal coffee with dry ginger, pepper and palm jaggery.",
+      "price": 80,
+      "image": "/mp8.jpeg",
+      "category": "traditional-brews"
+    },
+    {
+      "id": 9,
+      "name": "Paruthi Paal Coffee",
+      "description": "A unique coffee made with cotton seed milk, a traditional Tamil delicacy.",
+      "price": 85,
+      "image": "/mp9.jpeg",
+      "category": "traditional-brews"
+    },
+    {
+      "id": 10,
+      "name": "Inji Kaapi",
+      "description": "Ginger-infused coffee that's perfect for rainy days.",
+      "price": 75,
+      "image": "/mp10.jpeg",
+      "category": "traditional-brews"
+    },
+    {
+      "id": 11,
+      "name": "Coconut Cold Brew",
+      "description": "Cold brewed coffee with coconut water and a hint of cardamom.",
+      "price": 120,
+      "image": "/mp11.jpeg",
+      "category": "contemporary-coffees",
+      "new": true
+    },
+    {
+      "id": 12,
+      "name": "Spiced Mocha",
+      "description": "Our signature coffee blended with chocolate and traditional Indian spices.",
+      "price": 130,
+      "image": "/mp12.jpeg",
+      "category": "contemporary-coffees"
+    },
+    {
+      "id": 13,
+      "name": "Rose Cardamom Latte",
+      "description": "A fragrant latte infused with rose petals and cardamom.",
+      "price": 140,
+      "image": "/mp13.jpeg",
+      "category": "contemporary-coffees",
+      "new": true
+    },
+    {
+      "id": 14,
+      "name": "Mango Coffee Smoothie",
+      "description": "Seasonal delight with fresh mangoes and our cold brew coffee.",
+      "price": 150,
+      "image": "/mp14.jpeg",
+      "category": "contemporary-coffees"
+    },
+    {
+      "id": 15,
+      "name": "Crispy Vada",
+      "description": "Traditional savory donut made with urad dal, served with coconut chutney.",
+      "price": 60,
+      "image": "/mp15.jpeg",
+      "category": "south-indian-snacks"
+    },
+    {
+      "id": 16,
+      "name": "Butter Mysore Pak",
+      "description": "Melt-in-your-mouth sweet made with gram flour, ghee and sugar.",
+      "price": 70,
+      "image": "/mp16.jpeg",
+      "category": "south-indian-snacks"
+    },
+    {
+      "id": 17,
+      "name": "Mini Idli Sambar",
+      "description": "Bite-sized steamed rice cakes served with flavorful lentil soup.",
+      "price": 80,
+      "image": "/mp17.jpeg",
+      "category": "south-indian-snacks"
+    },
+    {
+      "id": 18,
+      "name": "Crispy Masala Dosa",
+      "description": "Thin rice crepe filled with spiced potato filling, served with chutneys.",
+      "price": 90,
+      "image": "/mp18.jpeg",
+      "category": "south-indian-snacks"
+    },
+    {
+      "id": 19,
+      "name": "Chettinad Bun Parotta",
+      "description": "Flaky layered bread served with aromatic Chettinad curry.",
+      "price": 100,
+      "image": "/mp19.jpeg",
+      "category": "south-indian-snacks"
+    },
+    {
+      "id": 20,
+      "name": "Filter Coffee Cookies",
+      "description": "Our signature cookies infused with our special coffee blend.",
+      "price": 65,
+      "image": "/mp20.jpeg",
+      "category": "south-indian-snacks"
+    },
+    {
+      "id": 21,
+      "name": "Coffee Payasam",
+      "description": "Traditional South Indian pudding infused with our signature coffee blend.",
+      "price": 110,
+      "image": "/mp21.jpeg",
+      "category": "desserts",
+      "chefSpecial": true
+    },
+    {
+      "id": 22,
+      "name": "Cardamom Coffee Cake",
+      "description": "Moist cake with hints of cardamom and our special coffee.",
+      "price": 95,
+      "image": "/mp22.jpeg",
+      "category": "desserts"
+    },
+    {
+      "id": 23,
+      "name": "Coffee Jaggery Ice Cream",
+      "description": "Handcrafted ice cream made with our coffee and palm jaggery.",
+      "price": 120,
+      "image": "/mp23.jpeg",
+      "category": "desserts",
+      "chefSpecial": true
+    },
+    {
+      "id": 24,
+      "name": "Coconut Coffee Ladoo",
+      "description": "Traditional coconut sweet balls infused with our coffee.",
+      "price": 85,
+      "image": "/mp24.jpeg",
+      "category": "desserts"
+    }
+  ]
