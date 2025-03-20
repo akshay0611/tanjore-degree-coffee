@@ -6,6 +6,7 @@ import MobileHeader from "./components/MobileHeader"
 import MobileSidebar from "./components/MobileSidebar"
 import DashboardView from "./components/DashboardView"
 import ProfileView from "./components/ProfileView"
+import Menu from "./components/Menu"
 import OrdersView from "./components/OrdersView"
 import SettingsView from "./components/SettingsView"
 import LogoutView from "./components/LogoutView"
@@ -49,6 +50,7 @@ export default function Dashboard() {
         <main className={`flex-1 p-6 transition-all duration-300 md:ml-64 ${collapsed ? "md:ml-20" : ""}`}>
           {activeItem === "Dashboard" && <DashboardView />}
           {activeItem === "Profile" && <ProfileView />}
+          {activeItem === "Menu" && <Menu />}
           {activeItem === "Orders" && <OrdersView />}
           {activeItem === "Settings" && <SettingsView />}
           {activeItem === "Logout" && <LogoutView setActiveItem={setActiveItem} />}

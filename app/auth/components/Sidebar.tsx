@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Coffee, LogOut, Home, Package, Settings, User } from "lucide-react";
+import { ChevronLeft, Coffee, LogOut, Home, Package, Settings, User,  } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
@@ -67,6 +67,7 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
   const menuItems = [
     { name: "Dashboard", icon: Home },
     { name: "Profile", icon: User },
+    { name: "Menu", icon: Coffee },
     { name: "Orders", icon: Package },
     { name: "Settings", icon: Settings },
     { name: "Logout", icon: LogOut },
