@@ -1,7 +1,7 @@
 // app/auth/components/Menu.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Search, ShoppingBag, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,13 +39,22 @@ type MenuItem = {
 export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const [cartItems, setCartItems] = useState<{ item: MenuItem; quantity: number }[]>([]);
+  const [cartItems, setCartItems] = useState<{ item: MenuItem; quantity: number }[]>(() => {
+    // Initialize cartItems from localStorage if it exists
+    const savedCart = localStorage.getItem("cartItems");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "confirmation">("cart");
   const [checkoutData, setCheckoutData] = useState({
     name: "",
     email: "",
     address: "",
   });
+
+  // Save cartItems to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // Filter menu items based on search query
   const filteredItems = menuItems.filter(
@@ -114,6 +123,8 @@ export default function Menu() {
     setCheckoutStep("cart");
     setCartItems([]);
     setCheckoutData({ name: "", email: "", address: "" });
+    // Clear localStorage when checkout is complete
+    localStorage.removeItem("cartItems");
   };
 
   return (
