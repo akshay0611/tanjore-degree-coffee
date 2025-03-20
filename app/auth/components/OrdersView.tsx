@@ -15,6 +15,9 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { AlertCircle, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Order {
   id: string;
@@ -40,6 +43,7 @@ interface Order {
 
 export default function OrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]); // State for filtered orders
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -51,10 +55,57 @@ export default function OrdersView() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
+  // Filter states
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [sortOption, setSortOption] = useState<string>("most-recent");
+
   // Fetch orders data from Supabase
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Apply filters and sorting whenever orders or filter/sort criteria change
+  useEffect(() => {
+    let filtered = [...orders];
+
+    // Filter by date range
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      filtered = filtered.filter((order) => new Date(order.created_at) >= fromDate);
+    }
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      filtered = filtered.filter((order) => new Date(order.created_at) <= toDate);
+    }
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((order) => order.status === statusFilter);
+    }
+
+    // Filter by price range
+    if (minPrice) {
+      const min = parseFloat(minPrice);
+      filtered = filtered.filter((order) => order.total_price >= min);
+    }
+    if (maxPrice) {
+      const max = parseFloat(maxPrice);
+      filtered = filtered.filter((order) => order.total_price <= max);
+    }
+
+    // Sort orders
+    if (sortOption === "most-recent") {
+      filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else if (sortOption === "highest-value") {
+      filtered.sort((a, b) => b.total_price - a.total_price);
+    }
+
+    setFilteredOrders(filtered);
+  }, [orders, dateFrom, dateTo, statusFilter, minPrice, maxPrice, sortOption]);
 
   // Auto-hide notification after 3 seconds
   useEffect(() => {
@@ -62,7 +113,6 @@ export default function OrdersView() {
       const timer = setTimeout(() => {
         setNotification({ ...notification, show: false });
       }, 3000);
-      
       return () => clearTimeout(timer);
     }
   }, [notification]);
@@ -77,7 +127,6 @@ export default function OrdersView() {
         return;
       }
 
-      // Fetch orders for the authenticated user
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
         .select("*")
@@ -99,63 +148,53 @@ export default function OrdersView() {
     }
   };
 
-  // Show notification helper
   const showNotification = (type: "success" | "error", message: string) => {
     setNotification({
       show: true,
       type,
-      message
+      message,
     });
   };
 
-  // Handle view details button click
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
     setShowDetailsDialog(true);
   };
 
-  // Handle reorder button click
   const handleReorder = async (order: Order) => {
     try {
       setReorderLoading(true);
-  
-      // Get current user
+
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData.user) {
         showNotification("error", "You must be logged in to reorder.");
         return;
       }
-  
-      // Prepare new order data based on the existing order
+
       const newOrder = {
         profile_id: userData.user.id,
-        items: order.items, // Reuse the items from the original order
+        items: order.items,
         total_price: order.total_price,
-        status: "pending", // Set status to "pending" for the new order
-        created_at: new Date().toISOString(), // New timestamp
+        status: "pending",
+        created_at: new Date().toISOString(),
         delivery_address: order.delivery_address,
         name: order.name,
         email: order.email,
       };
-  
-      // Insert the new order into the orders table
+
       const { error: orderError } = await supabase
         .from("orders")
         .insert(newOrder)
         .select();
-  
+
       if (orderError) {
         console.error("Order insert error:", orderError);
         showNotification("error", `Failed to create new order: ${orderError.message}`);
         return;
       }
-  
-      // Show success notification
+
       showNotification("success", "New order created successfully!");
-      
-      // Refresh the orders list
       fetchOrders();
-  
     } catch (e) {
       console.error("Unexpected error during reorder:", e);
       showNotification("error", "An unexpected error occurred. Please try again.");
@@ -164,14 +203,13 @@ export default function OrdersView() {
     }
   };
 
-  // Format date for display
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
@@ -184,15 +222,11 @@ export default function OrdersView() {
     return <p className="text-red-500">Error: {error}</p>;
   }
 
-  if (orders.length === 0) {
-    return <p className="text-amber-900">No orders found.</p>;
-  }
-
   return (
     <div className="space-y-6">
       {/* Custom notification */}
       {notification.show && (
-        <div 
+        <div
           className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
             notification.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
           }`}
@@ -207,71 +241,160 @@ export default function OrdersView() {
       )}
 
       <h1 className="text-2xl font-bold text-amber-900">Orders</h1>
+
+      {/* Filters Section */}
+      <Card className="bg-white border-amber-200">
+        <CardHeader>
+          <CardTitle className="text-amber-900">Filter Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Date Range Filter */}
+            <div>
+              <Label className="text-amber-700">From Date</Label>
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="mt-1 border-amber-200 bg-amber-50"
+              />
+            </div>
+            <div>
+              <Label className="text-amber-700">To Date</Label>
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="mt-1 border-amber-200 bg-amber-50"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <Label className="text-amber-700">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="mt-1 border-amber-200 bg-amber-50">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="pending">Processing</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Price Range Filter */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-amber-700">Min Price</Label>
+                <Input
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  placeholder="Min"
+                  className="mt-1 border-amber-200 bg-amber-50"
+                />
+              </div>
+              <div>
+                <Label className="text-amber-700">Max Price</Label>
+                <Input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="Max"
+                  className="mt-1 border-amber-200 bg-amber-50"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sorting Options */}
+          <div className="mt-4">
+            <Label className="text-amber-700">Sort By</Label>
+            <Select value={sortOption} onValueChange={setSortOption}>
+              <SelectTrigger className="mt-1 border-amber-200 bg-amber-50 w-full md:w-48">
+                <SelectValue placeholder="Select sorting" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="most-recent">Most Recent</SelectItem>
+                <SelectItem value="highest-value">Highest Value</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Orders List */}
       <Card className="bg-white border-amber-200">
         <CardHeader>
           <CardTitle className="text-amber-900">Order History</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            {orders.map((order) => {
-              const orderDate = new Date(order.created_at);
-              const daysAgo = Math.floor((Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+          {filteredOrders.length === 0 ? (
+            <p className="text-amber-900">No orders match the selected filters.</p>
+          ) : (
+            <div className="space-y-6">
+              {filteredOrders.map((order) => {
+                const orderDate = new Date(order.created_at);
+                const daysAgo = Math.floor((Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
 
-              return (
-                <Card key={order.id} className="bg-amber-50 border-amber-200">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-amber-900 text-base">Order #{order.id.slice(0, 8)}</CardTitle>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          order.status === "pending" ? "bg-amber-200 text-amber-800" : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {order.status === "pending" ? "Processing" : "Delivered"}
-                      </span>
-                    </div>
-                    <CardDescription>
-                      {daysAgo} day{daysAgo !== 1 ? "s" : ""} ago
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {order.items.map((orderItem, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span className="text-amber-700">
-                            {orderItem.item.name} x {orderItem.quantity}
-                          </span>
-                          <span className="font-medium text-amber-900">₹{orderItem.item.price * orderItem.quantity}</span>
-                        </div>
-                      ))}
-                      <Separator className="my-2 bg-amber-200" />
-                      <div className="flex justify-between">
-                        <span className="font-medium text-amber-900">Total</span>
-                        <span className="font-bold text-amber-900">₹{order.total_price}</span>
+                return (
+                  <Card key={order.id} className="bg-amber-50 border-amber-200">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-amber-900 text-base">Order #{order.id.slice(0, 8)}</CardTitle>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            order.status === "pending" ? "bg-amber-200 text-amber-800" : "bg-green-100 text-green-800"
+                          }`}
+                        >
+                          {order.status === "pending" ? "Processing" : "Delivered"}
+                        </span>
                       </div>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        className="text-amber-700 border-amber-300 text-xs"
-                        onClick={() => handleViewDetails(order)}
-                      >
-                        View Details
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="text-amber-700 border-amber-300 text-xs"
-                        onClick={() => handleReorder(order)}
-                        disabled={reorderLoading}
-                      >
-                        {reorderLoading ? "Processing..." : "Reorder"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                      <CardDescription>
+                        {daysAgo} day{daysAgo !== 1 ? "s" : ""} ago
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {order.items.map((orderItem, index) => (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span className="text-amber-700">
+                              {orderItem.item.name} x {orderItem.quantity}
+                            </span>
+                            <span className="font-medium text-amber-900">₹{orderItem.item.price * orderItem.quantity}</span>
+                          </div>
+                        ))}
+                        <Separator className="my-2 bg-amber-200" />
+                        <div className="flex justify-between">
+                          <span className="font-medium text-amber-900">Total</span>
+                          <span className="font-bold text-amber-900">₹{order.total_price}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          className="text-amber-700 border-amber-300 text-xs"
+                          onClick={() => handleViewDetails(order)}
+                        >
+                          View Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="text-amber-700 border-amber-300 text-xs"
+                          onClick={() => handleReorder(order)}
+                          disabled={reorderLoading}
+                        >
+                          {reorderLoading ? "Processing..." : "Reorder"}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -284,7 +407,7 @@ export default function OrdersView() {
               Order #{selectedOrder?.id.slice(0, 8)} placed on {selectedOrder && formatDate(selectedOrder.created_at)}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedOrder && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -303,7 +426,7 @@ export default function OrdersView() {
                   <span className="font-bold text-amber-900">₹{selectedOrder.total_price}</span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <h3 className="font-medium text-amber-900">Delivery Details</h3>
                 <p className="text-sm text-amber-700">
@@ -316,7 +439,7 @@ export default function OrdersView() {
                   <strong>Address:</strong> {selectedOrder.delivery_address}
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <h3 className="font-medium text-amber-900">Order Status</h3>
                 <p className="text-sm text-amber-700">
@@ -331,10 +454,10 @@ export default function OrdersView() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="text-amber-700 border-amber-300"
               onClick={() => handleReorder(selectedOrder!)}
               disabled={reorderLoading || !selectedOrder}
