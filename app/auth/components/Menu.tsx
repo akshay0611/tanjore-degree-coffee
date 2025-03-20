@@ -1,4 +1,4 @@
-// app/auth/Menu/page.tsx
+// app/auth/components/Menu.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -17,10 +17,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Cart from "./Cart";
-import CheckoutForm from "./ CheckoutForm";
+import CheckoutForm from "./CheckoutForm";
 import OrderConfirmation from "./OrderConfirmation";
 import MenuItemCard from "./MenuItemCard";
-import menuItemsData from "./data/menuItems.json";
+import menuItems from "./data/menuItems.json";
 
 // Menu item type definition
 type MenuItem = {
@@ -36,10 +36,7 @@ type MenuItem = {
   chefSpecial?: boolean;
 };
 
-// Assert the type of menuItems as MenuItem[]
-const menuItems: MenuItem[] = menuItemsData;
-
-export default function Page() {
+export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [cartItems, setCartItems] = useState<{ item: MenuItem; quantity: number }[]>(() => {
