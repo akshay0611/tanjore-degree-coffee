@@ -58,6 +58,12 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
     fetchProfileData();
   }, []);
 
+  // Get first two letters of fullName for AvatarFallback
+  const getInitials = () => {
+    if (loading || error || !fullName) return "JD"; // Fallback to "JD" during loading, error, or if no fullName
+    return fullName.slice(0, 2).toUpperCase();
+  };
+
   const menuItems = [
     { name: "Dashboard", icon: Home },
     { name: "Profile", icon: User },
@@ -109,7 +115,7 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
           <Avatar className="h-8 w-8 border border-amber-200">
             <AvatarImage src="/placeholder-user.jpg" alt="User" />
-            <AvatarFallback className="bg-amber-700 text-amber-50">JD</AvatarFallback>
+            <AvatarFallback className="bg-amber-700 text-amber-50">{getInitials()}</AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex flex-col">

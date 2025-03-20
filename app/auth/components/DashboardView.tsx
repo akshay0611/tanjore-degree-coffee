@@ -1,10 +1,53 @@
-"use client"
+"use client";
 
-import { Bell, Coffee } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Bell, Coffee } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function DashboardView() {
+  const [fullName, setFullName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user full name from Supabase
+  useEffect(() => {
+    const fetchFullName = async () => {
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !userData.user) {
+          setError("No authenticated user found.");
+          setLoading(false);
+          return;
+        }
+
+        // Fetch full_name from the `profiles` table
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", userData.user.id)
+          .single();
+
+        if (profileError || !profileData) {
+          setError("No profile found.");
+          setFullName(null);
+        } else {
+          setFullName(profileData.full_name || null);
+        }
+
+        setLoading(false);
+      } catch (e) {
+        setError("An unexpected error occurred.");
+        console.error("Error fetching full name:", e);
+        setLoading(false);
+      }
+    };
+
+    fetchFullName();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -19,7 +62,9 @@ export default function DashboardView() {
 
       <Card className="bg-white border-amber-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-amber-900">Welcome back, John!</CardTitle>
+          <CardTitle className="text-amber-900">
+            {loading ? "Welcome back!" : error ? "Welcome back, User!" : `Welcome back, ${fullName}!`}
+          </CardTitle>
           <CardDescription>Here&apos;s an overview of your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -121,5 +166,5 @@ export default function DashboardView() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
