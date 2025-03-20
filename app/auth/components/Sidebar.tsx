@@ -1,24 +1,67 @@
-"use client"
+"use client";
 
-import { ChevronLeft, Coffee, LogOut, Home, Package, Settings, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ChevronLeft, Coffee, LogOut, Home, Package, Settings, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 interface SidebarProps {
-  collapsed: boolean
-  toggleSidebar: () => void
-  activeItem: string
-  setActiveItem: (item: string) => void
+  collapsed: boolean;
+  toggleSidebar: () => void;
+  activeItem: string;
+  setActiveItem: (item: string) => void;
 }
 
 export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiveItem }: SidebarProps) {
+  const [email, setEmail] = useState<string | null>(null); // Store only the email
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user email
+  useEffect(() => {
+    const fetchEmail = async () => {
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+  
+        if (userError || !userData.user) {
+          setError("No authenticated user found.");
+          setLoading(false);
+          return;
+        }
+  
+        // Fetch email from the `profiles` table
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("id", userData.user.id)
+          .single();
+  
+        if (profileError || !profileData) {
+          setError("No profile found. Using authenticated email.");
+          setEmail(userData.user.email || null); // Fallback to authenticated email or null
+        } else {
+          setEmail(profileData.email || null); // Ensure email is either a string or null
+        }
+  
+        setLoading(false);
+      } catch (e) {
+        setError("An unexpected error occurred.");
+        console.error("Error fetching email:", e);
+        setLoading(false);
+      }
+    };
+  
+    fetchEmail();
+  }, []);
+
   const menuItems = [
     { name: "Dashboard", icon: Home },
     { name: "Profile", icon: User },
     { name: "Orders", icon: Package },
     { name: "Settings", icon: Settings },
     { name: "Logout", icon: LogOut },
-  ]
+  ];
 
   return (
     <aside
@@ -67,12 +110,14 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
           </Avatar>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-medium">John Doe</span>
-              <span className="text-xs text-amber-300">john@example.com</span>
+              <span className="text-sm font-medium">User</span>
+              <span className="text-xs text-amber-300">
+                {loading ? "Loading..." : error ? "Error fetching email" : email}
+              </span>
             </div>
           )}
         </div>
       </div>
     </aside>
-  )
+  );
 }
