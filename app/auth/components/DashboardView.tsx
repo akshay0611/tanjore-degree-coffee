@@ -5,15 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+
+// Define interfaces for our data types
+interface Order {
+  id: string;
+  items: {
+    item: {
+      id: number;
+      name: string;
+      image: string;
+      price: number;
+      popular: boolean;
+      category: string;
+      description: string;
+    };
+    quantity: number;
+  }[];
+  total_price: number;
+  status: string;
+  created_at: string;
+}
 
 export default function DashboardView() {
   const [fullName, setFullName] = useState<string | null>(null);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Fetch user full name from Supabase
+  // Fetch user data and orders from Supabase
   useEffect(() => {
-    const fetchFullName = async () => {
+    const fetchUserData = async () => {
       try {
         const { data: userData, error: userError } = await supabase.auth.getUser();
 
@@ -37,16 +60,42 @@ export default function DashboardView() {
           setFullName(profileData.full_name || null);
         }
 
+        // Fetch recent orders
+        const { data: ordersData, error: ordersError } = await supabase
+          .from("orders")
+          .select("*")
+          .eq("profile_id", userData.user.id)
+          .order("created_at", { ascending: false })
+          .limit(3);
+
+        if (ordersError) {
+          console.error("Error fetching orders:", ordersError);
+        } else {
+          setRecentOrders(ordersData || []);
+        }
+
         setLoading(false);
       } catch (e) {
         setError("An unexpected error occurred.");
-        console.error("Error fetching full name:", e);
+        console.error("Error fetching data:", e);
         setLoading(false);
       }
     };
 
-    fetchFullName();
+    fetchUserData();
   }, []);
+
+  // Calculate days ago for an order date
+  const calculateDaysAgo = (dateString: string) => {
+    const orderDate = new Date(dateString);
+    const daysAgo = Math.floor((Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysAgo;
+  };
+
+  // Handle navigation to orders page
+  const handleViewAllOrders = () => {
+    router.push("/orders");
+  };
 
   return (
     <div className="space-y-6">
@@ -83,8 +132,12 @@ export default function DashboardView() {
                 <CardTitle className="text-sm font-medium text-amber-900">Recent Orders</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-900">12</div>
-                <p className="text-xs text-amber-700 mt-1">Last order: 2 days ago</p>
+                <div className="text-2xl font-bold text-amber-900">{recentOrders.length}</div>
+                <p className="text-xs text-amber-700 mt-1">
+                  {recentOrders.length > 0
+                    ? `Last order: ${calculateDaysAgo(recentOrders[0].created_at)} days ago`
+                    : "No recent orders"}
+                </p>
               </CardContent>
             </Card>
             <Card className="bg-amber-100 border-amber-200">
@@ -106,27 +159,41 @@ export default function DashboardView() {
             <CardTitle className="text-amber-900">Recent Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3].map((order) => (
-                <div key={order} className="flex items-center justify-between pb-4 border-b border-amber-100">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center">
-                      <Coffee className="h-5 w-5 text-amber-700" />
+            {loading ? (
+              <p className="text-amber-900">Loading orders...</p>
+            ) : recentOrders.length > 0 ? (
+              <div className="space-y-4">
+                {recentOrders.map((order) => {
+                  const daysAgo = calculateDaysAgo(order.created_at);
+                  // Get first item name for display (or you could show count of items)
+                  const firstItemName = order.items.length > 0 ? order.items[0].item.name : "Unknown item";
+                  
+                  return (
+                    <div key={order.id} className="flex items-center justify-between pb-4 border-b border-amber-100">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center">
+                          <Coffee className="h-5 w-5 text-amber-700" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-amber-900">Order #{order.id.slice(0, 8)}</p>
+                          <p className="text-xs text-amber-700">
+                            {daysAgo} day{daysAgo !== 1 ? "s" : ""} ago • {firstItemName}
+                            {order.items.length > 1 ? ` + ${order.items.length - 1} more` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-medium text-amber-900">₹{order.total_price}</span>
                     </div>
-                    <div>
-                      <p className="font-medium text-amber-900">Order #{1000 + order}</p>
-                      <p className="text-xs text-amber-700">
-                        {order} day{order > 1 ? "s" : ""} ago
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-amber-900">₹{120 + order * 10}</span>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-amber-700 text-center py-4">No recent orders found</p>
+            )}
             <Button
               variant="ghost"
               className="w-full mt-4 text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+              onClick={handleViewAllOrders}
             >
               View All Orders
             </Button>

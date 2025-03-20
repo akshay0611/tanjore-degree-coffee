@@ -1,4 +1,3 @@
-// app/auth/components/Menu.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -21,6 +20,7 @@ import CheckoutForm from "./CheckoutForm";
 import OrderConfirmation from "./OrderConfirmation";
 import MenuItemCard from "./MenuItemCard";
 import menuItems from "./data/menuItems.json";
+import { supabase } from "@/lib/supabase/client";
 
 // Menu item type definition
 type MenuItem = {
@@ -36,11 +36,19 @@ type MenuItem = {
   chefSpecial?: boolean;
 };
 
+// Profile type definition
+type Profile = {
+  id: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  member_since: string;
+};
+
 export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [cartItems, setCartItems] = useState<{ item: MenuItem; quantity: number }[]>(() => {
-    // Initialize cartItems from localStorage if it exists
     const savedCart = localStorage.getItem("cartItems");
     return savedCart ? JSON.parse(savedCart) : [];
   });
@@ -50,17 +58,50 @@ export default function Menu() {
     email: "",
     address: "",
   });
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Save cartItems to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Fetch profile data when component mounts
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Get the current authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+
+          if (error) throw error;
+          
+          setProfile(data);
+          setCheckoutData({
+            name: data.full_name || "",
+            email: data.email || "",
+            address: "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   // Filter menu items based on search query
   const filteredItems = menuItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Add item to cart
@@ -69,8 +110,8 @@ export default function Menu() {
     if (existingItem) {
       setCartItems(
         cartItems.map((cartItem) =>
-          cartItem.item.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem,
-        ),
+          cartItem.item.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
+        )
       );
     } else {
       setCartItems([...cartItems, { item, quantity: 1 }]);
@@ -91,7 +132,9 @@ export default function Menu() {
       return;
     }
     setCartItems(
-      cartItems.map((cartItem) => (cartItem.item.id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem)),
+      cartItems.map((cartItem) =>
+        cartItem.item.id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
+      )
     );
   };
 
@@ -104,31 +147,65 @@ export default function Menu() {
   };
 
   // Calculate total price
-  const totalPrice = cartItems.reduce((total, cartItem) => total + cartItem.item.price * cartItem.quantity, 0);
+  const totalPrice = cartItems.reduce(
+    (total, cartItem) => total + cartItem.item.price * cartItem.quantity,
+    0
+  );
 
-  // Handle checkout form submission
-  const handleCheckout = () => {
+  // Handle checkout with Supabase integration
+  const handleCheckout = async () => {
     if (!checkoutData.name || !checkoutData.email || !checkoutData.address) {
       alert("Please fill in all fields");
       return;
     }
-    // Simulate API call delay
-    setTimeout(() => {
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .insert({
+          profile_id: profile?.id,
+          items: cartItems,
+          total_price: totalPrice,
+          delivery_address: checkoutData.address,
+          name: checkoutData.name,
+          email: checkoutData.email,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
       setCheckoutStep("confirmation");
-    }, 1000);
+    } catch (error) {
+      console.error("Error during checkout:", error);
+      alert("There was an error processing your order. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reset checkout process
   const resetCheckout = () => {
     setCheckoutStep("cart");
     setCartItems([]);
-    setCheckoutData({ name: "", email: "", address: "" });
-    // Clear localStorage when checkout is complete
+    setCheckoutData({
+      name: profile?.full_name || "",
+      email: profile?.email || "",
+      address: "",
+    });
     localStorage.removeItem("cartItems");
   };
 
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-700"></div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-amber-900">Our Menu</h1>
@@ -189,6 +266,7 @@ export default function Menu() {
                   totalPrice={totalPrice}
                   setCheckoutStep={setCheckoutStep}
                   handleCheckout={handleCheckout}
+                  loading={loading}
                 />
               ) : (
                 <OrderConfirmation
@@ -238,22 +316,24 @@ export default function Menu() {
           </div>
         </TabsContent>
 
-        {["coffee-specialties", "traditional-brews", "contemporary-coffees", "south-indian-snacks", "desserts"].map((category) => (
-          <TabsContent key={category} value={category} className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredItems
-                .filter((item) => item.category === category)
-                .map((item) => (
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    onAddToCart={addToCart}
-                    onViewDetails={() => setSelectedItem(item)}
-                  />
-                ))}
-            </div>
-          </TabsContent>
-        ))}
+        {["coffee-specialties", "traditional-brews", "contemporary-coffees", "south-indian-snacks", "desserts"].map(
+          (category) => (
+            <TabsContent key={category} value={category} className="mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredItems
+                  .filter((item) => item.category === category)
+                  .map((item) => (
+                    <MenuItemCard
+                      key={item.id}
+                      item={item}
+                      onAddToCart={addToCart}
+                      onViewDetails={() => setSelectedItem(item)}
+                    />
+                  ))}
+              </div>
+            </TabsContent>
+          )
+        )}
       </Tabs>
 
       {/* Item Details Dialog */}
