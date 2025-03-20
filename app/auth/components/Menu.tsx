@@ -1,11 +1,10 @@
+// app/auth/components/Menu.tsx
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
-import { CoffeeIcon, Search, ShoppingBag, Star, Trash2} from "lucide-react";
-
+import { Search, ShoppingBag, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
+import Cart from "./Cart";
+import CheckoutForm from "./CheckoutForm";
+import OrderConfirmation from "./OrderConfirmation";
+import MenuItemCard from "./MenuItemCard";
 
 // Menu item type definition
 type MenuItem = {
@@ -102,8 +104,8 @@ export default function Menu() {
     }
   };
 
- // Remove item from cart with confirmation
- const removeFromCart = (itemId: number) => {
+  // Remove item from cart with confirmation
+  const removeFromCart = (itemId: number) => {
     if (window.confirm("Are you sure you want to remove this item from your cart?")) {
       setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
     }
@@ -150,7 +152,6 @@ export default function Menu() {
     setCheckoutData({ name: "", email: "", address: "" });
   };
 
-
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -158,7 +159,6 @@ export default function Menu() {
           <h1 className="text-3xl font-bold text-amber-900">Our Menu</h1>
           <p className="text-amber-700 mt-1">Discover the authentic taste of South Indian coffee</p>
         </div>
-        {/* ... (rest of the header remains unchanged) */}
         <div className="flex items-center gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-amber-500" />
@@ -184,7 +184,7 @@ export default function Menu() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-              <DialogTitle className="text-amber-900">
+                <DialogTitle className="text-amber-900">
                   {checkoutStep === "cart" ? "Your Order" : checkoutStep === "form" ? "Checkout" : "Order Confirmed"}
                 </DialogTitle>
                 <DialogDescription>
@@ -199,166 +199,29 @@ export default function Menu() {
               </DialogHeader>
 
               {checkoutStep === "cart" ? (
-                cartItems.length > 0 ? (
-                  <div className="space-y-6">
-                    <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2">
-                      {cartItems.map(({ item, quantity }) => (
-                        <div key={item.id} className="flex items-center justify-between border-b border-amber-100 pb-3">
-                          <div className="flex items-center gap-3 flex-1">
-                            <Image
-                              src={item.image || "/placeholder.svg"}
-                              alt={item.name}
-                              width={40}
-                              height={40}
-                              className="rounded-md object-cover"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium text-amber-900">{item.name}</p>
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm text-amber-700">₹{item.price} × {quantity}</p>
-                                <p className="text-sm font-medium text-amber-900">= ₹{item.price * quantity}</p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              min="1"
-                              value={quantity}
-                              onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                              className="w-16 h-8 text-center border-amber-300"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-amber-700 hover:text-amber-900"
-                              onClick={() => removeFromCart(item.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex justify-between pt-2">
-                        <span className="font-medium text-amber-900">Total</span>
-                        <span className="font-bold text-amber-900">₹{totalPrice}</span>
-                      </div>
-
-                      <div className="flex justify-between gap-2">
-                        <Button
-                          variant="outline"
-                          className="border-amber-300 text-amber-700"
-                          onClick={clearCart}
-                          disabled={cartItems.length === 0}
-                        >
-                          Clear Cart
-                        </Button>
-                        <div className="flex flex-wrap gap-2 justify-between w-full">
-                          <DialogClose asChild>
-                            <Button variant="outline" className="border-amber-300 text-amber-700">
-                              Continue Shopping
-                            </Button>
-                          </DialogClose>
-                          <Button
-                            className="bg-amber-700 hover:bg-amber-800 text-white"
-                            disabled={cartItems.length === 0}
-                            onClick={() => setCheckoutStep("form")}
-                          >
-                            Proceed to Checkout
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 gap-4">
-                    <CoffeeIcon className="h-12 w-12 text-amber-300" />
-                    <p className="text-amber-700">Your cart is empty</p>
-                    <DialogClose asChild>
-                      <Button variant="outline" className="border-amber-300 text-amber-700">
-                        Browse Menu
-                      </Button>
-                    </DialogClose>
-                  </div>
-                )
+                <Cart
+                  cartItems={cartItems}
+                  totalPrice={totalPrice}
+                  updateQuantity={updateQuantity}
+                  removeFromCart={removeFromCart}
+                  clearCart={clearCart}
+                  setCheckoutStep={setCheckoutStep}
+                />
               ) : checkoutStep === "form" ? (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Full Name"
-                      value={checkoutData.name}
-                      onChange={(e) => setCheckoutData({ ...checkoutData, name: e.target.value })}
-                      className="border-amber-300"
-                    />
-                    <Input
-                      placeholder="Email"
-                      type="email"
-                      value={checkoutData.email}
-                      onChange={(e) => setCheckoutData({ ...checkoutData, email: e.target.value })}
-                      className="border-amber-300"
-                    />
-                    <Input
-                      placeholder="Delivery Address"
-                      value={checkoutData.address}
-                      onChange={(e) => setCheckoutData({ ...checkoutData, address: e.target.value })}
-                      className="border-amber-300"
-                    />
-                  </div>
-                  <div className="flex justify-between pt-2">
-                    <span className="font-medium text-amber-900">Order Total</span>
-                    <span className="font-bold text-amber-900">₹{totalPrice}</span>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <Button
-                      variant="outline"
-                      className="border-amber-300 text-amber-700"
-                      onClick={() => setCheckoutStep("cart")}
-                    >
-                      Back to Cart
-                    </Button>
-                    <Button
-                      className="bg-amber-700 hover:bg-amber-800 text-white"
-                      onClick={handleCheckout}
-                    >
-                      Place Order
-                    </Button>
-                  </div>
-                </div>
+                <CheckoutForm
+                  checkoutData={checkoutData}
+                  setCheckoutData={setCheckoutData}
+                  totalPrice={totalPrice}
+                  setCheckoutStep={setCheckoutStep}
+                  handleCheckout={handleCheckout}
+                />
               ) : (
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <CoffeeIcon className="h-12 w-12 text-amber-300 mx-auto mb-4" />
-                    <p className="text-amber-700">Order placed successfully!</p>
-                    <p className="text-sm text-amber-600 mt-2">
-                      Thank you, {checkoutData.name}! Your order will be delivered to {checkoutData.address}.
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="max-h-[200px] overflow-y-auto space-y-2">
-                      {cartItems.map(({ item, quantity }) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span>{item.name} × {quantity}</span>
-                          <span>₹{item.price * quantity}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-between pt-2">
-                      <span className="font-medium text-amber-900">Total</span>
-                      <span className="font-bold text-amber-900">₹{totalPrice}</span>
-                    </div>
-                  </div>
-                  <DialogClose asChild>
-                    <Button
-                      className="w-full bg-amber-700 hover:bg-amber-800 text-white"
-                      onClick={resetCheckout}
-                    >
-                      Back to Menu
-                    </Button>
-                  </DialogClose>
-                </div>
+                <OrderConfirmation
+                  cartItems={cartItems}
+                  totalPrice={totalPrice}
+                  checkoutData={checkoutData}
+                  resetCheckout={resetCheckout}
+                />
               )}
             </DialogContent>
           </Dialog>
@@ -471,62 +334,5 @@ export default function Menu() {
         </Dialog>
       )}
     </div>
-  );
-}
-
-// Menu Item Card Component
-function MenuItemCard({
-  item,
-  onAddToCart,
-  onViewDetails,
-}: {
-  item: MenuItem;
-  onAddToCart: (item: MenuItem) => void;
-  onViewDetails: () => void;
-}) {
-  return (
-    <Card className="overflow-hidden border-amber-200 transition-all hover:shadow-md">
-      <div className="relative h-48 w-full overflow-hidden">
-        <Image
-          src={item.image || "/placeholder.svg"}
-          alt={item.name}
-          fill
-          className="object-cover transition-transform hover:scale-105"
-        />
-        <div className="absolute top-0 left-0 right-0 p-2 flex justify-between">
-          {item.popular && (
-            <Badge className="bg-amber-500 hover:bg-amber-600">
-              <Star className="h-3 w-3 mr-1 fill-current" /> Popular
-            </Badge>
-          )}
-          {item.new && <Badge className="bg-green-500 hover:bg-green-600">New</Badge>}
-          {item.chefSpecial && <Badge className="bg-purple-500 hover:bg-purple-600">Chef&apos;s Special</Badge>}
-        </div>
-      </div>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-amber-900">{item.name}</CardTitle>
-        <CardDescription className="line-clamp-2">{item.description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          {item.vegan && (
-            <Badge variant="outline" className="border-green-500 text-green-600">
-              Vegan
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <span className="text-lg font-bold text-amber-900">₹{item.price}</span>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="border-amber-300 text-amber-700" onClick={onViewDetails}>
-            Details
-          </Button>
-          <Button size="sm" className="bg-amber-700 hover:bg-amber-800 text-white" onClick={() => onAddToCart(item)}>
-            Add
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
   );
 }
