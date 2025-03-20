@@ -22,7 +22,6 @@ import MenuItemCard from "./MenuItemCard";
 import menuItems from "./data/menuItems.json";
 import { supabase } from "@/lib/supabase/client";
 
-// Menu item type definition
 type MenuItem = {
   id: number;
   name: string;
@@ -36,7 +35,6 @@ type MenuItem = {
   chefSpecial?: boolean;
 };
 
-// Profile type definition
 type Profile = {
   id: string;
   email: string;
@@ -61,12 +59,10 @@ export default function Menu() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Save cartItems to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Fetch profile data when component mounts
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -95,14 +91,12 @@ export default function Menu() {
     fetchProfile();
   }, []);
 
-  // Filter menu items based on search query
   const filteredItems = menuItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Add item to cart
   const addToCart = (item: MenuItem) => {
     const existingItem = cartItems.find((cartItem) => cartItem.item.id === item.id);
     if (existingItem) {
@@ -116,14 +110,27 @@ export default function Menu() {
     }
   };
 
-  // Remove item from cart with confirmation
+  const reduceFromCart = (itemId: number) => {
+    const existingItem = cartItems.find((cartItem) => cartItem.item.id === itemId);
+    if (existingItem) {
+      if (existingItem.quantity > 1) {
+        setCartItems(
+          cartItems.map((cartItem) =>
+            cartItem.item.id === itemId ? { ...cartItem, quantity: cartItem.quantity - 1 } : cartItem
+          )
+        );
+      } else {
+        setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
+      }
+    }
+  };
+
   const removeFromCart = (itemId: number) => {
     if (window.confirm("Are you sure you want to remove this item from your cart?")) {
       setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
     }
   };
 
-  // Update item quantity in cart
   const updateQuantity = (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) {
       removeFromCart(itemId);
@@ -136,7 +143,6 @@ export default function Menu() {
     );
   };
 
-  // Clear entire cart
   const clearCart = () => {
     if (cartItems.length === 0) return;
     if (window.confirm("Are you sure you want to clear your entire cart?")) {
@@ -144,13 +150,11 @@ export default function Menu() {
     }
   };
 
-  // Calculate total price
   const totalPrice = cartItems.reduce(
     (total, cartItem) => total + cartItem.item.price * cartItem.quantity,
     0
   );
 
-  // Handle checkout with Supabase integration
   const handleCheckout = async () => {
     if (!checkoutData.name || !checkoutData.email || !checkoutData.address) {
       alert("Please fill in all fields");
@@ -183,7 +187,6 @@ export default function Menu() {
     }
   };
 
-  // Reset checkout process
   const resetCheckout = () => {
     setCheckoutStep("cart");
     setCartItems([]);
@@ -198,7 +201,7 @@ export default function Menu() {
   return (
     <div className="container mx-auto py-8 px-4">
       {loading && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+       <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-700"></div>
         </div>
       )}
@@ -309,8 +312,9 @@ export default function Menu() {
                   key={item.id}
                   item={item}
                   onAddToCart={addToCart}
+                  onReduceFromCart={reduceFromCart} // Pass the reduce function
                   onViewDetails={() => setSelectedItem(item)}
-                  quantity={cartItem ? cartItem.quantity : 0} // Pass quantity from cartItems
+                  quantity={cartItem ? cartItem.quantity : 0}
                 />
               );
             })}
@@ -330,8 +334,9 @@ export default function Menu() {
                         key={item.id}
                         item={item}
                         onAddToCart={addToCart}
+                        onReduceFromCart={reduceFromCart} // Pass the reduce function
                         onViewDetails={() => setSelectedItem(item)}
-                        quantity={cartItem ? cartItem.quantity : 0} // Pass quantity from cartItems
+                        quantity={cartItem ? cartItem.quantity : 0}
                       />
                     );
                   })}
@@ -341,7 +346,6 @@ export default function Menu() {
         )}
       </Tabs>
 
-      {/* Item Details Dialog */}
       {selectedItem && (
         <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
           <DialogContent className="sm:max-w-md">
