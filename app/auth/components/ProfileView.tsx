@@ -10,10 +10,10 @@ import { supabase } from "@/lib/supabase/client";
 export default function ProfileView() {
   const [isEditing, setIsEditing] = useState(false); // State for edit mode
   const [profile, setProfile] = useState({
-    fullName: "John Doe", // Default values
+    fullName: "",
     email: "",
-    phone: "+91 98765 43210",
-    memberSince: "January 2023",
+    phone: "",
+    memberSince: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,15 +37,23 @@ export default function ProfileView() {
         // Fetch profile data from the `profiles` table
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("email")
+          .select("email, full_name, phone, member_since")
           .eq("id", userData.user.id)
           .single();
 
         if (profileError || !profileData) {
           setError("No profile found. Using authenticated email.");
-          setProfile((prev) => ({ ...prev, email: userData.user?.email || "" }));
+          setProfile((prev) => ({
+            ...prev,
+            email: userData.user?.email || "",
+          }));
         } else {
-          setProfile((prev) => ({ ...prev, email: profileData.email }));
+          setProfile({
+            fullName: profileData.full_name || "",
+            email: profileData.email || "",
+            phone: profileData.phone || "",
+            memberSince: profileData.member_since || "",
+          });
         }
       } catch (e) {
         setError("An unexpected error occurred.");
@@ -84,7 +92,10 @@ export default function ProfileView() {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
-          email: profile.email, // Update email (or other fields if added later)
+          full_name: profile.fullName,
+          email: profile.email,
+          phone: profile.phone,
+          member_since: profile.memberSince,
         })
         .eq("id", userData.user.id);
 
@@ -172,9 +183,18 @@ export default function ProfileView() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-amber-700">Member Since</label>
-                    <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
-                      {profile.memberSince}
-                    </p>
+                    {isEditing ? (
+                      <Input
+                        name="memberSince"
+                        value={profile.memberSince}
+                        onChange={handleInputChange}
+                        className="mt-1 border-amber-200 bg-amber-50"
+                      />
+                    ) : (
+                      <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
+                        {profile.memberSince}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {isEditing ? (

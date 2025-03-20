@@ -14,13 +14,14 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiveItem }: SidebarProps) {
-  const [email, setEmail] = useState<string | null>(null); // Store only the email
+  const [fullName, setFullName] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user email
+  // Fetch user full name and email
   useEffect(() => {
-    const fetchEmail = async () => {
+    const fetchProfileData = async () => {
       try {
         const { data: userData, error: userError } = await supabase.auth.getUser();
   
@@ -30,29 +31,31 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
           return;
         }
   
-        // Fetch email from the `profiles` table
+        // Fetch full_name and email from the `profiles` table
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("email")
+          .select("full_name, email")
           .eq("id", userData.user.id)
           .single();
   
         if (profileError || !profileData) {
           setError("No profile found. Using authenticated email.");
-          setEmail(userData.user.email || null); // Fallback to authenticated email or null
+          setFullName(null);
+          setEmail(userData.user.email || null);
         } else {
-          setEmail(profileData.email || null); // Ensure email is either a string or null
+          setFullName(profileData.full_name || null);
+          setEmail(profileData.email || null);
         }
   
         setLoading(false);
       } catch (e) {
         setError("An unexpected error occurred.");
-        console.error("Error fetching email:", e);
+        console.error("Error fetching profile data:", e);
         setLoading(false);
       }
     };
   
-    fetchEmail();
+    fetchProfileData();
   }, []);
 
   const menuItems = [
@@ -110,9 +113,11 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
           </Avatar>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-medium">User</span>
+              <span className="text-sm font-medium">
+                {loading ? "Loading..." : error ? "User" : fullName || "User"}
+              </span>
               <span className="text-xs text-amber-300">
-                {loading ? "Loading..." : error ? "Error fetching email" : email}
+                {loading ? "Fetching..." : error ? "Error fetching profile" : email || "No email"}
               </span>
             </div>
           )}
