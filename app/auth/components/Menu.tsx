@@ -74,6 +74,12 @@ export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [cartItems, setCartItems] = useState<{ item: MenuItem; quantity: number }[]>([]);
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "confirmation">("cart");
+  const [checkoutData, setCheckoutData] = useState({
+    name: "",
+    email: "",
+    address: "",
+  });
 
   // Filter menu items based on search query
   const filteredItems = menuItems.filter(
@@ -125,6 +131,26 @@ export default function Menu() {
   // Calculate total price
   const totalPrice = cartItems.reduce((total, cartItem) => total + cartItem.item.price * cartItem.quantity, 0);
 
+  // Handle checkout form submission
+  const handleCheckout = () => {
+    if (!checkoutData.name || !checkoutData.email || !checkoutData.address) {
+      alert("Please fill in all fields");
+      return;
+    }
+    // Simulate API call delay
+    setTimeout(() => {
+      setCheckoutStep("confirmation");
+    }, 1000);
+  };
+
+  // Reset checkout process
+  const resetCheckout = () => {
+    setCheckoutStep("cart");
+    setCartItems([]);
+    setCheckoutData({ name: "", email: "", address: "" });
+  };
+
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -158,90 +184,178 @@ export default function Menu() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-amber-900">Your Order</DialogTitle>
+              <DialogTitle className="text-amber-900">
+                  {checkoutStep === "cart" ? "Your Order" : checkoutStep === "form" ? "Checkout" : "Order Confirmed"}
+                </DialogTitle>
                 <DialogDescription>
-                  {cartItems.length === 0
-                    ? "Your cart is empty. Add some delicious items!"
-                    : "Review your order before checkout."}
+                  {checkoutStep === "cart"
+                    ? cartItems.length === 0
+                      ? "Your cart is empty. Add some delicious items!"
+                      : "Review and manage your order below."
+                    : checkoutStep === "form"
+                    ? "Please enter your delivery details"
+                    : "Thank you for your order!"}
                 </DialogDescription>
               </DialogHeader>
-              {cartItems.length > 0 ? (
-                <div className="space-y-6">
-                  <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2">
-                    {cartItems.map(({ item, quantity }) => (
-                      <div key={item.id} className="flex items-center justify-between border-b border-amber-100 pb-3">
-                        <div className="flex items-center gap-3 flex-1">
-                          <Image
-                            src={item.image || "/placeholder.svg"}
-                            alt={item.name}
-                            width={40}
-                            height={40}
-                            className="rounded-md object-cover"
-                          />
-                          <div className="flex-1">
-                            <p className="font-medium text-amber-900">{item.name}</p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm text-amber-700">₹{item.price} × {quantity}</p>
-                              <p className="text-sm font-medium text-amber-900">= ₹{item.price * quantity}</p>
+
+              {checkoutStep === "cart" ? (
+                cartItems.length > 0 ? (
+                  <div className="space-y-6">
+                    <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2">
+                      {cartItems.map(({ item, quantity }) => (
+                        <div key={item.id} className="flex items-center justify-between border-b border-amber-100 pb-3">
+                          <div className="flex items-center gap-3 flex-1">
+                            <Image
+                              src={item.image || "/placeholder.svg"}
+                              alt={item.name}
+                              width={40}
+                              height={40}
+                              className="rounded-md object-cover"
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium text-amber-900">{item.name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm text-amber-700">₹{item.price} × {quantity}</p>
+                                <p className="text-sm font-medium text-amber-900">= ₹{item.price * quantity}</p>
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="1"
+                              value={quantity}
+                              onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                              className="w-16 h-8 text-center border-amber-300"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-amber-700 hover:text-amber-900"
+                              onClick={() => removeFromCart(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                            className="w-16 h-8 text-center border-amber-300"
-                          />
+                      ))}
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between pt-2">
+                        <span className="font-medium text-amber-900">Total</span>
+                        <span className="font-bold text-amber-900">₹{totalPrice}</span>
+                      </div>
+
+                      <div className="flex justify-between gap-2">
+                        <Button
+                          variant="outline"
+                          className="border-amber-300 text-amber-700"
+                          onClick={clearCart}
+                          disabled={cartItems.length === 0}
+                        >
+                          Clear Cart
+                        </Button>
+                        <div className="flex flex-wrap gap-2 justify-between w-full">
+                          <DialogClose asChild>
+                            <Button variant="outline" className="border-amber-300 text-amber-700">
+                              Continue Shopping
+                            </Button>
+                          </DialogClose>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-amber-700 hover:text-amber-900"
-                            onClick={() => removeFromCart(item.id)}
+                            className="bg-amber-700 hover:bg-amber-800 text-white"
+                            disabled={cartItems.length === 0}
+                            onClick={() => setCheckoutStep("form")}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            Proceed to Checkout
                           </Button>
                         </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 gap-4">
+                    <CoffeeIcon className="h-12 w-12 text-amber-300" />
+                    <p className="text-amber-700">Your cart is empty</p>
+                    <DialogClose asChild>
+                      <Button variant="outline" className="border-amber-300 text-amber-700">
+                        Browse Menu
+                      </Button>
+                    </DialogClose>
+                  </div>
+                )
+              ) : checkoutStep === "form" ? (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Full Name"
+                      value={checkoutData.name}
+                      onChange={(e) => setCheckoutData({ ...checkoutData, name: e.target.value })}
+                      className="border-amber-300"
+                    />
+                    <Input
+                      placeholder="Email"
+                      type="email"
+                      value={checkoutData.email}
+                      onChange={(e) => setCheckoutData({ ...checkoutData, email: e.target.value })}
+                      className="border-amber-300"
+                    />
+                    <Input
+                      placeholder="Delivery Address"
+                      value={checkoutData.address}
+                      onChange={(e) => setCheckoutData({ ...checkoutData, address: e.target.value })}
+                      className="border-amber-300"
+                    />
+                  </div>
+                  <div className="flex justify-between pt-2">
+                    <span className="font-medium text-amber-900">Order Total</span>
+                    <span className="font-bold text-amber-900">₹{totalPrice}</span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <Button
+                      variant="outline"
+                      className="border-amber-300 text-amber-700"
+                      onClick={() => setCheckoutStep("cart")}
+                    >
+                      Back to Cart
+                    </Button>
+                    <Button
+                      className="bg-amber-700 hover:bg-amber-800 text-white"
+                      onClick={handleCheckout}
+                    >
+                      Place Order
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <CoffeeIcon className="h-12 w-12 text-amber-300 mx-auto mb-4" />
+                    <p className="text-amber-700">Order placed successfully!</p>
+                    <p className="text-sm text-amber-600 mt-2">
+                      Thank you, {checkoutData.name}! Your order will be delivered to {checkoutData.address}.
+                    </p>
+                  </div>
                   <div className="space-y-4">
+                    <div className="max-h-[200px] overflow-y-auto space-y-2">
+                      {cartItems.map(({ item, quantity }) => (
+                        <div key={item.id} className="flex justify-between text-sm">
+                          <span>{item.name} × {quantity}</span>
+                          <span>₹{item.price * quantity}</span>
+                        </div>
+                      ))}
+                    </div>
                     <div className="flex justify-between pt-2">
                       <span className="font-medium text-amber-900">Total</span>
                       <span className="font-bold text-amber-900">₹{totalPrice}</span>
                     </div>
-
-                    <div className="flex justify-between gap-2">
-                      <Button
-                        variant="outline"
-                        className="border-amber-300 text-amber-700"
-                        onClick={clearCart}
-                        disabled={cartItems.length === 0}
-                      >
-                        Clear Cart
-                      </Button>
-                      <div className="flex gap-2">
-                        <DialogClose asChild>
-                          <Button variant="outline" className="border-amber-300 text-amber-700">
-                            Continue Shopping
-                          </Button>
-                        </DialogClose>
-                        <Button className="bg-amber-700 hover:bg-amber-800 text-white" disabled={cartItems.length === 0}>
-                          Checkout
-                        </Button>
-                      </div>
-                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 gap-4">
-                  <CoffeeIcon className="h-12 w-12 text-amber-300" />
-                  <p className="text-amber-700">Your cart is empty</p>
                   <DialogClose asChild>
-                    <Button variant="outline" className="border-amber-300 text-amber-700">
-                      Browse Menu
+                    <Button
+                      className="w-full bg-amber-700 hover:bg-amber-800 text-white"
+                      onClick={resetCheckout}
+                    >
+                      Back to Menu
                     </Button>
                   </DialogClose>
                 </div>
