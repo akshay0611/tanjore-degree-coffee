@@ -5,27 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 
 export default function ProfileView() {
-  const [isEditing, setIsEditing] = useState(false); // State for edit mode
+  const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     fullName: "",
     email: "",
     phone: "",
     memberSince: "",
+    avatarUrl: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
-  // Fetch profile data from Supabase
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Get authenticated user
         const { data: userData, error: userError } = await supabase.auth.getUser();
 
         if (userError || !userData.user) {
@@ -34,10 +35,9 @@ export default function ProfileView() {
           return;
         }
 
-        // Fetch profile data from the `profiles` table
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("email, full_name, phone")
+          .select("email, full_name, phone, avatar_url")
           .eq("id", userData.user.id)
           .single();
 
@@ -48,13 +48,13 @@ export default function ProfileView() {
             email: userData.user?.email || "",
           }));
         } else {
-          // Use the `created_at` timestamp from the authenticated user
           const memberSince = new Date(userData.user.created_at).getFullYear().toString();
           setProfile({
             fullName: profileData.full_name || "",
             email: profileData.email || "",
             phone: profileData.phone || "",
             memberSince: memberSince,
+            avatarUrl: profileData.avatar_url || "",
           });
         }
       } catch (e) {
@@ -68,20 +68,23 @@ export default function ProfileView() {
     fetchProfile();
   }, []);
 
-  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      // Get authenticated user
       const { data: userData, error: userError } = await supabase.auth.getUser();
 
       if (userError || !userData.user) {
@@ -90,12 +93,38 @@ export default function ProfileView() {
         return;
       }
 
+      let avatarUrl = profile.avatarUrl;
+
+      // Upload image if a file is selected
+      if (file) {
+        const fileExt = file.name.split(".").pop();
+        // Upload to a folder named after the user ID
+        const fileName = `${userData.user.id}/${Date.now()}.${fileExt}`; // e.g., user_id/timestamp.jpg
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(fileName, file);
+
+        if (uploadError) {
+          setError(`Error uploading image: ${uploadError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        // Get the public URL of the uploaded image
+        const { data: urlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(fileName);
+
+        avatarUrl = urlData.publicUrl;
+      }
+
       // Update profile in Supabase
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
           full_name: profile.fullName,
-          phone: profile.phone, // Only updating name and phone
+          phone: profile.phone,
+          avatar_url: avatarUrl,
         })
         .eq("id", userData.user.id);
 
@@ -105,7 +134,8 @@ export default function ProfileView() {
         return;
       }
 
-      // Exit edit mode
+      setProfile((prev) => ({ ...prev, avatarUrl }));
+      setFile(null);
       setIsEditing(false);
     } catch (e) {
       setError("An unexpected error occurred.");
@@ -115,15 +145,14 @@ export default function ProfileView() {
     }
   };
 
-  // Function to compute initials from fullName
   const getInitials = (fullName: string) => {
-    if (!fullName) return ""; // Return empty string if no name
+    if (!fullName) return "";
     const names = fullName.trim().split(" ");
     const initials = names
       .map((name) => name.charAt(0).toUpperCase())
       .join("")
-      .slice(0, 2); // Limit to 2 characters
-    return initials || ""; // Return initials or empty string if none
+      .slice(0, 2);
+    return initials || "";
   };
 
   return (
@@ -138,16 +167,30 @@ export default function ProfileView() {
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24 border-2 border-amber-300">
-                  <AvatarImage src="/placeholder-user.jpg" alt="User" />
+                  <AvatarImage src={profile.avatarUrl || "/placeholder-user.jpg"} alt="User" />
                   <AvatarFallback className="bg-amber-700 text-amber-50 text-xl">
                     {getInitials(profile.fullName)}
                   </AvatarFallback>
                 </Avatar>
+                {isEditing && (
+                  <div>
+                    <Label htmlFor="avatar" className="text-sm font-medium text-amber-700">
+                      Upload New Picture
+                    </Label>
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="mt-1 border-amber-200 bg-amber-50"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex-1 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="text-sm font-medium text-amber-700">Full Name</label>
+                    <Label className="text-sm font-medium text-amber-700">Full Name</Label>
                     {isEditing ? (
                       <Input
                         name="fullName"
@@ -162,14 +205,13 @@ export default function ProfileView() {
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-amber-700">Email</label>
-                    {/* Always read-only email */}
+                    <Label className="text-sm font-medium text-amber-700">Email</Label>
                     <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
                       {profile.email}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-amber-700">Phone</label>
+                    <Label className="text-sm font-medium text-amber-700">Phone</Label>
                     {isEditing ? (
                       <Input
                         name="phone"
@@ -184,7 +226,7 @@ export default function ProfileView() {
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-amber-700">Member Since</label>
+                    <Label className="text-sm font-medium text-amber-700">Member Since</Label>
                     <p className="mt-1 p-2 border border-amber-200 rounded-md bg-amber-50">
                       {profile.memberSince}
                     </p>
