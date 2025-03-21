@@ -64,110 +64,36 @@ export default function Menu() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Sync cart with Supabase when cartItems change
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    if (profile) {
-      syncCartWithSupabase();
-    }
-  }, [cartItems, profile]);
-
-  // Fetch profile and saved cart on mount
-  useEffect(() => {
-    const fetchProfileAndCart = async () => {
+    const fetchProfile = async () => {
       try {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Fetch profile
-          const { data: profileData, error: profileError } = await supabase
+          const { data, error } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", user.id)
             .single();
 
-          if (profileError) throw profileError;
+          if (error) throw error;
 
-          setProfile(profileData);
+          setProfile(data);
           setCheckoutData({
-            name: profileData.full_name || "",
-            email: profileData.email || "",
+            name: data.full_name || "",
+            email: data.email || "",
             address: "",
           });
-
-          // Fetch saved cart from Supabase
-          await fetchSavedCart(user.id);
         }
       } catch (error) {
-        console.error("Error fetching profile or cart:", error);
+        console.error("Error fetching profile:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfileAndCart();
+    fetchProfile();
   }, []);
-
-  // Function to fetch saved cart from Supabase and merge with localStorage
-  const fetchSavedCart = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("carts")
-        .select("items")
-        .eq("profile_id", userId)
-        .single();
-
-      if (error && error.code !== "PGRST116") throw error; // Ignore if no cart exists
-
-      if (data?.items) {
-        const savedCart: CartItem[] = data.items;
-        const localCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
-        
-        // Merge local and saved carts (avoid duplicates)
-        const mergedCart = [...localCart];
-        savedCart.forEach((savedItem) => {
-          const existingItemIndex = mergedCart.findIndex(
-            (item) => item.item.id === savedItem.item.id
-          );
-          if (existingItemIndex === -1) {
-            mergedCart.push(savedItem);
-          } else {
-            // Update quantity if item exists
-            mergedCart[existingItemIndex].quantity = Math.max(
-              mergedCart[existingItemIndex].quantity,
-              savedItem.quantity
-            );
-          }
-        });
-
-        setCartItems(mergedCart);
-        localStorage.setItem("cartItems", JSON.stringify(mergedCart));
-      }
-    } catch (error) {
-      console.error("Error fetching saved cart:", error);
-    }
-  };
-
-  // Function to sync cart with Supabase
-  const syncCartWithSupabase = async () => {
-    if (!profile) return;
-
-    try {
-      const { error } = await supabase
-        .from("carts")
-        .upsert({
-          profile_id: profile.id,
-          items: cartItems,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: "profile_id"
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error syncing cart with Supabase:", error);
-    }
-  };
 
   const filteredItems = menuItems.filter(
     (item) =>
@@ -203,31 +129,6 @@ export default function Menu() {
     }
   };
 
-  const removeFromCart = (itemId: number) => {
-    if (window.confirm("Are you sure you want to remove this item from your cart?")) {
-      setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
-    }
-  };
-
-  const updateQuantity = (itemId: number, newQuantity: number) => {
-    if (newQuantity < 1) {
-      removeFromCart(itemId);
-      return;
-    }
-    setCartItems(
-      cartItems.map((cartItem) =>
-        cartItem.item.id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
-      )
-    );
-  };
-
-  const clearCart = () => {
-    if (cartItems.length === 0) return;
-    if (window.confirm("Are you sure you want to clear your entire cart?")) {
-      setCartItems([]);
-    }
-  };
-
   const totalPrice = cartItems.reduce(
     (total, cartItem) => total + cartItem.item.price * cartItem.quantity,
     0
@@ -256,7 +157,6 @@ export default function Menu() {
 
       if (error) throw error;
 
-      // Clear the cart in Supabase after successful checkout
       if (profile) {
         await supabase
           .from("carts")
@@ -295,7 +195,7 @@ export default function Menu() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-amber-900">Our Menu</h1>
-          <p className="text- Hannah-700 mt-1">Discover the authentic taste of South Indian coffee</p>
+          <p className="text-amber-700 mt-1">Discover the authentic taste of South Indian coffee</p>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
@@ -338,12 +238,10 @@ export default function Menu() {
 
               {checkoutStep === "cart" ? (
                 <Cart
-                  cartItems={cartItems}
-                  totalPrice={totalPrice}
-                  updateQuantity={updateQuantity}
-                  removeFromCart={removeFromCart}
-                  clearCart={clearCart}
+                  initialCartItems={cartItems}
+                  profileId={profile?.id || null}
                   setCheckoutStep={setCheckoutStep}
+                  onCartUpdate={setCartItems}
                 />
               ) : checkoutStep === "form" ? (
                 <CheckoutForm
@@ -483,7 +381,6 @@ export default function Menu() {
           </DialogContent>
         </Dialog>
       )}
-      {/* WhatsApp Support */}
       <a
         href="https://wa.me/1234567890"
         target="_blank"

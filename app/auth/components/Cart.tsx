@@ -4,6 +4,8 @@ import { CoffeeIcon, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DialogClose } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase/client";
+import { useState, useEffect } from "react";
 
 type MenuItem = {
   id: number;
@@ -18,23 +20,124 @@ type MenuItem = {
   chefSpecial?: boolean;
 };
 
+type CartItem = {
+  item: MenuItem;
+  quantity: number;
+};
+
 interface CartProps {
-  cartItems: { item: MenuItem; quantity: number }[];
-  totalPrice: number;
-  updateQuantity: (itemId: number, newQuantity: number) => void;
-  removeFromCart: (itemId: number) => void;
-  clearCart: () => void;
+  initialCartItems: CartItem[];
+  profileId: string | null;
   setCheckoutStep: (step: "cart" | "form" | "confirmation") => void;
+  onCartUpdate: (items: CartItem[]) => void;
 }
 
 export default function Cart({
-  cartItems,
-  totalPrice,
-  updateQuantity,
-  removeFromCart,
-  clearCart,
+  initialCartItems,
+  profileId,
   setCheckoutStep,
+  onCartUpdate,
 }: CartProps) {
+  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+
+  // Sync with localStorage and Supabase
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    onCartUpdate(cartItems);
+    if (profileId) {
+      syncCartWithSupabase();
+    }
+  }, [cartItems, profileId]);
+
+  // Initial cart sync on mount
+  useEffect(() => {
+    const fetchSavedCart = async () => {
+      if (!profileId) return;
+      try {
+        const { data, error } = await supabase
+          .from("carts")
+          .select("items")
+          .eq("profile_id", profileId)
+          .single();
+
+        if (error && error.code !== "PGRST116") throw error;
+
+        if (data?.items) {
+          const savedCart: CartItem[] = data.items;
+          const localCart = initialCartItems;
+          const mergedCart = [...localCart];
+          savedCart.forEach((savedItem) => {
+            const existingItemIndex = mergedCart.findIndex(
+              (item) => item.item.id === savedItem.item.id
+            );
+            if (existingItemIndex === -1) {
+              mergedCart.push(savedItem);
+            } else {
+              mergedCart[existingItemIndex].quantity = Math.max(
+                mergedCart[existingItemIndex].quantity,
+                savedItem.quantity
+              );
+            }
+          });
+          setCartItems(mergedCart);
+        }
+      } catch (error) {
+        console.error("Error fetching saved cart:", error);
+      }
+    };
+
+    fetchSavedCart();
+  }, [profileId, initialCartItems]);
+
+  const syncCartWithSupabase = async () => {
+    if (!profileId) return;
+    try {
+      const { error } = await supabase
+        .from("carts")
+        .upsert({
+          profile_id: profileId,
+          items: cartItems,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: "profile_id"
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error syncing cart with Supabase:", error);
+    }
+  };
+
+  const updateQuantity = (itemId: number, newQuantity: number) => {
+    if (newQuantity < 1) {
+      removeFromCart(itemId);
+      return;
+    }
+    setCartItems(
+      cartItems.map((cartItem) =>
+        cartItem.item.id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
+      )
+    );
+  };
+
+  const removeFromCart = (itemId: number) => {
+    if (window.confirm("Are you sure you want to remove this item from your cart?")) {
+      setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
+    }
+  };
+
+  const clearCart = () => {
+    if (cartItems.length === 0) return;
+    if (window.confirm("Are you sure you want to clear your entire cart?")) {
+      setCartItems([]);
+    }
+  };
+
+  const totalPrice = cartItems.reduce(
+    (total, cartItem) => total + cartItem.item.price * cartItem.quantity,
+    0
+  );
+
   return cartItems.length > 0 ? (
     <div className="space-y-6">
       <div className="max-h-[300px] overflow-y-auto space-y-4 pr-2">
@@ -93,21 +196,21 @@ export default function Cart({
             Clear Cart
           </Button>
           <div className="flex flex-wrap gap-2 justify-between w-full">
-          <DialogClose asChild>
-            <Button variant="outline" className="border-amber-300 text-amber-700 ">
-              Continue Shopping
+            <DialogClose asChild>
+              <Button variant="outline" className="border-amber-300 text-amber-700">
+                Continue Shopping
+              </Button>
+            </DialogClose>
+            <Button
+              className="bg-amber-700 hover:bg-amber-800 text-white flex-1"
+              disabled={cartItems.length === 0}
+              onClick={() => setCheckoutStep("form")}
+            >
+              Proceed to Checkout
             </Button>
-          </DialogClose>
-          <Button
-            className="bg-amber-700 hover:bg-amber-800 text-white flex-1"
-            disabled={cartItems.length === 0}
-            onClick={() => setCheckoutStep("form")}
-          >
-            Proceed to Checkout
-          </Button>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center py-8 gap-4">
