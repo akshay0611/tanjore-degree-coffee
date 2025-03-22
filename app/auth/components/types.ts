@@ -34,3 +34,13 @@ export type CartItem = {
   item: MenuItem;
   quantity: number;
 };
+
+// Add Notification type
+export type Notification = {
+  id: string;
+  profile_id: string;
+  order_id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+};
