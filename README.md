@@ -1,20 +1,29 @@
 # Tanjore Degree Coffee ☕
 
-![Tanjore Degree Coffee Banner](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee)  
-*A modern e-commerce platform for authentic South Indian coffee and snacks.* 🌟
+![Tanjore Degree Coffee Homepage](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee+Homepage)  
+*A modern e-commerce platform for authentic South Indian coffee and snacks, brewed to perfection since 1942.* 🌟
 
 ## Overview 📖
 
-Tanjore Degree Coffee is a Next.js-based web application designed to bring the rich flavors of South Indian coffee and cuisine to your doorstep. Built with TypeScript, Supabase for backend services, and a sleek UI powered by custom components, this project offers a seamless browsing, cart management, and checkout experience. 🚀
+Tanjore Degree Coffee is a Next.js-based web application that brings the authentic taste of traditional South Indian coffee to your doorstep. With a rich history dating back to 1942, this platform offers a seamless experience for browsing menus, managing orders, and enjoying a personalized dashboard for authenticated users. Built with TypeScript, Supabase for backend services, and a clean UI, Tanjore Degree Coffee combines tradition with modern technology. 🚀
 
 ## Features ✨
 
-- **Menu Browsing**: Explore a variety of coffee specialties, traditional brews, contemporary coffees, South Indian snacks, and desserts. 🍵
-- **Cart Management**: Add, reduce, or remove items from your cart with real-time updates synced to local storage and Supabase. 🛒
-- **User Profiles**: Authenticated users can view their profile details and manage orders. 👤
-- **Checkout Process**: Multi-step checkout with cart review, delivery details, and order confirmation. ✅
+- **Menu Browsing**: Explore coffee specialties, traditional brews, and snacks via the menu page. 🍵
+- **User Authentication**: Secure login to access personalized features like the dashboard. 🔒
+- **Dashboard**: View loyalty points, recent orders, saved addresses, and favorite coffees after logging in. 📊
+- **Order Online**: Place orders directly from the homepage with a streamlined checkout process. 🛒
 - **Responsive Design**: Optimized for both desktop and mobile devices. 📱💻
 - **WhatsApp Support**: Integrated support link for customer assistance. 📞
+
+## User Flow 👤
+
+1. **Homepage**: Start on the homepage, where you can explore the "View Menu" or "Our Story" sections. 🌐
+2. **Order Online**: Click the "Order Online" button in the top-right corner to begin your ordering journey. 🛒
+3. **Login**: You'll be prompted to log in to proceed with your order. 🔑
+4. **Dashboard**: Upon successful login, you're redirected to a personalized dashboard showing:
+   - Recent orders 📦
+5. **Menu & Ordering**: Navigate to the menu to browse items, add them to your cart, and complete your order. 🍽️
 
 ## Tech Stack 🛠️
 
@@ -67,14 +76,15 @@ Tanjore Degree Coffee is a Next.js-based web application designed to bring the r
 - `npm start`: Start the production server 🚀
 - `npm lint`: Run ESLint to check code quality ✅
 
-## Usage 🎯
+## Screenshots 📸
 
-- **Browse Menu**: Visit the `/menu` page to explore items. 🍽️
-- **Add to Cart**: Click the "+" button on any item to add it to your cart. ➕
-- **Manage Cart**: Open the cart dialog (shopping bag icon) to review, update quantities, or remove items. 🛒
-- **Checkout**: Proceed through the checkout steps to place an order (requires authentication). ✅
-- **Profile**: View your profile details under the `/auth` section after signing in. 👤
+### Homepage
+![Homepage](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee+Homepage)  
+*The homepage welcomes users with a call to "View Menu" or learn "Our Story," with an "Order Online" button to start the ordering process.*
 
+### Dashboard
+![Dashboard](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee+Dashboard)  
+*The dashboard provides a personalized overview with loyalty points, recent orders, saved addresses, and favorite coffees.*
 
 ## Contributing 🤝
 
@@ -93,4 +103,4 @@ This project is licensed under the [MIT License](LICENSE). ✅
 ## Acknowledgments 🌟
 
 - Built with ❤️ by [Akshay](https://github.com/akshay0611)
-- Inspired by the rich tradition of South Indian coffee culture ☕
+- Inspired by the rich tradition of South Indian coffee culture since 1942 ☕
