@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Cart from "./Cart";
 import CheckoutForm from "./CheckoutForm";
 import OrderConfirmation from "./OrderConfirmation";
@@ -48,6 +49,8 @@ export default function Menu() {
   });
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, Infinity]);
+  const [sortOption, setSortOption] = useState<string>("default");
 
   // Sync cart with Supabase when cartItems change
   useEffect(() => {
@@ -91,12 +94,26 @@ export default function Menu() {
     fetchProfileAndCart();
   }, []);
 
-  const filteredItems = menuItems.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filterAndSortItems = (items: MenuItem[]) => {
+    const filtered = items.filter(
+      (item) =>
+        (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        item.price >= priceRange[0] &&
+        item.price <= priceRange[1]
+    );
 
+    switch (sortOption) {
+      case "price-low-high":
+        return filtered.sort((a, b) => a.price - b.price);
+      case "price-high-low":
+        return filtered.sort((a, b) => b.price - a.price);
+      default:
+        return filtered;
+    }
+  };
+
+  const filteredItems = filterAndSortItems(menuItems);
   const totalPrice = calculateTotalPrice(cartItems);
 
   const resetCheckout = () => {
@@ -121,9 +138,9 @@ export default function Menu() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-amber-900">Our Menu</h1>
-          <p className="text- Hannah-700 mt-1">Discover the authentic taste of South Indian coffee</p>
+          <p className="text-amber-700 mt-1">Discover the authentic taste of South Indian coffee</p>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-amber-500" />
             <Input
@@ -134,7 +151,32 @@ export default function Menu() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-
+          <div className="flex gap-2 w-full md:w-auto">
+            <Input
+              type="number"
+              placeholder="Min Price"
+              className="w-24 border-amber-200"
+              value={priceRange[0] === 0 ? "" : priceRange[0]}
+              onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
+            />
+            <Input
+              type="number"
+              placeholder="Max Price"
+              className="w-24 border-amber-200"
+              value={priceRange[1] === Infinity ? "" : priceRange[1]}
+              onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || Infinity])}
+            />
+            <Select value={sortOption} onValueChange={setSortOption}>
+              <SelectTrigger className="w-48 border-amber-200">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default Order</SelectItem>
+                <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" className="relative border-amber-300 text-amber-700">
