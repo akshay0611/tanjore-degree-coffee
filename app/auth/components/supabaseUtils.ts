@@ -1,6 +1,6 @@
 // app/auth/components/supabaseUtils.ts
 import { supabase } from "@/lib/supabase/client";
-import { CartItem, Profile } from "./types";
+import { CartItem, Profile, Address } from "./types";
 
 export const fetchSavedCart = async (
   userId: string,
@@ -103,5 +103,74 @@ export const handleCheckout = async (
     alert("There was an error processing your order. Please try again.");
   } finally {
     setLoading(false);
+  }
+};
+
+// New address-related functions
+export const fetchAddresses = async (profileId: string): Promise<Address[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("addresses")
+      .select("*")
+      .eq("profile_id", profileId)
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching addresses:", error);
+    return [];
+  }
+};
+
+export const addAddress = async (
+  profileId: string,
+  label: string,
+  address: string,
+  isDefault = false
+): Promise<Address | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("addresses")
+      .insert({ profile_id: profileId, label, address, is_default: isDefault })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error adding address:", error);
+    return null;
+  }
+};
+
+export const updateAddress = async (addressId: string, updates: Partial<Address>): Promise<Address | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("addresses")
+      .update(updates)
+      .eq("id", addressId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error updating address:", error);
+    return null;
+  }
+};
+
+export const deleteAddress = async (addressId: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from("addresses")
+      .delete()
+      .eq("id", addressId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error deleting address:", error);
+    throw error;
   }
 };
