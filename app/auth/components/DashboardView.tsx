@@ -1,3 +1,4 @@
+// app/auth/components/DashboardView.tsx
 "use client";
 
 import { Bell, Coffee } from "lucide-react";
@@ -6,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { Address } from "./types"; // Import Address type
+import { fetchAddresses } from "./supabaseUtils"; // Import fetchAddresses utility
 
 // Define interfaces for our data types
 interface Order {
@@ -30,11 +33,12 @@ interface Order {
 export default function DashboardView() {
   const [fullName, setFullName] = useState<string | null>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]); // State for addresses
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Fetch user data and orders from Supabase
+  // Fetch user data, orders, and addresses from Supabase
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -73,6 +77,10 @@ export default function DashboardView() {
         } else {
           setRecentOrders(ordersData || []);
         }
+
+        // Fetch addresses
+        const addressData = await fetchAddresses(userData.user.id);
+        setAddresses(addressData);
 
         setLoading(false);
       } catch (e) {
@@ -145,8 +153,10 @@ export default function DashboardView() {
                 <CardTitle className="text-sm font-medium text-amber-900">Saved Addresses</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-900">3</div>
-                <p className="text-xs text-amber-700 mt-1">Home, Work, Parents</p>
+                <div className="text-2xl font-bold text-amber-900">{addresses.length}</div>
+                <p className="text-xs text-amber-700 mt-1">
+                  {addresses.length > 0 ? addresses.map(addr => addr.label).join(", ") : "No addresses saved"}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -165,7 +175,6 @@ export default function DashboardView() {
               <div className="space-y-4">
                 {recentOrders.map((order) => {
                   const daysAgo = calculateDaysAgo(order.created_at);
-                  // Get first item name for display (or you could show count of items)
                   const firstItemName = order.items.length > 0 ? order.items[0].item.name : "Unknown item";
                   
                   return (
