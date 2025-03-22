@@ -1,7 +1,7 @@
 // app/auth/components/DashboardView.tsx
 "use client";
 
-import { Bell, Coffee } from "lucide-react";
+import { Bell, Coffee, Trash2 } from "lucide-react"; // Added Trash2 icon for delete
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useEffect, useState } from "react";
@@ -36,10 +36,9 @@ export default function DashboardView() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showNotifications, setShowNotifications] = useState(false); // State for dropdown visibility
+  const [showNotifications, setShowNotifications] = useState(false);
   const router = useRouter();
 
-  // Fetch user data, orders, addresses, and notifications
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -117,7 +116,6 @@ export default function DashboardView() {
 
         setLoading(false);
 
-        // Cleanup subscription on unmount
         return () => {
           supabase.removeChannel(subscription);
         };
@@ -146,22 +144,38 @@ export default function DashboardView() {
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  // Toggle notification dropdown and optionally mark all as read
-  const handleToggleNotifications = async () => {
+  // Toggle notification dropdown (no longer marks all as read)
+  const handleToggleNotifications = () => {
     setShowNotifications(!showNotifications);
-    if (!showNotifications && unreadCount > 0) {
-      // Mark all notifications as read when opening the dropdown
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("profile_id", supabase.auth.getUser().then(({ data }) => data.user?.id))
-        .in("id", notifications.filter((n) => !n.is_read).map((n) => n.id));
+  };
 
-      if (!error) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-      } else {
-        console.error("Error marking notifications as read:", error);
-      }
+  // Mark a single notification as read
+  const markNotificationAsRead = async (notificationId: string) => {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", notificationId);
+
+    if (!error) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+      );
+    } else {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Delete a notification
+  const deleteNotification = async (notificationId: string) => {
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", notificationId);
+
+    if (!error) {
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    } else {
+      console.error("Error deleting notification:", error);
     }
   };
 
@@ -184,17 +198,28 @@ export default function DashboardView() {
             )}
           </Button>
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-64 bg-white border border-amber-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+            <div className="absolute right-0 mt-2 w-80 bg-white border border-amber-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
               {notifications.length > 0 ? (
                 notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-2 text-sm ${n.is_read ? "text-amber-700" : "text-amber-900 font-medium"} border-b border-amber-100 last:border-b-0`}
+                    className="p-2 flex justify-between items-center border-b border-amber-100 last:border-b-0"
                   >
-                    {n.message}
-                    <p className="text-xs text-amber-600">
-                      {new Date(n.created_at).toLocaleString()}
-                    </p>
+                    <div
+                      className={`text-sm ${n.is_read ? "text-amber-700" : "text-amber-900 font-medium"} cursor-pointer`}
+                      onClick={() => !n.is_read && markNotificationAsRead(n.id)}
+                    >
+                      {n.message}
+                      <p className="text-xs text-amber-600">{new Date(n.created_at).toLocaleString()}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-600 hover:text-red-800"
+                      onClick={() => deleteNotification(n.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))
               ) : (
