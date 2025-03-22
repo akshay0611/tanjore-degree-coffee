@@ -22,8 +22,16 @@ import OrderConfirmation from "./OrderConfirmation";
 import MenuItemCard from "./MenuItemCard";
 import menuItems from "./data/menuItems.json";
 import { supabase } from "@/lib/supabase/client";
-
 import { MenuItem, Profile, CartItem } from "./types";
+import {
+  addToCart,
+  reduceFromCart,
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+  calculateTotalPrice,
+} from "./cartUtils";
+import { fetchSavedCart, syncCartWithSupabase, handleCheckout } from "./supabaseUtils";
 
 export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,7 +53,7 @@ export default function Menu() {
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
     if (profile) {
-      syncCartWithSupabase();
+      syncCartWithSupabase(profile, cartItems);
     }
   }, [cartItems, profile]);
 
@@ -56,7 +64,6 @@ export default function Menu() {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Fetch profile
           const { data: profileData, error: profileError } = await supabase
             .from("profiles")
             .select("*")
@@ -72,8 +79,7 @@ export default function Menu() {
             address: "",
           });
 
-          // Fetch saved cart from Supabase
-          await fetchSavedCart(user.id);
+          await fetchSavedCart(user.id, setCartItems);
         }
       } catch (error) {
         console.error("Error fetching profile or cart:", error);
@@ -85,170 +91,13 @@ export default function Menu() {
     fetchProfileAndCart();
   }, []);
 
-  // Function to fetch saved cart from Supabase and merge with localStorage
-  const fetchSavedCart = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("carts")
-        .select("items")
-        .eq("profile_id", userId)
-        .single();
-
-      if (error && error.code !== "PGRST116") throw error; // Ignore if no cart exists
-
-      if (data?.items) {
-        const savedCart: CartItem[] = data.items;
-        const localCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
-        
-        // Merge local and saved carts (avoid duplicates)
-        const mergedCart = [...localCart];
-        savedCart.forEach((savedItem) => {
-          const existingItemIndex = mergedCart.findIndex(
-            (item) => item.item.id === savedItem.item.id
-          );
-          if (existingItemIndex === -1) {
-            mergedCart.push(savedItem);
-          } else {
-            // Update quantity if item exists
-            mergedCart[existingItemIndex].quantity = Math.max(
-              mergedCart[existingItemIndex].quantity,
-              savedItem.quantity
-            );
-          }
-        });
-
-        setCartItems(mergedCart);
-        localStorage.setItem("cartItems", JSON.stringify(mergedCart));
-      }
-    } catch (error) {
-      console.error("Error fetching saved cart:", error);
-    }
-  };
-
-  // Function to sync cart with Supabase
-  const syncCartWithSupabase = async () => {
-    if (!profile) return;
-
-    try {
-      const { error } = await supabase
-        .from("carts")
-        .upsert({
-          profile_id: profile.id,
-          items: cartItems,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: "profile_id"
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error syncing cart with Supabase:", error);
-    }
-  };
-
   const filteredItems = menuItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const addToCart = (item: MenuItem) => {
-    const existingItem = cartItems.find((cartItem) => cartItem.item.id === item.id);
-    if (existingItem) {
-      setCartItems(
-        cartItems.map((cartItem) =>
-          cartItem.item.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
-        )
-      );
-    } else {
-      setCartItems([...cartItems, { item, quantity: 1 }]);
-    }
-  };
-
-  const reduceFromCart = (itemId: number) => {
-    const existingItem = cartItems.find((cartItem) => cartItem.item.id === itemId);
-    if (existingItem) {
-      if (existingItem.quantity > 1) {
-        setCartItems(
-          cartItems.map((cartItem) =>
-            cartItem.item.id === itemId ? { ...cartItem, quantity: cartItem.quantity - 1 } : cartItem
-          )
-        );
-      } else {
-        setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
-      }
-    }
-  };
-
-  const removeFromCart = (itemId: number) => {
-    if (window.confirm("Are you sure you want to remove this item from your cart?")) {
-      setCartItems(cartItems.filter((cartItem) => cartItem.item.id !== itemId));
-    }
-  };
-
-  const updateQuantity = (itemId: number, newQuantity: number) => {
-    if (newQuantity < 1) {
-      removeFromCart(itemId);
-      return;
-    }
-    setCartItems(
-      cartItems.map((cartItem) =>
-        cartItem.item.id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
-      )
-    );
-  };
-
-  const clearCart = () => {
-    if (cartItems.length === 0) return;
-    if (window.confirm("Are you sure you want to clear your entire cart?")) {
-      setCartItems([]);
-    }
-  };
-
-  const totalPrice = cartItems.reduce(
-    (total, cartItem) => total + cartItem.item.price * cartItem.quantity,
-    0
-  );
-
-  const handleCheckout = async () => {
-    if (!checkoutData.name || !checkoutData.email || !checkoutData.address) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from("orders")
-        .insert({
-          profile_id: profile?.id,
-          items: cartItems,
-          total_price: totalPrice,
-          delivery_address: checkoutData.address,
-          name: checkoutData.name,
-          email: checkoutData.email,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Clear the cart in Supabase after successful checkout
-      if (profile) {
-        await supabase
-          .from("carts")
-          .delete()
-          .eq("profile_id", profile.id);
-      }
-
-      setCheckoutStep("confirmation");
-    } catch (error) {
-      console.error("Error during checkout:", error);
-      alert("There was an error processing your order. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const totalPrice = calculateTotalPrice(cartItems);
 
   const resetCheckout = () => {
     setCheckoutStep("cart");
@@ -317,9 +166,9 @@ export default function Menu() {
                 <Cart
                   cartItems={cartItems}
                   totalPrice={totalPrice}
-                  updateQuantity={updateQuantity}
-                  removeFromCart={removeFromCart}
-                  clearCart={clearCart}
+                  updateQuantity={(itemId, qty) => updateQuantity(itemId, qty, cartItems, setCartItems)}
+                  removeFromCart={(itemId) => removeFromCart(itemId, cartItems, setCartItems)}
+                  clearCart={() => clearCart(cartItems, setCartItems)}
                   setCheckoutStep={setCheckoutStep}
                 />
               ) : checkoutStep === "form" ? (
@@ -328,7 +177,9 @@ export default function Menu() {
                   setCheckoutData={setCheckoutData}
                   totalPrice={totalPrice}
                   setCheckoutStep={setCheckoutStep}
-                  handleCheckout={handleCheckout}
+                  handleCheckout={() =>
+                    handleCheckout(profile, cartItems, totalPrice, checkoutData, setCheckoutStep, setLoading)
+                  }
                   loading={loading}
                 />
               ) : (
@@ -374,8 +225,8 @@ export default function Menu() {
                 <MenuItemCard
                   key={item.id}
                   item={item}
-                  onAddToCart={addToCart}
-                  onReduceFromCart={reduceFromCart}
+                  onAddToCart={() => addToCart(item, cartItems, setCartItems)}
+                  onReduceFromCart={() => reduceFromCart(item.id, cartItems, setCartItems)}
                   onViewDetails={() => setSelectedItem(item)}
                   quantity={cartItem ? cartItem.quantity : 0}
                 />
@@ -396,8 +247,8 @@ export default function Menu() {
                       <MenuItemCard
                         key={item.id}
                         item={item}
-                        onAddToCart={addToCart}
-                        onReduceFromCart={reduceFromCart}
+                        onAddToCart={() => addToCart(item, cartItems, setCartItems)}
+                        onReduceFromCart={() => reduceFromCart(item.id, cartItems, setCartItems)}
                         onViewDetails={() => setSelectedItem(item)}
                         quantity={cartItem ? cartItem.quantity : 0}
                       />
@@ -449,7 +300,7 @@ export default function Menu() {
                 <Button
                   className="bg-amber-700 hover:bg-amber-800 text-white"
                   onClick={() => {
-                    addToCart(selectedItem);
+                    addToCart(selectedItem, cartItems, setCartItems);
                     setSelectedItem(null);
                   }}
                 >
@@ -460,7 +311,7 @@ export default function Menu() {
           </DialogContent>
         </Dialog>
       )}
-      {/* WhatsApp Support */}
+
       <a
         href="https://wa.me/1234567890"
         target="_blank"
