@@ -1,3 +1,4 @@
+// app/auth/components/Menu.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,31 +23,7 @@ import MenuItemCard from "./MenuItemCard";
 import menuItems from "./data/menuItems.json";
 import { supabase } from "@/lib/supabase/client";
 
-type MenuItem = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  popular?: boolean;
-  vegan?: boolean;
-  new?: boolean;
-  chefSpecial?: boolean;
-};
-
-type Profile = {
-  id: string;
-  email: string;
-  full_name: string;
-  phone: string;
-  member_since: string;
-};
-
-type CartItem = {
-  item: MenuItem;
-  quantity: number;
-};
+import { MenuItem, Profile, CartItem } from "./types";
 
 export default function Menu() {
   const [searchQuery, setSearchQuery] = useState("");
