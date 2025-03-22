@@ -35,6 +35,7 @@ interface Notification {
   message: string;
   created_at: string;
   read: boolean;
+  notification_hash?: string;
 }
 
 export default function DashboardView() {
@@ -44,6 +45,17 @@ export default function DashboardView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Simple hash function for deduplication
+  const simpleHash = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -100,6 +112,10 @@ export default function DashboardView() {
           setNotifications(notificationsData || []);
         }
 
+        // Track the last processed status and debounce timeouts
+        const lastProcessedStatus = new Map<string, string>();
+        const debounceTimeouts = new Map<string, NodeJS.Timeout>();
+
         // Real-time subscription for order updates
         const orderSubscription = supabase
           .channel("orders-channel")
@@ -115,38 +131,86 @@ export default function DashboardView() {
               const updatedOrder = payload.new as Order;
               const oldOrder = payload.old as Order;
 
+              console.log("Order Update Payload:", {
+                eventType: payload.eventType,
+                newStatus: updatedOrder.status,
+                oldStatus: oldOrder.status,
+                orderId: updatedOrder.id,
+                timestamp: new Date().toISOString(),
+              });
+
               if (updatedOrder.status !== oldOrder.status) {
-                const message =
-                  updatedOrder.status === "Confirmed"
-                    ? `Order #${updatedOrder.id.slice(0, 8)} Confirmed`
-                    : updatedOrder.status === "Shipped"
-                    ? `Order #${updatedOrder.id.slice(0, 8)} Shipped`
-                    : `Order #${updatedOrder.id.slice(0, 8)} Updated: ${updatedOrder.status}`;
+                const orderId = updatedOrder.id;
+                const newStatus = updatedOrder.status;
 
-                // Insert the notification into the database
-                const { error: insertError } = await supabase
-                  .from("notifications")
-                  .insert({
-                    profile_id: userId,
-                    message,
-                    created_at: new Date().toISOString(),
-                    read: false,
-                  });
+                const lastStatus = lastProcessedStatus.get(orderId);
+                console.log(`Checking last processed status for Order #${orderId.slice(0, 8)}:`, {
+                  lastStatus,
+                  newStatus,
+                });
 
-                if (insertError) {
-                  console.error("Error inserting notification:", insertError);
+                if (lastStatus === newStatus) {
+                  console.log(`Duplicate status update for Order #${orderId.slice(0, 8)}: ${newStatus}, skipping notification.`);
+                  return;
                 }
 
-                // Update recent orders
-                setRecentOrders((prev) =>
-                  prev.map((order) =>
-                    order.id === updatedOrder.id ? updatedOrder : order
-                  )
+                // Clear any existing debounce timeout for this order
+                if (debounceTimeouts.has(orderId)) {
+                  clearTimeout(debounceTimeouts.get(orderId));
+                }
+
+                // Set a new debounce timeout
+                debounceTimeouts.set(
+                  orderId,
+                  setTimeout(async () => {
+                    lastProcessedStatus.set(orderId, newStatus);
+                    console.log(`Updated lastProcessedStatus for Order #${orderId.slice(0, 8)}: ${newStatus}`);
+
+                    const message =
+                      updatedOrder.status === "Confirmed"
+                        ? `Order #${updatedOrder.id.slice(0, 8)} Confirmed`
+                        : updatedOrder.status === "Shipped"
+                        ? `Order #${updatedOrder.id.slice(0, 8)} Shipped`
+                        : `Order #${updatedOrder.id.slice(0, 8)} Updated: ${updatedOrder.status}`;
+
+                    // Compute the notification hash
+                    const notificationHash = simpleHash(`${userId}-${message}`);
+
+                    const { error: insertError } = await supabase
+                      .from("notifications")
+                      .insert({
+                        profile_id: userId,
+                        message,
+                        created_at: new Date().toISOString(),
+                        read: false,
+                        notification_hash: notificationHash,
+                      });
+
+                    if (insertError) {
+                      console.error("Error inserting notification:", insertError);
+                      if (insertError.code === "23505") {
+                        console.log(`Duplicate notification detected for Order #${orderId.slice(0, 8)}: ${message}`);
+                      }
+                    } else {
+                      console.log(`Inserted notification for Order #${orderId.slice(0, 8)}: ${message}`);
+                    }
+
+                    setRecentOrders((prev) =>
+                      prev.map((order) =>
+                        order.id === updatedOrder.id ? updatedOrder : order
+                      )
+                    );
+
+                    // Clean up the timeout
+                    debounceTimeouts.delete(orderId);
+                  }, 1000) // 1-second debounce
                 );
               }
             }
           )
-          .subscribe();
+          .subscribe((status) => {
+            console.log("Order Subscription Status:", status);
+          });
 
         // Real-time subscription for notifications table
         const notificationSubscription = supabase
@@ -187,6 +251,9 @@ export default function DashboardView() {
         return () => {
           supabase.removeChannel(orderSubscription);
           supabase.removeChannel(notificationSubscription);
+          lastProcessedStatus.clear();
+          debounceTimeouts.forEach((timeout) => clearTimeout(timeout));
+          debounceTimeouts.clear();
         };
       } catch (e) {
         setError("An unexpected error occurred.");
@@ -236,10 +303,8 @@ export default function DashboardView() {
         return;
       }
 
-      // Optimistically update the UI
       setNotifications([]);
 
-      // Fetch notifications again as a fallback to ensure consistency
       const { data: notificationsData, error: fetchError } = await supabase
         .from("notifications")
         .select("*")
