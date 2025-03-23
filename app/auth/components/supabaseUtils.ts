@@ -1,4 +1,3 @@
-// app/auth/components/supabaseUtils.ts
 import { supabase } from "@/lib/supabase/client";
 import { CartItem, Profile, Address } from "./types";
 
@@ -106,7 +105,6 @@ export const handleCheckout = async (
   }
 };
 
-// New address-related functions
 export const fetchAddresses = async (profileId: string): Promise<Address[]> => {
   try {
     const { data, error } = await supabase
@@ -171,6 +169,21 @@ export const deleteAddress = async (addressId: string): Promise<void> => {
     if (error) throw error;
   } catch (error) {
     console.error("Error deleting address:", error);
+    throw error;
+  }
+};
+
+// New function for cancelling an order
+export const cancelOrder = async (orderId: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "cancelled" })
+      .eq("id", orderId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error cancelling order:", error);
     throw error;
   }
 };

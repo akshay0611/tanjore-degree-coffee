@@ -1,4 +1,3 @@
-// app/auth/components/types.ts
 export type MenuItem = {
   id: number;
   name: string;
@@ -27,7 +26,7 @@ export type Profile = {
   full_name: string;
   phone: string;
   member_since: string;
-  addresses?: Address[]; // Added optional addresses array
+  addresses?: Address[];
 };
 
 export type CartItem = {
@@ -35,7 +34,6 @@ export type CartItem = {
   quantity: number;
 };
 
-// Add Notification type
 export type Notification = {
   id: string;
   profile_id: string;
@@ -43,4 +41,17 @@ export type Notification = {
   message: string;
   is_read: boolean;
   created_at: string;
+};
+
+// Add Order type (was missing, aligning with OrdersView.tsx)
+export type Order = {
+  id: string;
+  profile_id: string; // Added to match database structure
+  items: CartItem[];  // Changed to CartItem to match handleCheckout
+  total_price: number;
+  status: "pending" | "preparing" | "shipped" | "delivered" | "cancelled"; // Added "cancelled"
+  created_at: string;
+  delivery_address: string;
+  name: string;
+  email: string;
 };

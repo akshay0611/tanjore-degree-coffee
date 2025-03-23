@@ -1,3 +1,4 @@
+// app/auth/components/OrdersView.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cancelOrder } from "./supabaseUtils"; // Import cancelOrder utility
 
 interface Order {
   id: string;
@@ -43,7 +45,7 @@ interface Order {
 
 export default function OrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]); // State for filtered orders
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -63,16 +65,31 @@ export default function OrdersView() {
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("most-recent");
 
-  // Fetch orders data from Supabase
   useEffect(() => {
     fetchOrders();
+
+    // Real-time subscription to orders
+    const orderSubscription = supabase
+      .channel("orders")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders" },
+        (payload) => {
+          setOrders((prev) =>
+            prev.map((order) => (order.id === payload.new.id ? { ...order, ...payload.new } : order))
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(orderSubscription);
+    };
   }, []);
 
-  // Apply filters and sorting whenever orders or filter/sort criteria change
   useEffect(() => {
     let filtered = [...orders];
 
-    // Filter by date range
     if (dateFrom) {
       const fromDate = new Date(dateFrom);
       filtered = filtered.filter((order) => new Date(order.created_at) >= fromDate);
@@ -81,13 +98,9 @@ export default function OrdersView() {
       const toDate = new Date(dateTo);
       filtered = filtered.filter((order) => new Date(order.created_at) <= toDate);
     }
-
-    // Filter by status
     if (statusFilter !== "all") {
       filtered = filtered.filter((order) => order.status === statusFilter);
     }
-
-    // Filter by price range
     if (minPrice) {
       const min = parseFloat(minPrice);
       filtered = filtered.filter((order) => order.total_price >= min);
@@ -97,7 +110,6 @@ export default function OrdersView() {
       filtered = filtered.filter((order) => order.total_price <= max);
     }
 
-    // Sort orders
     if (sortOption === "most-recent") {
       filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     } else if (sortOption === "highest-value") {
@@ -107,7 +119,6 @@ export default function OrdersView() {
     setFilteredOrders(filtered);
   }, [orders, dateFrom, dateTo, statusFilter, minPrice, maxPrice, sortOption]);
 
-  // Auto-hide notification after 3 seconds
   useEffect(() => {
     if (notification.show) {
       const timer = setTimeout(() => {
@@ -120,7 +131,6 @@ export default function OrdersView() {
   const fetchOrders = async () => {
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
-
       if (userError || !userData.user) {
         setError("No authenticated user found.");
         setLoading(false);
@@ -149,11 +159,7 @@ export default function OrdersView() {
   };
 
   const showNotification = (type: "success" | "error", message: string) => {
-    setNotification({
-      show: true,
-      type,
-      message,
-    });
+    setNotification({ show: true, type, message });
   };
 
   const handleViewDetails = (order: Order) => {
@@ -164,7 +170,6 @@ export default function OrdersView() {
   const handleReorder = async (order: Order) => {
     try {
       setReorderLoading(true);
-
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData.user) {
         showNotification("error", "You must be logged in to reorder.");
@@ -182,11 +187,7 @@ export default function OrdersView() {
         email: order.email,
       };
 
-      const { error: orderError } = await supabase
-        .from("orders")
-        .insert(newOrder)
-        .select();
-
+      const { error: orderError } = await supabase.from("orders").insert(newOrder).select();
       if (orderError) {
         console.error("Order insert error:", orderError);
         showNotification("error", `Failed to create new order: ${orderError.message}`);
@@ -214,6 +215,26 @@ export default function OrdersView() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Check if order is cancellable (within 10 minutes of creation)
+  const isOrderCancellable = (order: Order) => {
+    const createdAt = new Date(order.created_at);
+    const now = new Date();
+    const diffInMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+    return diffInMinutes <= 10 && order.status !== "cancelled" && order.status !== "delivered";
+  };
+
+  // Handle order cancellation
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      await cancelOrder(orderId);
+      showNotification("success", "Order cancelled successfully!");
+      // Real-time subscription will update the UI
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      showNotification("error", "Failed to cancel order. Please try again.");
+    }
+  };
+
   if (loading) {
     return <p className="text-amber-900">Loading orders...</p>;
   }
@@ -224,7 +245,6 @@ export default function OrdersView() {
 
   return (
     <div className="space-y-6">
-      {/* Custom notification */}
       {notification.show && (
         <div
           className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
@@ -242,14 +262,12 @@ export default function OrdersView() {
 
       <h1 className="text-2xl font-bold text-amber-900">Orders</h1>
 
-      {/* Filters Section */}
       <Card className="bg-white border-amber-200">
         <CardHeader>
           <CardTitle className="text-amber-900">Filter Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Date Range Filter */}
             <div>
               <Label className="text-amber-700">From Date</Label>
               <Input
@@ -268,8 +286,6 @@ export default function OrdersView() {
                 className="mt-1 border-amber-200 bg-amber-50"
               />
             </div>
-
-            {/* Status Filter */}
             <div>
               <Label className="text-amber-700">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -280,11 +296,10 @@ export default function OrdersView() {
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="pending">Processing</SelectItem>
                   <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem> {/* Added */}
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Price Range Filter */}
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-amber-700">Min Price</Label>
@@ -308,8 +323,6 @@ export default function OrdersView() {
               </div>
             </div>
           </div>
-
-          {/* Sorting Options */}
           <div className="mt-4">
             <Label className="text-amber-700">Sort By</Label>
             <Select value={sortOption} onValueChange={setSortOption}>
@@ -325,7 +338,6 @@ export default function OrdersView() {
         </CardContent>
       </Card>
 
-      {/* Orders List */}
       <Card className="bg-white border-amber-200">
         <CardHeader>
           <CardTitle className="text-amber-900">Order History</CardTitle>
@@ -338,6 +350,7 @@ export default function OrdersView() {
               {filteredOrders.map((order) => {
                 const orderDate = new Date(order.created_at);
                 const daysAgo = Math.floor((Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+                const cancellable = isOrderCancellable(order);
 
                 return (
                   <Card key={order.id} className="bg-amber-50 border-amber-200">
@@ -346,10 +359,14 @@ export default function OrdersView() {
                         <CardTitle className="text-amber-900 text-base">Order #{order.id.slice(0, 8)}</CardTitle>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            order.status === "pending" ? "bg-amber-200 text-amber-800" : "bg-green-100 text-green-800"
+                            order.status === "pending"
+                              ? "bg-amber-200 text-amber-800"
+                              : order.status === "delivered"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800" // Added for cancelled
                           }`}
                         >
-                          {order.status === "pending" ? "Processing" : "Delivered"}
+                          {order.status === "pending" ? "Processing" : order.status === "delivered" ? "Delivered" : "Cancelled"}
                         </span>
                       </div>
                       <CardDescription>
@@ -363,7 +380,9 @@ export default function OrdersView() {
                             <span className="text-amber-700">
                               {orderItem.item.name} x {orderItem.quantity}
                             </span>
-                            <span className="font-medium text-amber-900">₹{orderItem.item.price * orderItem.quantity}</span>
+                            <span className="font-medium text-amber-900">
+                              ₹{orderItem.item.price * orderItem.quantity}
+                            </span>
                           </div>
                         ))}
                         <Separator className="my-2 bg-amber-200" />
@@ -384,10 +403,19 @@ export default function OrdersView() {
                           variant="outline"
                           className="text-amber-700 border-amber-300 text-xs"
                           onClick={() => handleReorder(order)}
-                          disabled={reorderLoading}
+                          disabled={reorderLoading || order.status === "cancelled"} // Disable if cancelled
                         >
                           {reorderLoading ? "Processing..." : "Reorder"}
                         </Button>
+                        {cancellable && (
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 text-xs hover:text-red-800"
+                            onClick={() => handleCancelOrder(order.id)}
+                          >
+                            Cancel
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -398,7 +426,6 @@ export default function OrdersView() {
         </CardContent>
       </Card>
 
-      {/* Order Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -445,10 +472,18 @@ export default function OrdersView() {
                 <p className="text-sm text-amber-700">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      selectedOrder.status === "pending" ? "bg-amber-200 text-amber-800" : "bg-green-100 text-green-800"
+                      selectedOrder.status === "pending"
+                        ? "bg-amber-200 text-amber-800"
+                        : selectedOrder.status === "delivered"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800" // Added for cancelled
                     }`}
                   >
-                    {selectedOrder.status === "pending" ? "Processing" : "Delivered"}
+                    {selectedOrder.status === "pending"
+                      ? "Processing"
+                      : selectedOrder.status === "delivered"
+                      ? "Delivered"
+                      : "Cancelled"}
                   </span>
                 </p>
               </div>
@@ -460,10 +495,19 @@ export default function OrdersView() {
               variant="outline"
               className="text-amber-700 border-amber-300"
               onClick={() => handleReorder(selectedOrder!)}
-              disabled={reorderLoading || !selectedOrder}
+              disabled={reorderLoading || !selectedOrder || selectedOrder?.status === "cancelled"} // Disable if cancelled
             >
               {reorderLoading ? "Processing..." : "Reorder"}
             </Button>
+            {selectedOrder && isOrderCancellable(selectedOrder) && (
+              <Button
+                variant="outline"
+                className="text-red-600 border-red-300 hover:text-red-800"
+                onClick={() => handleCancelOrder(selectedOrder.id)}
+              >
+                Cancel Order
+              </Button>
+            )}
             <DialogClose asChild>
               <Button variant="ghost" className="text-amber-700">Close</Button>
             </DialogClose>
