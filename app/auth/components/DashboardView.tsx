@@ -1,7 +1,7 @@
 // app/auth/components/DashboardView.tsx
 "use client";
 
-import { Bell, Coffee, Trash2 } from "lucide-react"; // Added Trash2 icon for delete
+import { Bell, Coffee, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ interface Order {
     quantity: number;
   }[];
   total_price: number;
-  status: string;
+  status: string; 
   created_at: string;
 }
 
@@ -97,8 +97,29 @@ export default function DashboardView() {
           setNotifications(notificationsData || []);
         }
 
+        // Real-time subscription to orders
+        const orderSubscription = supabase
+          .channel("orders")
+          .on(
+            "postgres_changes",
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "orders",
+              filter: `profile_id=eq.${userId}`,
+            },
+            (payload) => {
+              setRecentOrders((prev) =>
+                prev.map((order) =>
+                  order.id === payload.new.id ? { ...order, ...payload.new } : order
+                )
+              );
+            }
+          )
+          .subscribe();
+
         // Real-time subscription to notifications
-        const subscription = supabase
+        const notificationSubscription = supabase
           .channel("notifications")
           .on(
             "postgres_changes",
@@ -117,7 +138,8 @@ export default function DashboardView() {
         setLoading(false);
 
         return () => {
-          supabase.removeChannel(subscription);
+          supabase.removeChannel(orderSubscription);
+          supabase.removeChannel(notificationSubscription);
         };
       } catch (e) {
         setError("An unexpected error occurred.");
@@ -129,27 +151,22 @@ export default function DashboardView() {
     fetchUserData();
   }, []);
 
-  // Calculate days ago for an order date
   const calculateDaysAgo = (dateString: string) => {
     const orderDate = new Date(dateString);
     const daysAgo = Math.floor((Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
     return daysAgo;
   };
 
-  // Handle navigation to orders page
   const handleViewAllOrders = () => {
     router.push("/orders");
   };
 
-  // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  // Toggle notification dropdown (no longer marks all as read)
   const handleToggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
 
-  // Mark a single notification as read
   const markNotificationAsRead = async (notificationId: string) => {
     const { error } = await supabase
       .from("notifications")
@@ -165,7 +182,6 @@ export default function DashboardView() {
     }
   };
 
-  // Delete a notification
   const deleteNotification = async (notificationId: string) => {
     const { error } = await supabase
       .from("notifications")
@@ -304,6 +320,7 @@ export default function DashboardView() {
                             {daysAgo} day{daysAgo !== 1 ? "s" : ""} ago • {firstItemName}
                             {order.items.length > 1 ? ` + ${order.items.length - 1} more` : ""}
                           </p>
+                          <p className="text-xs text-amber-800 font-medium">Status: {order.status}</p>
                         </div>
                       </div>
                       <span className="text-sm font-medium text-amber-900">₹{order.total_price}</span>
