@@ -228,7 +228,7 @@ export default function DashboardView() {
           <CardTitle className="text-amber-900">
             {loading ? "Welcome back!" : error ? "Welcome back, User!" : `Welcome back, ${fullName}!`}
           </CardTitle>
-          <CardDescription>Here's an overview of your account</CardDescription>
+          <CardDescription>Here&apos;s an overview of your account</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
