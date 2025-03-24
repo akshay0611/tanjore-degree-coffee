@@ -1,4 +1,3 @@
-// app/auth/components/DashboardView.tsx
 "use client";
 
 import { Bell, Coffee, Trash2 } from "lucide-react";
@@ -7,31 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Address, Notification } from "./types";
+import { Address, Notification, Order } from "./types"; // Import Order from types.ts
 import { fetchAddresses } from "./supabaseUtils";
-
-interface Order {
-  id: string;
-  items: {
-    item: {
-      id: number;
-      name: string;
-      image: string;
-      price: number;
-      popular: boolean;
-      category: string;
-      description: string;
-    };
-    quantity: number;
-  }[];
-  total_price: number;
-  status: string; 
-  created_at: string;
-}
+import { getRecommendedItems } from "./supabaseRecommendations";
 
 export default function DashboardView() {
   const [fullName, setFullName] = useState<string | null>(null);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]); // Use Order from types.ts
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +33,6 @@ export default function DashboardView() {
 
         const userId = userData.user.id;
 
-        // Fetch full_name from the `profiles` table
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("full_name")
@@ -66,7 +46,6 @@ export default function DashboardView() {
           setFullName(profileData.full_name || null);
         }
 
-        // Fetch recent orders
         const { data: ordersData, error: ordersError } = await supabase
           .from("orders")
           .select("*")
@@ -80,11 +59,9 @@ export default function DashboardView() {
           setRecentOrders(ordersData || []);
         }
 
-        // Fetch addresses
         const addressData = await fetchAddresses(userId);
         setAddresses(addressData);
 
-        // Fetch initial notifications
         const { data: notificationsData, error: notificationsError } = await supabase
           .from("notifications")
           .select("*")
@@ -97,7 +74,6 @@ export default function DashboardView() {
           setNotifications(notificationsData || []);
         }
 
-        // Real-time subscription to orders
         const orderSubscription = supabase
           .channel("orders")
           .on(
@@ -118,7 +94,6 @@ export default function DashboardView() {
           )
           .subscribe();
 
-        // Real-time subscription to notifications
         const notificationSubscription = supabase
           .channel("notifications")
           .on(
@@ -195,6 +170,8 @@ export default function DashboardView() {
     }
   };
 
+  const recommendedItems = getRecommendedItems(recentOrders);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -251,7 +228,7 @@ export default function DashboardView() {
           <CardTitle className="text-amber-900">
             {loading ? "Welcome back!" : error ? "Welcome back, User!" : `Welcome back, ${fullName}!`}
           </CardTitle>
-          <CardDescription>Here&apos;s an overview of your account</CardDescription>
+          <CardDescription>Here's an overview of your account</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -343,27 +320,33 @@ export default function DashboardView() {
 
         <Card className="bg-white border-amber-200">
           <CardHeader>
-            <CardTitle className="text-amber-900">Favorite Coffees</CardTitle>
+            <CardTitle className="text-amber-900">Recommended for You</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {["Tanjore Filter Coffee", "Madras Kaapi", "Kumbakonam Degree Coffee"].map((coffee, index) => (
-                <div key={coffee} className="flex items-center justify-between pb-4 border-b border-amber-100">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center">
-                      <Coffee className="h-5 w-5 text-amber-700" />
+            {loading ? (
+              <p className="text-amber-900">Loading recommendations...</p>
+            ) : recommendedItems.length > 0 ? (
+              <div className="space-y-4">
+                {recommendedItems.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between pb-4 border-b border-amber-100">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center">
+                        <Coffee className="h-5 w-5 text-amber-700" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-amber-900">{item.name}</p>
+                        <p className="text-xs text-amber-700">{item.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-amber-900">{coffee}</p>
-                      <p className="text-xs text-amber-700">Ordered {5 - index} times</p>
-                    </div>
+                    <Button variant="outline" size="sm" className="text-xs border-amber-300 text-amber-700">
+                      Order Now
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm" className="text-xs border-amber-300 text-amber-700">
-                    Reorder
-                  </Button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-amber-700 text-center py-4">No recommendations available</p>
+            )}
             <Button
               variant="ghost"
               className="w-full mt-4 text-amber-700 hover:text-amber-900 hover:bg-amber-100"
