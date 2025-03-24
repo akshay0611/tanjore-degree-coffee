@@ -1,6 +1,7 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+// app/auth/admin/PopularItems.tsx
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 export default function PopularItems() {
   const items = [
@@ -44,20 +45,20 @@ export default function PopularItems() {
       stock: "In Stock",
       popularity: 65,
     },
-  ]
+  ];
 
   const getStockColor = (stock: string) => {
     switch (stock) {
       case "In Stock":
-        return "bg-green-100 text-green-800 hover:bg-green-200"
+        return "bg-green-100 text-green-800 hover:bg-green-200";
       case "Low Stock":
-        return "bg-amber-100 text-amber-800 hover:bg-amber-200"
+        return "bg-amber-100 text-amber-800 hover:bg-amber-200";
       case "Out of Stock":
-        return "bg-red-100 text-red-800 hover:bg-red-200"
+        return "bg-red-100 text-red-800 hover:bg-red-200";
       default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200"
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
     }
-  }
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -95,6 +96,5 @@ export default function PopularItems() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
-

@@ -1,15 +1,16 @@
-"use client"
+// app/auth/admin/dashboard/page.tsx
+"use client";
 
-import { useState } from "react"
-import { Coffee, ShoppingBag, Users, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import RecentOrders from "./RecentOrders"
-import PopularItems from "./PopularItems"
+import { useState } from "react";
+import { Coffee, ShoppingBag, Users, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import RecentOrders from "../RecentOrders"; // Adjust path if needed
+import PopularItems from "../PopularItems"; // Adjust path if needed
 
-export default function AdminDashboard() {
-  const [dateRange, setDateRange] = useState("week")
+export default function DashboardPage() {
+  const [dateRange, setDateRange] = useState("week");
 
   return (
     <div className="space-y-6">
@@ -115,7 +116,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Sales Chart */}
+      {/* Sales Chart Placeholder */}
       <Card className="col-span-4">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -141,7 +142,11 @@ export default function AdminDashboard() {
             </Tabs>
           </div>
         </CardHeader>
-       
+        <CardContent>
+          <div className="h-64 flex items-center justify-center text-amber-600">
+            Sales Chart Placeholder (Implement with Chart.js or Recharts)
+          </div>
+        </CardContent>
       </Card>
 
       {/* Recent Orders and Popular Items */}
@@ -167,5 +172,5 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,11 +1,12 @@
-"use client"
+// app/auth/admin/orders/page.tsx
+"use client";
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -13,13 +14,21 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
-import { Eye, Download, Filter, Search, RefreshCcw } from "lucide-react"
+} from "@/components/ui/pagination";
+import { Eye, Download, Filter, Search, RefreshCcw } from "lucide-react";
 
-export default function OrdersManagement() {
-  const [filterStatus, setFilterStatus] = useState("all")
+interface Order {
+  id: string;
+  customer: string;
+  date: string;
+  amount: string;
+  status: string;
+  items: number;
+  payment: string;
+}
 
-  const orders = [
+export default function OrdersPage() {
+  const [orders] = useState<Order[]>([
     {
       id: "ORD-1234",
       customer: "Ramesh Kumar",
@@ -110,28 +119,76 @@ export default function OrdersManagement() {
       items: 6,
       payment: "Cash",
     },
-  ]
+  ]);
 
-  const filteredOrders = filterStatus === "all" ? orders : orders.filter((order) => order.status === filterStatus)
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPayment, setFilterPayment] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
+
+  // Apply filters and search
+  useEffect(() => {
+    let filtered = orders;
+
+    // Filter by status
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((order) => order.status === filterStatus);
+    }
+
+    // Filter by payment method
+    if (filterPayment !== "all") {
+      filtered = filtered.filter((order) => order.payment.toLowerCase() === filterPayment);
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (order) =>
+          order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          order.customer.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredOrders(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [filterStatus, filterPayment, searchQuery, orders]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ordersPerPage,
+    currentPage * ordersPerPage
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 hover:bg-green-200"
+        return "bg-green-100 text-green-800 hover:bg-green-200";
       case "processing":
-        return "bg-amber-100 text-amber-800 hover:bg-amber-200"
+        return "bg-amber-100 text-amber-800 hover:bg-amber-200";
       case "cancelled":
-        return "bg-red-100 text-red-800 hover:bg-red-200"
+        return "bg-red-100 text-red-800 hover:bg-red-200";
       default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200"
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
     }
-  }
+  };
+
+  const handleReset = () => {
+    setFilterStatus("all");
+    setFilterPayment("all");
+    setSearchQuery("");
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-amber-900 custom-serif">Orders Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-amber-900 custom-serif">
+            Orders Management
+          </h1>
           <p className="text-amber-700">View and manage all customer orders</p>
         </div>
 
@@ -147,7 +204,13 @@ export default function OrdersManagement() {
       <div className="bg-white p-4 rounded-lg border border-amber-200 flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
-          <Input type="search" placeholder="Search orders by ID, customer..." className="pl-10 border-amber-200" />
+          <Input
+            type="search"
+            placeholder="Search orders by ID, customer..."
+            className="pl-10 border-amber-200"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
         <div className="flex flex-wrap gap-4">
@@ -163,7 +226,7 @@ export default function OrdersManagement() {
             </SelectContent>
           </Select>
 
-          <Select>
+          <Select value={filterPayment} onValueChange={setFilterPayment}>
             <SelectTrigger className="w-[180px] border-amber-200">
               <SelectValue placeholder="Payment method" />
             </SelectTrigger>
@@ -179,7 +242,7 @@ export default function OrdersManagement() {
             More Filters
           </Button>
 
-          <Button variant="ghost" className="text-amber-700">
+          <Button variant="ghost" className="text-amber-700" onClick={handleReset}>
             <RefreshCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
@@ -203,27 +266,35 @@ export default function OrdersManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.customer}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell>{order.items} items</TableCell>
-                  <TableCell>{order.amount}</TableCell>
-                  <TableCell>{order.payment}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(order.status)} variant="outline">
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="h-8 text-amber-700">
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
+              {paginatedOrders.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-amber-600">
+                    No orders found.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                paginatedOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell>{order.customer}</TableCell>
+                    <TableCell>{order.date}</TableCell>
+                    <TableCell>{order.items} items</TableCell>
+                    <TableCell>{order.amount}</TableCell>
+                    <TableCell>{order.payment}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(order.status)} variant="outline">
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" className="h-8 text-amber-700">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -233,27 +304,32 @@ export default function OrdersManagement() {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious
+                  href="#"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                />
               </PaginationItem>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    isActive={currentPage === page}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
               <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  1
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">2</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext
+                  href="#"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

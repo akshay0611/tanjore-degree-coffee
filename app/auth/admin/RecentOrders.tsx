@@ -1,7 +1,9 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Eye } from "lucide-react"
+// app/auth/admin/RecentOrders.tsx
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
+import Link from "next/link";
 
 export default function RecentOrders() {
   const orders = [
@@ -45,20 +47,20 @@ export default function RecentOrders() {
       status: "cancelled",
       items: 6,
     },
-  ]
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 hover:bg-green-200"
+        return "bg-green-100 text-green-800 hover:bg-green-200";
       case "processing":
-        return "bg-amber-100 text-amber-800 hover:bg-amber-200"
+        return "bg-amber-100 text-amber-800 hover:bg-amber-200";
       case "cancelled":
-        return "bg-red-100 text-red-800 hover:bg-red-200"
+        return "bg-red-100 text-red-800 hover:bg-red-200";
       default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200"
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
     }
-  }
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -86,15 +88,16 @@ export default function RecentOrders() {
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="icon">
-                  <Eye className="h-4 w-4" />
-                </Button>
+                <Link href={`/auth/admin/orders/${order.id}`}>
+                  <Button variant="ghost" size="icon" className="text-amber-700">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </Link>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
-

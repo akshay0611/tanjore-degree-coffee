@@ -1,9 +1,10 @@
-"use client"
+// app/auth/admin/AdminHeader.tsx
+"use client";
 
-import { useState } from "react"
-import { Bell, Search, User, Settings, LogOut, HelpCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { Bell, Search, User, Settings, LogOut, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export default function AdminHeader() {
+// Define the props interface for AdminHeader
+interface AdminHeaderProps {
+  activeSection: string;
+}
+
+export default function AdminHeader({ activeSection }: AdminHeaderProps) {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -37,28 +43,34 @@ export default function AdminHeader() {
       time: "3 hours ago",
       read: true,
     },
-  ])
+  ]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAsRead = (id: number) => {
-    setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }
+    setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })))
-  }
+    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  };
+
+  // Capitalize the active section for display
+  const displaySection = activeSection.charAt(0).toUpperCase() + activeSection.slice(1);
 
   return (
     <header className="bg-white border-b border-amber-200 py-3 px-4 md:px-6">
       <div className="flex items-center justify-between">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
-          <Input
-            type="search"
-            placeholder="Search orders, customers..."
-            className="pl-10 border-amber-200 focus:border-amber-500 focus:ring-amber-500"
-          />
+        <div className="flex items-center space-x-4">
+          <h2 className="text-lg font-semibold text-amber-900">{displaySection}</h2>
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
+            <Input
+              type="search"
+              placeholder="Search orders, customers..."
+              className="pl-10 border-amber-200 focus:border-amber-500 focus:ring-amber-500"
+            />
+          </div>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -155,6 +167,5 @@ export default function AdminHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }
-
