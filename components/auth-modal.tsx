@@ -1,84 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { supabase } from "@/lib/supabase/client"
-import { AuthError } from "@supabase/supabase-js"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase/client";
+import { AuthError } from "@supabase/supabase-js";
 
-export function AuthModal() {
-  const [isSignIn, setIsSignIn] = useState(true)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+// Define props interface for AuthModal
+interface AuthModalProps {
+  onClose?: () => void; // Optional callback to execute when modal closes
+}
+
+export function AuthModal({ onClose }: AuthModalProps) {
+  const [isSignIn, setIsSignIn] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false); // Add state to control Dialog open/close
+  const router = useRouter();
 
   const createProfile = async (userId: string, userEmail: string) => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .insert([
-          { id: userId, email: userEmail }
-        ])
-      
+      const { error } = await supabase.from("profiles").insert([{ id: userId, email: userEmail }]);
       if (error) throw error;
       console.log("Profile created successfully");
     } catch (error) {
       console.error("Error creating profile:", error);
     }
-  }
+  };
 
   const handleAuth = async () => {
-    setError(null)
+    setError(null);
 
     // Validate confirm password for sign-up
     if (!isSignIn && password !== confirmPassword) {
-      setError("Passwords do not match")
-      return
+      setError("Passwords do not match");
+      return;
     }
 
     try {
       if (isSignIn) {
         // Sign in
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-        router.push("/auth") // Redirect to the auth page after sign-in
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setOpen(false); // Close the modal on successful sign-in
+        if (onClose) onClose(); // Call onClose if provided
+        router.push("/auth"); // Redirect to the auth page after sign-in
       } else {
         // Sign up
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
+        const { data, error } = await supabase.auth.signUp({
+          email,
           password,
           options: {
             data: {
               email: email,
-            }
-          }
-        })
-        
-        if (error) throw error
-        
+            },
+          },
+        });
+        if (error) throw error;
+
         // Create profile for the new user
         if (data.user) {
-          await createProfile(data.user.id, email)
+          await createProfile(data.user.id, email);
         }
-        
-        alert("Check your email for the confirmation link!")
+
+        alert("Check your email for the confirmation link!");
+        setOpen(false); // Close the modal after sign-up
+        if (onClose) onClose(); // Call onClose if provided
       }
     } catch (error) {
       if (error instanceof AuthError) {
-        setError(error.message)
+        setError(error.message);
       } else {
-        setError("An unknown error occurred")
+        setError("An unknown error occurred");
       }
     }
-  }
+  };
+
+  // Handle manual close of the modal
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) onClose(); // Call onClose if provided
+  };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           className="transition-all duration-300 
@@ -154,7 +164,14 @@ export function AuthModal() {
             {isSignIn ? "Sign In" : "Sign Up"}
           </Button>
         </div>
+        <Button
+          variant="ghost"
+          onClick={handleClose}
+          className="w-full mt-4 text-gray-600 hover:text-gray-800"
+        >
+          Close
+        </Button>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
