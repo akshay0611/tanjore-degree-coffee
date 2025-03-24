@@ -35,42 +35,39 @@ export function AuthModal({ onClose }: AuthModalProps) {
 
   const handleAuth = async () => {
     setError(null);
-
-    // Validate confirm password for sign-up
+  
     if (!isSignIn && password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
+  
     try {
       if (isSignIn) {
-        // Sign in
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        setOpen(false); // Close the modal on successful sign-in
-        if (onClose) onClose(); // Call onClose if provided
-        router.push("/auth"); // Redirect to the auth page after sign-in
+  
+        // Check user role after sign-in
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user?.id)
+          .single();
+  
+        setOpen(false);
+        if (onClose) onClose();
+        router.push(profile?.role === "admin" ? "/auth/admin" : "/auth");
       } else {
-        // Sign up
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              email: email,
-            },
-          },
-        });
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { email } } });
         if (error) throw error;
-
-        // Create profile for the new user
+  
         if (data.user) {
           await createProfile(data.user.id, email);
         }
-
+  
         alert("Check your email for the confirmation link!");
-        setOpen(false); // Close the modal after sign-up
-        if (onClose) onClose(); // Call onClose if provided
+        setOpen(false);
+        if (onClose) onClose();
       }
     } catch (error) {
       if (error instanceof AuthError) {
