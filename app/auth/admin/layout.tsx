@@ -1,16 +1,34 @@
 // app/auth/admin/layout.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import { Button } from "@/components/ui/button";
 
+// Create a SearchContext to share the search query with child components
+interface SearchContextType {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+}
+
+const SearchContext = createContext<SearchContextType | undefined>(undefined);
+
+// Custom hook to access the search context
+export const useSearch = () => {
+  const context = useContext(SearchContext);
+  if (!context) {
+    throw new Error("useSearch must be used within a SearchProvider");
+  }
+  return context;
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); // Add search query state
   const router = useRouter();
   const pathname = usePathname();
 
@@ -69,17 +87,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-amber-50/50">
-      <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <AdminSidebar activeSection={getActiveSection()} />
+    <SearchContext.Provider value={{ searchQuery, setSearchQuery }}>
+      <div className="min-h-screen bg-amber-50/50">
+        <div className="flex h-screen overflow-hidden">
+          {/* Sidebar */}
+          <AdminSidebar activeSection={getActiveSection()} />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <AdminHeader activeSection={getActiveSection()} /> {/* Pass activeSection */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <AdminHeader
+              activeSection={getActiveSection()}
+              onSearch={(query) => setSearchQuery(query)} // Pass onSearch callback
+            />
+            <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+          </div>
         </div>
       </div>
-    </div>
+    </SearchContext.Provider>
   );
 }

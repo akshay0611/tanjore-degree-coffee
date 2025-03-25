@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,117 +17,74 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Eye, Download, Filter, Search, RefreshCcw } from "lucide-react";
+import { format } from "date-fns";
 
+// Define the structure of the item details inside an OrderItem
+interface ItemDetails {
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  category: string;
+  description: string;
+}
+
+// Define the structure of an item in the order
+interface OrderItem {
+  item: ItemDetails;
+  quantity: number;
+}
+
+// Define the structure of an order from the Supabase orders table
 interface Order {
   id: string;
   customer: string;
   date: string;
   amount: string;
   status: string;
-  items: number;
-  payment: string;
+  items: OrderItem[];
 }
 
 export default function OrdersPage() {
-  const [orders] = useState<Order[]>([
-    {
-      id: "ORD-1234",
-      customer: "Ramesh Kumar",
-      date: "2023-07-31 14:30",
-      amount: "₹450",
-      status: "completed",
-      items: 3,
-      payment: "Online",
-    },
-    {
-      id: "ORD-1233",
-      customer: "Priya Venkatesh",
-      date: "2023-07-31 13:15",
-      amount: "₹680",
-      status: "processing",
-      items: 5,
-      payment: "Cash",
-    },
-    {
-      id: "ORD-1232",
-      customer: "Arun Nair",
-      date: "2023-07-31 11:45",
-      amount: "₹320",
-      status: "completed",
-      items: 2,
-      payment: "Online",
-    },
-    {
-      id: "ORD-1231",
-      customer: "Lakshmi Narayan",
-      date: "2023-07-31 10:20",
-      amount: "₹550",
-      status: "completed",
-      items: 4,
-      payment: "Cash",
-    },
-    {
-      id: "ORD-1230",
-      customer: "Karthik Subramanian",
-      date: "2023-07-30 16:40",
-      amount: "₹780",
-      status: "cancelled",
-      items: 6,
-      payment: "Online",
-    },
-    {
-      id: "ORD-1229",
-      customer: "Meena Iyer",
-      date: "2023-07-30 15:10",
-      amount: "₹420",
-      status: "processing",
-      items: 3,
-      payment: "Cash",
-    },
-    {
-      id: "ORD-1228",
-      customer: "Rajesh Sharma",
-      date: "2023-07-30 14:25",
-      amount: "₹650",
-      status: "completed",
-      items: 5,
-      payment: "Online",
-    },
-    {
-      id: "ORD-1227",
-      customer: "Ananya Patel",
-      date: "2023-07-30 12:50",
-      amount: "₹380",
-      status: "completed",
-      items: 2,
-      payment: "Cash",
-    },
-    {
-      id: "ORD-1226",
-      customer: "Vikram Singh",
-      date: "2023-07-30 11:15",
-      amount: "₹520",
-      status: "cancelled",
-      items: 4,
-      payment: "Online",
-    },
-    {
-      id: "ORD-1225",
-      customer: "Divya Krishnan",
-      date: "2023-07-29 17:30",
-      amount: "₹720",
-      status: "completed",
-      items: 6,
-      payment: "Cash",
-    },
-  ]);
-
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [filterStatus, setFilterStatus] = useState("all");
-  const [filterPayment, setFilterPayment] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const ordersPerPage = 10;
+
+  // Fetch orders from Supabase
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id, name, created_at, total_price, status, items")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching orders:", error);
+        setOrders([]);
+        setFilteredOrders([]);
+      } else {
+        // Map the Supabase data to the Order interface
+        const mappedOrders: Order[] = data.map((order) => ({
+          id: order.id,
+          customer: order.name,
+          date: format(new Date(order.created_at), "yyyy-MM-dd HH:mm"),
+          amount: `₹${order.total_price.toLocaleString()}`,
+          status: order.status,
+          items: order.items || [], // Ensure items is an array
+        }));
+
+        setOrders(mappedOrders);
+        setFilteredOrders(mappedOrders);
+      }
+      setLoading(false);
+    };
+
+    fetchOrders();
+  }, []);
 
   // Apply filters and search
   useEffect(() => {
@@ -135,11 +93,6 @@ export default function OrdersPage() {
     // Filter by status
     if (filterStatus !== "all") {
       filtered = filtered.filter((order) => order.status === filterStatus);
-    }
-
-    // Filter by payment method
-    if (filterPayment !== "all") {
-      filtered = filtered.filter((order) => order.payment.toLowerCase() === filterPayment);
     }
 
     // Filter by search query
@@ -153,7 +106,7 @@ export default function OrdersPage() {
 
     setFilteredOrders(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [filterStatus, filterPayment, searchQuery, orders]);
+  }, [filterStatus, searchQuery, orders]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
@@ -164,9 +117,9 @@ export default function OrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
+      case "delivered":
         return "bg-green-100 text-green-800 hover:bg-green-200";
-      case "processing":
+      case "pending":
         return "bg-amber-100 text-amber-800 hover:bg-amber-200";
       case "cancelled":
         return "bg-red-100 text-red-800 hover:bg-red-200";
@@ -177,10 +130,13 @@ export default function OrdersPage() {
 
   const handleReset = () => {
     setFilterStatus("all");
-    setFilterPayment("all");
     setSearchQuery("");
     setCurrentPage(1);
   };
+
+  if (loading) {
+    return <div className="p-4 text-amber-600">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -220,20 +176,9 @@ export default function OrdersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={filterPayment} onValueChange={setFilterPayment}>
-            <SelectTrigger className="w-[180px] border-amber-200">
-              <SelectValue placeholder="Payment method" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Methods</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="cash">Cash</SelectItem>
             </SelectContent>
           </Select>
 
@@ -260,7 +205,6 @@ export default function OrdersPage() {
                 <TableHead>Date & Time</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Payment</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -268,7 +212,7 @@ export default function OrdersPage() {
             <TableBody>
               {paginatedOrders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-amber-600">
+                  <TableCell colSpan={7} className="text-center text-amber-600">
                     No orders found.
                   </TableCell>
                 </TableRow>
@@ -278,9 +222,8 @@ export default function OrdersPage() {
                     <TableCell className="font-medium">{order.id}</TableCell>
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{order.date}</TableCell>
-                    <TableCell>{order.items} items</TableCell>
+                    <TableCell>{order.items.length} items</TableCell>
                     <TableCell>{order.amount}</TableCell>
-                    <TableCell>{order.payment}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(order.status)} variant="outline">
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

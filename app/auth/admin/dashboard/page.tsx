@@ -1,16 +1,190 @@
 // app/auth/admin/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
 import { Coffee, ShoppingBag, Users, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import RecentOrders from "../RecentOrders"; // Adjust path if needed
-import PopularItems from "../PopularItems"; // Adjust path if needed
+import RecentOrders from "../RecentOrders";
+import PopularItems from "../PopularItems";
+import { subDays, subWeeks, subMonths, subYears, startOfDay, startOfWeek, startOfMonth, startOfYear, format } from "date-fns";
+
+// Define the structure of the item details inside an OrderItem
+interface ItemDetails {
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  category: string;
+  description: string;
+}
+
+// Define the structure of an item in the order
+interface OrderItem {
+  item: ItemDetails;
+  quantity: number;
+}
+
+// Define the structure of an order from the Supabase orders table
+interface Order {
+  id: string;
+  name: string;
+  created_at: string;
+  total_price: number;
+  status: string;
+  items: OrderItem[];
+}
+
+// Define the structure of the stats for the dashboard
+interface DashboardStats {
+  totalRevenue: number;
+  totalOrders: number;
+  totalCustomers: number;
+  coffeeSold: number;
+  revenueChange: number;
+  ordersChange: number;
+  customersChange: number;
+  coffeeSoldChange: number;
+}
 
 export default function DashboardPage() {
-  const [dateRange, setDateRange] = useState("week");
+  const [dateRange, setDateRange] = useState("month");
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Calculate the date range for the current and previous periods
+  const getDateRange = (range: string) => {
+    const now = new Date();
+    let startCurrent: Date;
+    let startPrevious: Date;
+
+    switch (range) {
+      case "day":
+        startCurrent = startOfDay(now);
+        startPrevious = startOfDay(subDays(now, 1));
+        break;
+      case "week":
+        startCurrent = startOfWeek(now, { weekStartsOn: 1 });
+        startPrevious = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+        break;
+      case "month":
+        startCurrent = startOfMonth(now);
+        startPrevious = startOfMonth(subMonths(now, 1));
+        break;
+      case "year":
+        startCurrent = startOfYear(now);
+        startPrevious = startOfYear(subYears(now, 1));
+        break;
+      default:
+        startCurrent = startOfMonth(now);
+        startPrevious = startOfMonth(subMonths(now, 1));
+    }
+
+    return { startCurrent, startPrevious };
+  };
+
+  // Fetch orders and calculate stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+
+      const { startCurrent, startPrevious } = getDateRange(dateRange);
+
+      // Fetch orders for the current period (only delivered/completed orders)
+      const { data: currentOrders, error: currentError } = await supabase
+        .from("orders")
+        .select("id, name, created_at, total_price, status, items")
+        .gte("created_at", startCurrent.toISOString())
+        .eq("status", "delivered"); // Only count delivered (completed) orders
+
+      // Fetch orders for the previous period (only delivered/completed orders)
+      const { data: previousOrders, error: previousError } = await supabase
+        .from("orders")
+        .select("id, name, created_at, total_price, status, items")
+        .gte("created_at", startPrevious.toISOString())
+        .lt("created_at", startCurrent.toISOString())
+        .eq("status", "delivered"); // Only count delivered (completed) orders
+
+      if (currentError || previousError) {
+        console.error("Error fetching orders:", currentError || previousError);
+        setStats({
+          totalRevenue: 0,
+          totalOrders: 0,
+          totalCustomers: 0,
+          coffeeSold: 0,
+          revenueChange: 0,
+          ordersChange: 0,
+          customersChange: 0,
+          coffeeSoldChange: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Calculate stats for the current period
+      const currentStats = calculateStats(currentOrders || []);
+      const previousStats = calculateStats(previousOrders || []);
+
+      // Calculate percentage changes
+      const revenueChange = previousStats.totalRevenue
+        ? ((currentStats.totalRevenue - previousStats.totalRevenue) / previousStats.totalRevenue) * 100
+        : 0;
+      const ordersChange = previousStats.totalOrders
+        ? ((currentStats.totalOrders - previousStats.totalOrders) / previousStats.totalOrders) * 100
+        : 0;
+      const customersChange = previousStats.totalCustomers
+        ? ((currentStats.totalCustomers - previousStats.totalCustomers) / previousStats.totalCustomers) * 100
+        : 0;
+      const coffeeSoldChange = previousStats.coffeeSold
+        ? ((currentStats.coffeeSold - previousStats.coffeeSold) / previousStats.coffeeSold) * 100
+        : 0;
+
+      setStats({
+        totalRevenue: currentStats.totalRevenue,
+        totalOrders: currentStats.totalOrders,
+        totalCustomers: currentStats.totalCustomers,
+        coffeeSold: currentStats.coffeeSold,
+        revenueChange,
+        ordersChange,
+        customersChange,
+        coffeeSoldChange,
+      });
+      setLoading(false);
+    };
+
+    fetchStats();
+  }, [dateRange]);
+
+  // Function to calculate stats from a list of orders
+  const calculateStats = (orders: Order[]) => {
+    const totalRevenue = orders.reduce((sum, order) => sum + order.total_price, 0);
+    const totalOrders = orders.length;
+    const uniqueCustomers = new Set(orders.map((order) => order.name)).size;
+
+    // Calculate coffee sold (items with category including "coffee")
+    let coffeeSold = 0;
+    orders.forEach((order) => {
+      order.items.forEach((orderItem) => {
+        const category = orderItem.item.category.toLowerCase();
+        if (category.includes("coffee")) {
+          coffeeSold += orderItem.quantity;
+        }
+      });
+    });
+
+    return {
+      totalRevenue,
+      totalOrders,
+      totalCustomers: uniqueCustomers,
+      coffeeSold,
+    };
+  };
+
+  if (loading || !stats) {
+    return <div className="p-4 text-amber-600">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -23,7 +197,10 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" className="border-amber-300 text-amber-800">
             <Calendar className="h-4 w-4 mr-2" />
-            July 1 - July 31, 2023
+            {dateRange === "day" && format(new Date(), "MMMM d, yyyy")}
+            {dateRange === "week" && `${format(subWeeks(new Date(), 1), "MMM d")} - ${format(new Date(), "MMM d, yyyy")}`}
+            {dateRange === "month" && format(new Date(), "MMMM yyyy")}
+            {dateRange === "year" && format(new Date(), "yyyy")}
           </Button>
           <Button className="bg-amber-800 hover:bg-amber-700 text-white">Download Report</Button>
         </div>
@@ -36,13 +213,21 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-amber-600">Total Revenue</p>
-                <h3 className="text-2xl font-bold text-amber-900 mt-1">₹42,890</h3>
+                <h3 className="text-2xl font-bold text-amber-900 mt-1">₹{stats.totalRevenue.toLocaleString()}</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-green-600 text-sm font-medium flex items-center">
-                    <ArrowUpRight className="h-3 w-3 mr-1" />
-                    12.5%
+                  <span
+                    className={`text-sm font-medium flex items-center ${
+                      stats.revenueChange >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {stats.revenueChange >= 0 ? (
+                      <ArrowUpRight className="h-3 w-3 mr-1" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3 mr-1" />
+                    )}
+                    {Math.abs(stats.revenueChange).toFixed(1)}%
                   </span>
-                  <span className="text-amber-600 text-xs ml-2">vs last month</span>
+                  <span className="text-amber-600 text-xs ml-2">vs previous period</span>
                 </div>
               </div>
               <div className="bg-amber-100 p-3 rounded-full">
@@ -57,13 +242,21 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-amber-600">Total Orders</p>
-                <h3 className="text-2xl font-bold text-amber-900 mt-1">538</h3>
+                <h3 className="text-2xl font-bold text-amber-900 mt-1">{stats.totalOrders}</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-green-600 text-sm font-medium flex items-center">
-                    <ArrowUpRight className="h-3 w-3 mr-1" />
-                    8.2%
+                  <span
+                    className={`text-sm font-medium flex items-center ${
+                      stats.ordersChange >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {stats.ordersChange >= 0 ? (
+                      <ArrowUpRight className="h-3 w-3 mr-1" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3 mr-1" />
+                    )}
+                    {Math.abs(stats.ordersChange).toFixed(1)}%
                   </span>
-                  <span className="text-amber-600 text-xs ml-2">vs last month</span>
+                  <span className="text-amber-600 text-xs ml-2">vs previous period</span>
                 </div>
               </div>
               <div className="bg-amber-100 p-3 rounded-full">
@@ -78,13 +271,21 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-amber-600">Total Customers</p>
-                <h3 className="text-2xl font-bold text-amber-900 mt-1">1,429</h3>
+                <h3 className="text-2xl font-bold text-amber-900 mt-1">{stats.totalCustomers}</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-green-600 text-sm font-medium flex items-center">
-                    <ArrowUpRight className="h-3 w-3 mr-1" />
-                    5.3%
+                  <span
+                    className={`text-sm font-medium flex items-center ${
+                      stats.customersChange >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {stats.customersChange >= 0 ? (
+                      <ArrowUpRight className="h-3 w-3 mr-1" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3 mr-1" />
+                    )}
+                    {Math.abs(stats.customersChange).toFixed(1)}%
                   </span>
-                  <span className="text-amber-600 text-xs ml-2">vs last month</span>
+                  <span className="text-amber-600 text-xs ml-2">vs previous period</span>
                 </div>
               </div>
               <div className="bg-amber-100 p-3 rounded-full">
@@ -99,13 +300,21 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-amber-600">Coffee Sold</p>
-                <h3 className="text-2xl font-bold text-amber-900 mt-1">892 cups</h3>
+                <h3 className="text-2xl font-bold text-amber-900 mt-1">{stats.coffeeSold} cups</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-red-600 text-sm font-medium flex items-center">
-                    <ArrowDownRight className="h-3 w-3 mr-1" />
-                    2.1%
+                  <span
+                    className={`text-sm font-medium flex items-center ${
+                      stats.coffeeSoldChange >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {stats.coffeeSoldChange >= 0 ? (
+                      <ArrowUpRight className="h-3 w-3 mr-1" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3 mr-1" />
+                    )}
+                    {Math.abs(stats.coffeeSoldChange).toFixed(1)}%
                   </span>
-                  <span className="text-amber-600 text-xs ml-2">vs last month</span>
+                  <span className="text-amber-600 text-xs ml-2">vs previous period</span>
                 </div>
               </div>
               <div className="bg-amber-100 p-3 rounded-full">
@@ -124,7 +333,7 @@ export default function DashboardPage() {
               <CardTitle className="text-xl text-amber-900">Sales Overview</CardTitle>
               <CardDescription className="text-amber-600">Monitor your sales performance over time</CardDescription>
             </div>
-            <Tabs defaultValue="week" value={dateRange} onValueChange={setDateRange}>
+            <Tabs defaultValue="month" value={dateRange} onValueChange={setDateRange}>
               <TabsList className="bg-amber-100">
                 <TabsTrigger value="day" className="data-[state=active]:bg-amber-800 data-[state=active]:text-white">
                   Day
