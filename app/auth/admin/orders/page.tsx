@@ -55,34 +55,45 @@ export default function OrdersPage() {
   const ordersPerPage = 10;
 
   // Fetch orders from Supabase
+  const fetchOrders = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, name, created_at, total_price, status, items")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching orders:", error);
+      setOrders([]);
+      setFilteredOrders([]);
+    } else {
+      const mappedOrders: Order[] = data.map((order) => ({
+        id: order.id,
+        customer: order.name,
+        date: format(new Date(order.created_at), "yyyy-MM-dd HH:mm"),
+        amount: `₹${order.total_price.toLocaleString()}`,
+        status: order.status,
+        items: order.items || [],
+      }));
+
+      setOrders(mappedOrders);
+      setFilteredOrders(mappedOrders);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id, name, created_at, total_price, status, items")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching orders:", error);
-        setOrders([]);
-        setFilteredOrders([]);
-      } else {
-        const mappedOrders: Order[] = data.map((order) => ({
-          id: order.id,
-          customer: order.name,
-          date: format(new Date(order.created_at), "yyyy-MM-dd HH:mm"),
-          amount: `₹${order.total_price.toLocaleString()}`,
-          status: order.status,
-          items: order.items || [],
-        }));
-
-        setOrders(mappedOrders);
-        setFilteredOrders(mappedOrders);
-      }
-      setLoading(false);
-    };
-
     fetchOrders();
+
+    // Real-time subscription for orders table
+    const ordersSubscription = supabase
+      .channel("orders-channel")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ordersSubscription);
+    };
   }, []);
 
   // Apply filters and search
@@ -96,10 +107,10 @@ export default function OrdersPage() {
     if (searchQuery) {
       filtered = filtered.filter((order) => {
         const searchLower = searchQuery.toLowerCase();
-        const matchesBasic = 
+        const matchesBasic =
           order.id.toLowerCase().includes(searchLower) ||
           order.customer.toLowerCase().includes(searchLower);
-        
+
         // Search through items
         const matchesItems = order.items.some((orderItem) =>
           orderItem.item.name.toLowerCase().includes(searchLower)
@@ -158,10 +169,41 @@ export default function OrdersPage() {
     }
   };
 
-  const handleReset = () => {
+  // Reset and refetch data
+  const handleReset = async () => {
     setFilterStatus("all");
     setSearchQuery("");
     setCurrentPage(1);
+    await fetchOrders(); // Refetch data from Supabase
+  };
+
+  // Export Orders as CSV
+  const handleExportOrders = () => {
+    const headers = ["Order ID", "Customer", "Date & Time", "Items", "Quantity", "Amount", "Status"];
+    const csvRows = [
+      headers.join(","), // Header row
+      ...filteredOrders.map((order) =>
+        [
+          order.id,
+          `"${order.customer}"`, // Wrap in quotes to handle commas
+          order.date,
+          `"${getItemNames(order.items)}"`, // Wrap in quotes to handle commas
+          getTotalQuantity(order.items),
+          order.amount.replace("₹", ""), // Remove ₹ symbol
+          order.status,
+        ].join(",")
+      ),
+    ];
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `orders_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Helper to truncate Order ID to 8 characters
@@ -195,7 +237,10 @@ export default function OrdersPage() {
           <p className="text-amber-700">View and manage all customer orders</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button className="bg-amber-800 hover:bg-amber-700 text-white">
+          <Button
+            className="bg-amber-800 hover:bg-amber-700 text-white"
+            onClick={handleExportOrders}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Orders
           </Button>
