@@ -21,8 +21,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Pencil, Trash2, Plus, Search, Filter, RefreshCcw } from "lucide-react";
 
-// Define the RawMenuItem interface for data directly from the database
-interface RawMenuItem {
+// Define the MenuItem interface (status removed)
+interface MenuItem {
   id: number;
   name: string;
   description: string;
@@ -36,16 +36,10 @@ interface RawMenuItem {
   updated_at: string;
 }
 
-// Define the MenuItem interface with the derived status field
-interface MenuItem extends RawMenuItem {
-  status: string; // Derived: "active" if created_at or updated_at within 30 days, else "inactive"
-}
-
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [filterCategory, setFilterCategory] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // State for Add dialog
@@ -56,7 +50,6 @@ export default function MenuPage() {
     price: "",
     description: "",
     image: "",
-    status: "active",
     popular: false,
     new: false,
     chef_special: false,
@@ -78,19 +71,8 @@ export default function MenuPage() {
         return;
       }
 
-      // Process status (active if created_at or updated_at within 30 days)
-      const processedItems = data.map((item: RawMenuItem) => {
-        const lastActivity = new Date(item.updated_at) > new Date(item.created_at)
-          ? item.updated_at
-          : item.created_at;
-        const status = new Date(lastActivity) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          ? "active"
-          : "inactive";
-        return { ...item, status };
-      });
-
-      setMenuItems(processedItems);
-      setFilteredItems(processedItems);
+      setMenuItems(data);
+      setFilteredItems(data);
       setLoading(false);
     };
 
@@ -113,18 +95,8 @@ export default function MenuPage() {
             return;
           }
 
-          const processedItems = data.map((item: RawMenuItem) => {
-            const lastActivity = new Date(item.updated_at) > new Date(item.created_at)
-              ? item.updated_at
-              : item.created_at;
-            const status = new Date(lastActivity) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-              ? "active"
-              : "inactive";
-            return { ...item, status };
-          });
-
-          setMenuItems(processedItems);
-          setFilteredItems(processedItems);
+          setMenuItems(data);
+          setFilteredItems(data);
         }
       )
       .subscribe();
@@ -144,11 +116,6 @@ export default function MenuPage() {
       filtered = filtered.filter((item) => item.category === filterCategory);
     }
 
-    // Filter by status
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((item) => item.status === filterStatus);
-    }
-
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter((item) =>
@@ -157,22 +124,10 @@ export default function MenuPage() {
     }
 
     setFilteredItems(filtered);
-  }, [filterCategory, filterStatus, searchQuery, menuItems]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800 hover:bg-green-200";
-      case "inactive":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
-    }
-  };
+  }, [filterCategory, searchQuery, menuItems]);
 
   const handleReset = () => {
     setFilterCategory("all");
-    setFilterStatus("all");
     setSearchQuery("");
   };
 
@@ -212,7 +167,6 @@ export default function MenuPage() {
       price: "",
       description: "",
       image: "",
-      status: "active",
       popular: false,
       new: false,
       chef_special: false,
@@ -369,23 +323,6 @@ export default function MenuPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">
-                  Status
-                </Label>
-                <Select
-                  value={newItem.status}
-                  onValueChange={(value) => setNewItem({ ...newItem, status: value })}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="popular" className="text-right">
                   Popular
                 </Label>
@@ -448,7 +385,6 @@ export default function MenuPage() {
                     price: "",
                     description: "",
                     image: "",
-                    status: "active",
                     popular: false,
                     new: false,
                     chef_special: false,
@@ -501,17 +437,6 @@ export default function MenuPage() {
             </SelectContent>
           </Select>
 
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[180px] border-amber-200">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-
           <Button variant="outline" className="border-amber-200">
             <Filter className="h-4 w-4 mr-2" />
             More Filters
@@ -534,7 +459,6 @@ export default function MenuPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Popular</TableHead>
                 <TableHead>New</TableHead>
                 <TableHead>Chef Special</TableHead>
@@ -544,7 +468,7 @@ export default function MenuPage() {
             <TableBody>
               {filteredItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-amber-600">
+                  <TableCell colSpan={8} className="text-center text-amber-600">
                     No menu items found.
                   </TableCell>
                 </TableRow>
@@ -555,11 +479,6 @@ export default function MenuPage() {
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.category}</TableCell>
                     <TableCell>₹{item.price}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(item.status)} variant="outline">
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                      </Badge>
-                    </TableCell>
                     <TableCell>
                       {item.popular ? (
                         <Badge className="bg-amber-100 text-amber-800" variant="outline">
