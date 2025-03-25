@@ -131,48 +131,55 @@ export default function MenuPage() {
     setSearchQuery("");
   };
 
-  // Handle adding a new item
   const handleAddItem = async () => {
     const { name, category, price, description, image, popular, new: isNew, chef_special } = newItem;
-
+  
     // Validation
-    if (!name || !category || !price || !description) {
-      alert("Please fill in all required fields (Name, Category, Price, Description).");
+    if (!name || !category || isNaN(parseInt(price)) || !description) {
+      alert("Please fill in all required fields (Name, Category, Price, Description) with valid values.");
       return false;
     }
-
-    const { error } = await supabase
-      .from("menu_items")
-      .insert({
+  
+    try {
+      const payload = {
         name,
         category,
         price: parseInt(price),
         description,
-        image: image || "/default.jpeg", // Fallback image if none provided
+        image: image || "/default.jpeg",
         popular,
         new: isNew,
         chef_special,
+      };
+      console.log("Insert payload:", payload); // Debug payload
+  
+      const { error } = await supabase.from("menu_items").insert(payload);
+  
+      if (error) {
+        console.error("Error adding menu item:", error.message, error.details, error.hint);
+        alert(`Failed to add menu item: ${error.message}`);
+        return false;
+      }
+  
+      // Reset the form
+      setNewItem({
+        name: "",
+        category: "",
+        price: "",
+        description: "",
+        image: "",
+        popular: false,
+        new: false,
+        chef_special: false,
       });
-
-    if (error) {
-      console.error("Error adding menu item:", error);
-      alert("Failed to add menu item. Please try again.");
+  
+      alert("Menu item added successfully!");
+      return true;
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      alert("An unexpected error occurred. Please try again.");
       return false;
     }
-
-    // Reset the form
-    setNewItem({
-      name: "",
-      category: "",
-      price: "",
-      description: "",
-      image: "",
-      popular: false,
-      new: false,
-      chef_special: false,
-    });
-
-    return true;
   };
 
   // Handle editing an item
