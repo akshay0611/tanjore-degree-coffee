@@ -25,7 +25,40 @@ export default function AdminSidebar({ activeSection }: AdminSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [fullName, setFullName] = useState<string>("Admin"); // State for full name
+  const [initials, setInitials] = useState<string>("AU"); // State for initials
   const router = useRouter();
+
+  // Fetch the admin's full name from Supabase
+  useEffect(() => {
+    const fetchFullName = async () => {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        console.error("Error fetching user:", userError);
+        router.push("/");
+        return;
+      }
+
+      const userId = userData.user.id;
+      const { data, error } = await supabase
+        .from("profiles") // Fetch from "profiles" table
+        .select("full_name")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching full name:", error);
+        return;
+      }
+
+      if (data?.full_name) {
+        setFullName(data.full_name);
+        setInitials(data.full_name.slice(0, 2).toUpperCase());
+      }
+    };
+
+    fetchFullName();
+  }, [router]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -178,10 +211,10 @@ export default function AdminSidebar({ activeSection }: AdminSidebarProps) {
           <>
             <div className="flex items-center mb-4">
               <div className="h-10 w-10 rounded-full bg-amber-800 flex items-center justify-center mr-3">
-                <span className="text-amber-100 font-medium">AR</span>
+                <span className="text-amber-100 font-medium">{initials}</span>
               </div>
               <div>
-                <p className="text-amber-100 font-medium">Admin Rajesh</p>
+                <p className="text-amber-100 font-medium">{fullName}</p>
                 <p className="text-amber-400 text-sm">Super Admin</p>
               </div>
             </div>

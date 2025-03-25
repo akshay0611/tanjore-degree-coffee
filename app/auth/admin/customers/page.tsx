@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,117 +17,193 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Search, Filter, RefreshCcw, Download, Eye, Mail, Phone } from "lucide-react";
+import { format, subDays, isAfter } from "date-fns";
 
+// Define the Customer interface
 interface Customer {
-  id: number;
-  name: string;
+  id: string; // UUID from profiles
+  name: string; // full_name from profiles
+  email: string; // email from profiles
+  phone: string; // phone from profiles
+  orders: number; // Count of delivered orders from orders table
+  totalSpent: string; // Sum of total_price from delivered orders
+  lastOrder: string; // Most recent created_at from orders table
+  status: string; // "active" or "inactive" based on last order date
+  type: string; // "vip" or "regular" based on totalSpent
+}
+
+// Define the Profile interface (from profiles table)
+interface Profile {
+  id: string;
+  full_name: string;
   email: string;
   phone: string;
-  orders: number;
-  totalSpent: string;
-  lastOrder: string;
+}
+
+// Define the OrderItem interface (for items in an order)
+interface OrderItem {
+  item: {
+    id: number;
+    name: string;
+    image: string;
+    price: number;
+    category: string;
+    description: string;
+  };
+  quantity: number;
+}
+
+// Define the Order interface (from orders table)
+interface Order {
+  id: string;
+  name: string;
+  created_at: string;
+  total_price: number;
   status: string;
-  type: string;
+  items: OrderItem[]; // Replaced 'any[]' with 'OrderItem[]'
 }
 
 export default function CustomersPage() {
-  const [customers] = useState<Customer[]>([
-    {
-      id: 1,
-      name: "Ramesh Kumar",
-      email: "ramesh@example.com",
-      phone: "+91 98765 43210",
-      orders: 12,
-      totalSpent: "₹5,480",
-      lastOrder: "2023-07-31",
-      status: "active",
-      type: "regular",
-    },
-    {
-      id: 2,
-      name: "Priya Venkatesh",
-      email: "priya@example.com",
-      phone: "+91 87654 32109",
-      orders: 8,
-      totalSpent: "₹3,240",
-      lastOrder: "2023-07-29",
-      status: "active",
-      type: "vip",
-    },
-    {
-      id: 3,
-      name: "Arun Nair",
-      email: "arun@example.com",
-      phone: "+91 76543 21098",
-      orders: 5,
-      totalSpent: "₹1,950",
-      lastOrder: "2023-07-25",
-      status: "active",
-      type: "regular",
-    },
-    {
-      id: 4,
-      name: "Lakshmi Narayan",
-      email: "lakshmi@example.com",
-      phone: "+91 65432 10987",
-      orders: 15,
-      totalSpent: "₹7,320",
-      lastOrder: "2023-07-30",
-      status: "active",
-      type: "vip",
-    },
-    {
-      id: 5,
-      name: "Karthik Subramanian",
-      email: "karthik@example.com",
-      phone: "+91 54321 09876",
-      orders: 3,
-      totalSpent: "₹1,120",
-      lastOrder: "2023-07-20",
-      status: "inactive",
-      type: "regular",
-    },
-    {
-      id: 6,
-      name: "Meena Iyer",
-      email: "meena@example.com",
-      phone: "+91 43210 98765",
-      orders: 7,
-      totalSpent: "₹2,890",
-      lastOrder: "2023-07-28",
-      status: "active",
-      type: "regular",
-    },
-    {
-      id: 7,
-      name: "Rajesh Sharma",
-      email: "rajesh@example.com",
-      phone: "+91 32109 87654",
-      orders: 10,
-      totalSpent: "₹4,560",
-      lastOrder: "2023-07-27",
-      status: "active",
-      type: "vip",
-    },
-    {
-      id: 8,
-      name: "Ananya Patel",
-      email: "ananya@example.com",
-      phone: "+91 21098 76543",
-      orders: 4,
-      totalSpent: "₹1,780",
-      lastOrder: "2023-07-22",
-      status: "active",
-      type: "regular",
-    },
-  ]);
-
-  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>(customers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const customersPerPage = 5;
+
+  // Fetch customers and orders, and set up real-time subscriptions
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
+      // Fetch all profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, phone");
+
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch all orders (only delivered)
+      const { data: ordersData, error: ordersError } = await supabase
+        .from("orders")
+        .select("id, name, created_at, total_price, status, items")
+        .eq("status", "delivered"); // Filter for delivered orders
+
+      if (ordersError) {
+        console.error("Error fetching orders:", ordersError);
+        setLoading(false);
+        return;
+      }
+
+      // Process data to create customers list
+      const customersList = processCustomers(profilesData || [], ordersData || []);
+      setCustomers(customersList);
+      setFilteredCustomers(customersList);
+      setLoading(false);
+    };
+
+    fetchData();
+
+    // Set up real-time subscription for profiles table
+    const profilesSubscription = supabase
+      .channel("profiles-channel")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles" },
+        async () => { // Removed unused 'payload' parameter
+          const { data: ordersData } = await supabase
+            .from("orders")
+            .select("id, name, created_at, total_price, status, items")
+            .eq("status", "delivered");
+
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, full_name, email, phone");
+
+          const updatedCustomers = processCustomers(profilesData || [], ordersData || []);
+          setCustomers(updatedCustomers);
+          setFilteredCustomers(updatedCustomers);
+        }
+      )
+      .subscribe();
+
+    // Set up real-time subscription for orders table
+    const ordersSubscription = supabase
+      .channel("orders-channel")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        async () => { // Removed unused 'payload' parameter
+          const { data: ordersData } = await supabase
+            .from("orders")
+            .select("id, name, created_at, total_price, status, items")
+            .eq("status", "delivered");
+
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, full_name, email, phone");
+
+          const updatedCustomers = processCustomers(profilesData || [], ordersData || []);
+          setCustomers(updatedCustomers);
+          setFilteredCustomers(updatedCustomers);
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscriptions on unmount
+    return () => {
+      supabase.removeChannel(profilesSubscription);
+      supabase.removeChannel(ordersSubscription);
+    };
+  }, []);
+
+  // Process profiles and orders to create the customers list
+  const processCustomers = (profiles: Profile[], orders: Order[]): Customer[] => {
+    return profiles.map((profile) => {
+      // Filter orders for this customer (match by name)
+      const customerOrders = orders.filter((order) => order.name === profile.full_name);
+
+      // Calculate orders count (delivered orders only)
+      const ordersCount = customerOrders.length;
+
+      // Calculate total spent (delivered orders only)
+      const totalSpent = customerOrders.reduce((sum, order) => sum + order.total_price, 0);
+
+      // Determine last order date (from delivered orders)
+      const lastOrderDate = customerOrders.length
+        ? customerOrders.reduce((latest, order) =>
+            new Date(order.created_at) > new Date(latest.created_at) ? order : latest
+          ).created_at
+        : null;
+
+      // Determine status (active if last order within 30 days)
+      const status =
+        lastOrderDate && isAfter(new Date(lastOrderDate), subDays(new Date(), 30))
+          ? "active"
+          : "inactive";
+
+      // Determine type (VIP if totalSpent > ₹5,000)
+      const type = totalSpent > 5000 ? "vip" : "regular";
+
+      return {
+        id: profile.id,
+        name: profile.full_name || "Unknown",
+        email: profile.email || "N/A",
+        phone: profile.phone || "N/A",
+        orders: ordersCount,
+        totalSpent: `₹${totalSpent.toLocaleString()}`,
+        lastOrder: lastOrderDate ? format(new Date(lastOrderDate), "yyyy-MM-dd") : "N/A",
+        status,
+        type,
+      };
+    });
+  };
 
   // Apply filters and search
   useEffect(() => {
@@ -190,6 +267,10 @@ export default function CustomersPage() {
     setSearchQuery("");
     setCurrentPage(1);
   };
+
+  if (loading) {
+    return <div className="p-4 text-amber-600">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -282,9 +363,9 @@ export default function CustomersPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedCustomers.map((customer) => (
+                paginatedCustomers.map((customer, index) => (
                   <TableRow key={customer.id}>
-                    <TableCell>{customer.id}</TableCell>
+                    <TableCell>{index + 1 + (currentPage - 1) * customersPerPage}</TableCell>
                     <TableCell className="font-medium">{customer.name}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">

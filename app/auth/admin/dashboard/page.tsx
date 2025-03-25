@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import RecentOrders from "../RecentOrders";
 import PopularItems from "../PopularItems";
-import SalesChart from "../SalesChart"; // Import the new SalesChart component
+import SalesChart from "../SalesChart";
 import { subDays, subWeeks, subMonths, subYears, startOfDay, startOfWeek, startOfMonth, startOfYear, format } from "date-fns";
 
 // Define the structure of the item details inside an OrderItem
@@ -53,8 +53,38 @@ interface DashboardStats {
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState("month");
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [startDate, setStartDate] = useState<Date>(startOfMonth(new Date())); // Initialize startDate
+  const [startDate, setStartDate] = useState<Date>(startOfMonth(new Date()));
   const [loading, setLoading] = useState(true);
+  const [fullName, setFullName] = useState<string>("Admin");
+
+  // Fetch the admin's full name from Supabase
+  useEffect(() => {
+    const fetchFullName = async () => {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        console.error("Error fetching user:", userError);
+        return;
+      }
+
+      const userId = userData.user.id;
+      const { data, error } = await supabase
+        .from("profiles") // Changed from "users" to "profiles" to match AdminHeader
+        .select("full_name")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching full name:", error);
+        return;
+      }
+
+      if (data?.full_name) {
+        setFullName(data.full_name);
+      }
+    };
+
+    fetchFullName();
+  }, []);
 
   // Calculate the date range for the current and previous periods
   const getDateRange = (range: string) => {
@@ -94,17 +124,14 @@ export default function DashboardPage() {
 
       const { startCurrent, startPrevious } = getDateRange(dateRange);
 
-      // Update startDate for the SalesChart
       setStartDate(startCurrent);
 
-      // Fetch orders for the current period (only delivered orders)
       const { data: currentOrders, error: currentError } = await supabase
         .from("orders")
         .select("id, name, created_at, total_price, status, items")
         .gte("created_at", startCurrent.toISOString())
         .eq("status", "delivered");
 
-      // Fetch orders for the previous period (only delivered orders)
       const { data: previousOrders, error: previousError } = await supabase
         .from("orders")
         .select("id, name, created_at, total_price, status, items")
@@ -128,11 +155,9 @@ export default function DashboardPage() {
         return;
       }
 
-      // Calculate stats for the current period
       const currentStats = calculateStats(currentOrders || []);
       const previousStats = calculateStats(previousOrders || []);
 
-      // Calculate percentage changes
       const revenueChange = previousStats.totalRevenue
         ? ((currentStats.totalRevenue - previousStats.totalRevenue) / previousStats.totalRevenue) * 100
         : 0;
@@ -163,13 +188,11 @@ export default function DashboardPage() {
     fetchStats();
   }, [dateRange]);
 
-  // Function to calculate stats from a list of orders
   const calculateStats = (orders: Order[]) => {
     const totalRevenue = orders.reduce((sum, order) => sum + order.total_price, 0);
     const totalOrders = orders.length;
     const uniqueCustomers = new Set(orders.map((order) => order.name)).size;
 
-    // Calculate coffee sold (items with category including "coffee")
     let coffeeSold = 0;
     orders.forEach((order) => {
       order.items.forEach((orderItem) => {
@@ -197,7 +220,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-amber-900 custom-serif">Dashboard</h1>
-          <p className="text-amber-700">Welcome back, Admin Rajesh</p>
+          <p className="text-amber-700">Welcome back, {fullName}</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -212,7 +235,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-6">
@@ -331,13 +353,12 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Sales Chart */}
       <Card className="col-span-4">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl text-amber-900">Sales Overview</CardTitle>
-              <CardDescription className="text-amber-600">Monitor your sales performance over time</CardDescription>
+              <CardDescription className="text-amber-600">Monitor your sales performance over time (delivered orders only)</CardDescription>
             </div>
             <Tabs defaultValue="month" value={dateRange} onValueChange={setDateRange}>
               <TabsList className="bg-amber-100">
@@ -362,13 +383,12 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Orders and Popular Items */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-amber-900">Recent Orders</CardTitle>
             <CardDescription className="text-amber-600">
-              Latest 10 orders from customers 
+              Latest 10 orders from customers (includes all statuses; stats above reflect delivered orders only)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -379,7 +399,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-amber-900">Popular Items</CardTitle>
-            <CardDescription className="text-amber-600">Most ordered items this month</CardDescription>
+            <CardDescription className="text-amber-600">Most ordered items this month (delivered orders only)</CardDescription>
           </CardHeader>
           <CardContent>
             <PopularItems />
