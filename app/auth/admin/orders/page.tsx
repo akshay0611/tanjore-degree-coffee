@@ -1,4 +1,3 @@
-// app/auth/admin/orders/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -95,11 +94,19 @@ export default function OrdersPage() {
     }
 
     if (searchQuery) {
-      filtered = filtered.filter(
-        (order) =>
-          order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.customer.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      filtered = filtered.filter((order) => {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesBasic = 
+          order.id.toLowerCase().includes(searchLower) ||
+          order.customer.toLowerCase().includes(searchLower);
+        
+        // Search through items
+        const matchesItems = order.items.some((orderItem) =>
+          orderItem.item.name.toLowerCase().includes(searchLower)
+        );
+
+        return matchesBasic || matchesItems;
+      });
     }
 
     setFilteredOrders(filtered);
@@ -159,14 +166,19 @@ export default function OrdersPage() {
 
   // Helper to truncate Order ID to 8 characters
   const truncateOrderId = (id: string) => {
-    return id.length > 8 ? `${id.slice(0, 8)}...` : id;
+    return id.length > 8 ? `${id.slice(0, 8)}` : id;
   };
 
   // Helper to get item names for display in the table
   const getItemNames = (items: OrderItem[]) => {
     if (items.length === 0) return "No items";
     const names = items.map((orderItem) => orderItem.item.name).join(", ");
-    return names.length > 50 ? `${names.slice(0, 50)}...` : names; // Truncate long lists
+    return names.length > 50 ? `${names.slice(0, 50)}...` : names;
+  };
+
+  // Helper to get total quantity of items
+  const getTotalQuantity = (items: OrderItem[]) => {
+    return items.reduce((sum, orderItem) => sum + orderItem.quantity, 0);
   };
 
   if (loading) {
@@ -196,7 +208,7 @@ export default function OrdersPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
           <Input
             type="search"
-            placeholder="Search orders by ID, customer..."
+            placeholder="Search by ID, customer, or items..."
             className="pl-10 border-amber-200"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -235,6 +247,7 @@ export default function OrdersPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Date & Time</TableHead>
                 <TableHead>Items</TableHead>
+                <TableHead>Quantity</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -243,7 +256,7 @@ export default function OrdersPage() {
             <TableBody>
               {paginatedOrders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-amber-600">
+                  <TableCell colSpan={8} className="text-center text-amber-600">
                     No orders found.
                   </TableCell>
                 </TableRow>
@@ -254,6 +267,7 @@ export default function OrdersPage() {
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{order.date}</TableCell>
                     <TableCell>{getItemNames(order.items)}</TableCell>
+                    <TableCell>{getTotalQuantity(order.items)}</TableCell>
                     <TableCell>{order.amount}</TableCell>
                     <TableCell>
                       <Select
