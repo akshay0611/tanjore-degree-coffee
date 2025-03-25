@@ -15,6 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Eye, Download, Filter, Search, RefreshCcw } from "lucide-react";
 import { format } from "date-fns";
 
@@ -51,6 +52,7 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const ordersPerPage = 10;
 
   // Fetch orders from Supabase
@@ -155,6 +157,18 @@ export default function OrdersPage() {
     setCurrentPage(1);
   };
 
+  // Helper to truncate Order ID to 8 characters
+  const truncateOrderId = (id: string) => {
+    return id.length > 8 ? `${id.slice(0, 8)}...` : id;
+  };
+
+  // Helper to get item names for display in the table
+  const getItemNames = (items: OrderItem[]) => {
+    if (items.length === 0) return "No items";
+    const names = items.map((orderItem) => orderItem.item.name).join(", ");
+    return names.length > 50 ? `${names.slice(0, 50)}...` : names; // Truncate long lists
+  };
+
   if (loading) {
     return <div className="p-4 text-amber-600">Loading...</div>;
   }
@@ -236,10 +250,10 @@ export default function OrdersPage() {
               ) : (
                 paginatedOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell className="font-medium">{truncateOrderId(order.id)}</TableCell>
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{order.date}</TableCell>
-                    <TableCell>{order.items.length} items</TableCell>
+                    <TableCell>{getItemNames(order.items)}</TableCell>
                     <TableCell>{order.amount}</TableCell>
                     <TableCell>
                       <Select
@@ -259,10 +273,49 @@ export default function OrdersPage() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="h-8 text-amber-700">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-amber-700"
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </DialogTrigger>
+                        {selectedOrder && selectedOrder.id === order.id && (
+                          <DialogContent className="sm:max-w-[600px]">
+                            <DialogHeader>
+                              <DialogTitle>Order Details - {order.id}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <p><strong>Customer:</strong> {order.customer}</p>
+                                <p><strong>Date:</strong> {order.date}</p>
+                                <p><strong>Total Amount:</strong> {order.amount}</p>
+                                <p><strong>Status:</strong> {order.status.charAt(0).toUpperCase() + order.status.slice(1)}</p>
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-amber-900">Items</h3>
+                                {order.items.length > 0 ? (
+                                  <ul className="space-y-2">
+                                    {order.items.map((orderItem, index) => (
+                                      <li key={index} className="flex justify-between">
+                                        <span>{orderItem.item.name} (x{orderItem.quantity})</span>
+                                        <span>₹{orderItem.item.price * orderItem.quantity}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p>No items in this order.</p>
+                                )}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        )}
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 ))
