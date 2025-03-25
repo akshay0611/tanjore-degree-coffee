@@ -1,12 +1,56 @@
-import { Coffee, Utensils, Cake, ChevronRight, Star } from "lucide-react"
-import { Button } from "@/components/ui/button"
+// app/menu/page.tsx
+import { Coffee, Utensils, Cake, ChevronRight, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Link from 'next/link';
+import Link from "next/link";
+import { supabase } from "@/lib/supabase/client";// Adjust path based on your setup
 
-export default function MenuPage() {
+// Define the shape of a menu item
+interface MenuItem {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  popular: boolean;
+  new: boolean;
+  chef_special: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Fetch data from Supabase
+async function fetchMenuItems() {
+  const { data, error } = await supabase
+    .from("menu_items")
+    .select("*")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching menu items:", error);
+    return [];
+  }
+
+  return data as MenuItem[];
+}
+
+export default async function MenuPage() {
+  const menuItems = await fetchMenuItems();
+
+  // Group items by category for display
+  const categories = {
+    "coffee-specialties": menuItems.filter((item) => item.category === "coffee-specialties"),
+    "traditional-brews": menuItems.filter((item) => item.category === "traditional-brews"),
+    "contemporary-coffees": menuItems.filter((item) => item.category === "contemporary-coffees"),
+    "south-indian-snacks": menuItems.filter((item) => item.category === "south-indian-snacks"),
+    "desserts": menuItems.filter((item) => item.category === "desserts"),
+    "customer-favorites": menuItems.filter((item) => item.popular), // Example: popular items as favorites
+  };
+
   return (
     <div className="pt-20">
-    
+      {/* Hero Section */}
       <section className="relative py-24 bg-amber-950">
         <div className="absolute inset-0 z-0 opacity-20">
           <div
@@ -29,6 +73,7 @@ export default function MenuPage() {
         </div>
       </section>
 
+      {/* Category Navigation */}
       <section className="sticky top-20 z-30 bg-amber-900 shadow-md">
         <div className="container px-4 mx-auto">
           <div className="flex overflow-x-auto py-4 gap-4 no-scrollbar">
@@ -47,6 +92,7 @@ export default function MenuPage() {
         </div>
       </section>
 
+      {/* Coffee Specialties */}
       <section id="coffee-specialties" className="py-20 bg-amber-50">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -59,61 +105,30 @@ export default function MenuPage() {
               Our signature coffee preparations that have delighted customers for generations
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                name: "Tanjore Degree Coffee",
-                description:
-                  "Our signature coffee made with traditional decoction and farm-fresh milk heated to the perfect 'degree'.",
-                price: "₹80",
-                image: "/mp1.jpeg",
-                popular: true,
-              },
-              {
-                name: "Royal Mysore Coffee",
-                description:
-                  "A special blend inspired by the royal courts of Mysore, with a hint of cardamom and chicory.",
-                price: "₹90",
-                image: "/mp2.jpeg",
-              },
-              {
-                name: "Kumbakonam Degree Coffee",
-                description: "A tribute to the famous Kumbakonam style, with a stronger decoction and creamy milk.",
-                price: "₹85",
-                image: "/mp3.jpeg",
-                popular: true,
-              },
-              {
-                name: "Temple Town Special",
-                description:
-                  "A unique blend that pays homage to the temple towns of Tamil Nadu, with a rich aroma and smooth finish.",
-                price: "₹95",
-                image: "/mp4.jpeg",
-              },
-            ].map((item, index) => (
+            {categories["coffee-specialties"].map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="flex bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <div className="w-1/3 relative overflow-hidden">
-  <Image
-    src={item.image || "/placeholder.svg"}
-    alt={item.name}
-    width={500}
-    height={500}
-    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-  />
-  {item.popular && (
-    <div className="absolute top-4 left-0 bg-amber-600 text-amber-50 px-3 py-1 text-sm font-medium">
-      Popular
-    </div>
-  )}
-</div>
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {item.popular && (
+                    <div className="absolute top-4 left-0 bg-amber-600 text-amber-50 px-3 py-1 text-sm font-medium">
+                      Popular
+                    </div>
+                  )}
+                </div>
                 <div className="w-2/3 p-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xl font-bold text-amber-900">{item.name}</h3>
-                    <span className="text-lg font-bold text-amber-700">{item.price}</span>
+                    <span className="text-lg font-bold text-amber-700">₹{item.price}</span>
                   </div>
                   <p className="text-gray-600 mb-4">{item.description}</p>
                   <Button variant="ghost" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 p-0 h-auto">
@@ -126,7 +141,7 @@ export default function MenuPage() {
         </div>
       </section>
 
-    
+      {/* Traditional Brews */}
       <section id="traditional-brews" className="py-20 bg-white">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -139,64 +154,26 @@ export default function MenuPage() {
               Classic South Indian coffee preparations made with authentic methods
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Filter Coffee",
-                description: "Classic South Indian filter coffee served in traditional davara-tumbler.",
-                price: "₹60",
-                image: "/mp5.jpeg",
-              },
-              {
-                name: "Chukku Kaapi",
-                description: "Traditional coffee with dry ginger and warming spices.",
-                price: "₹75",
-                image: "/mp6.jpeg",
-              },
-              {
-                name: "Bella Coffee",
-                description: "Coffee sweetened with jaggery instead of sugar for a rich flavor.",
-                price: "₹70",
-                image: "/mp7.jpeg",
-              },
-              {
-                name: "Sukku Coffee",
-                description: "Medicinal coffee with dry ginger, pepper and palm jaggery.",
-                price: "₹80",
-                image: "/mp8.jpeg",
-              },
-              {
-                name: "Paruthi Paal Coffee",
-                description: "A unique coffee made with cotton seed milk, a traditional Tamil delicacy.",
-                price: "₹85",
-                image: "/mp9.jpeg",
-              },
-              {
-                name: "Inji Kaapi",
-                description: "Ginger-infused coffee that's perfect for rainy days.",
-                price: "₹75",
-                image: "/mp10.jpeg",
-              },
-            ].map((item, index) => (
+            {categories["traditional-brews"].map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="bg-amber-50 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <div className="relative h-48 overflow-hidden group">
-  <Image
-    src={item.image || "/placeholder.svg"}
-    alt={item.name}
-    width={400} 
-    height={192} 
-    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-  />
-  <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-</div>
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={400}
+                    height={192}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xl font-bold text-amber-900">{item.name}</h3>
-                    <span className="text-lg font-bold text-amber-700">{item.price}</span>
+                    <span className="text-lg font-bold text-amber-700">₹{item.price}</span>
                   </div>
                   <p className="text-gray-600 mb-4">{item.description}</p>
                   <Button variant="ghost" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 p-0 h-auto">
@@ -209,7 +186,7 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
+      {/* Contemporary Coffees */}
       <section id="contemporary-coffees" className="py-20 bg-amber-900 text-white">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -222,58 +199,30 @@ export default function MenuPage() {
               Modern interpretations of classic coffee with innovative twists
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                name: "Coconut Cold Brew",
-                description: "Cold brewed coffee with coconut water and a hint of cardamom.",
-                price: "₹120",
-                image: "/mp11.jpeg",
-                new: true,
-              },
-              {
-                name: "Spiced Mocha",
-                description: "Our signature coffee blended with chocolate and traditional Indian spices.",
-                price: "₹130",
-                image: "/mp12.jpeg",
-              },
-              {
-                name: "Rose Cardamom Latte",
-                description: "A fragrant latte infused with rose petals and cardamom.",
-                price: "₹140",
-                image: "/mp13.jpeg",
-                new: true,
-              },
-              {
-                name: "Mango Coffee Smoothie",
-                description: "Seasonal delight with fresh mangoes and our cold brew coffee.",
-                price: "₹150",
-                image: "/mp14.jpeg",
-              },
-            ].map((item, index) => (
+            {categories["contemporary-coffees"].map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="flex bg-amber-800/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
-               <div className="w-1/3 relative overflow-hidden group">
-  <Image
-    src={item.image || "/placeholder.svg"}
-    alt={item.name}
-    width={300} 
-    height={300}
-    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-  />
-  {item.new && (
-    <div className="absolute top-4 left-0 bg-amber-500 text-amber-950 px-3 py-1 text-sm font-medium">
-      New
-    </div>
-  )}
-</div>
+                <div className="w-1/3 relative overflow-hidden group">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={300}
+                    height={300}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {item.new && (
+                    <div className="absolute top-4 left-0 bg-amber-500 text-amber-950 px-3 py-1 text-sm font-medium">
+                      New
+                    </div>
+                  )}
+                </div>
                 <div className="w-2/3 p-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xl font-bold text-amber-100">{item.name}</h3>
-                    <span className="text-lg font-bold text-amber-300">{item.price}</span>
+                    <span className="text-lg font-bold text-amber-300">₹{item.price}</span>
                   </div>
                   <p className="text-amber-200 mb-4">{item.description}</p>
                   <Button
@@ -289,7 +238,7 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
+      {/* South Indian Snacks */}
       <section id="south-indian-snacks" className="py-20 bg-amber-50">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -302,64 +251,26 @@ export default function MenuPage() {
               Perfect accompaniments to enhance your coffee experience
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Crispy Vada",
-                description: "Traditional savory donut made with urad dal, served with coconut chutney.",
-                price: "₹60",
-                image: "/mp15.jpeg",
-              },
-              {
-                name: "Butter Mysore Pak",
-                description: "Melt-in-your-mouth sweet made with gram flour, ghee and sugar.",
-                price: "₹70",
-                image: "/mp16.jpeg",
-              },
-              {
-                name: "Mini Idli Sambar",
-                description: "Bite-sized steamed rice cakes served with flavorful lentil soup.",
-                price: "₹80",
-                image: "/mp17.jpeg",
-              },
-              {
-                name: "Crispy Masala Dosa",
-                description: "Thin rice crepe filled with spiced potato filling, served with chutneys.",
-                price: "₹90",
-                image: "/mp18.jpeg",
-              },
-              {
-                name: "Chettinad Bun Parotta",
-                description: "Flaky layered bread served with aromatic Chettinad curry.",
-                price: "₹100",
-                image: "/mp19.jpeg",
-              },
-              {
-                name: "Filter Coffee Cookies",
-                description: "Our signature cookies infused with our special coffee blend.",
-                price: "₹65",
-                image: "/mp20.jpeg",
-              },
-            ].map((item, index) => (
+            {categories["south-indian-snacks"].map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <div className="relative h-48 overflow-hidden group">
-  <Image
-    src={item.image || "/placeholder.svg"}
-    alt={item.name}
-    layout="fill"
-    objectFit="cover"
-    className="transition-transform duration-700 group-hover:scale-110"
-  />
-  <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-</div>
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xl font-bold text-amber-900">{item.name}</h3>
-                    <span className="text-lg font-bold text-amber-700">{item.price}</span>
+                    <span className="text-lg font-bold text-amber-700">₹{item.price}</span>
                   </div>
                   <p className="text-gray-600 mb-4">{item.description}</p>
                   <Button variant="ghost" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 p-0 h-auto">
@@ -372,7 +283,7 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
+      {/* Desserts */}
       <section id="desserts" className="py-20 bg-white">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -385,58 +296,30 @@ export default function MenuPage() {
               Sweet treats to complement your coffee experience
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                name: "Coffee Payasam",
-                description: "Traditional South Indian pudding infused with our signature coffee blend.",
-                price: "₹110",
-                image: "/mp21.jpeg",
-                chef: true,
-              },
-              {
-                name: "Cardamom Coffee Cake",
-                description: "Moist cake with hints of cardamom and our special coffee.",
-                price: "₹95",
-                image: "/mp22.jpeg",
-              },
-              {
-                name: "Coffee Jaggery Ice Cream",
-                description: "Handcrafted ice cream made with our coffee and palm jaggery.",
-                price: "₹120",
-                image: "/mp23.jpeg",
-                chef: true,
-              },
-              {
-                name: "Coconut Coffee Ladoo",
-                description: "Traditional coconut sweet balls infused with our coffee.",
-                price: "₹85",
-                image: "/mp24.jpeg",
-              },
-            ].map((item, index) => (
+            {categories["desserts"].map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="flex bg-amber-50 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
-              <div className="w-1/3 relative overflow-hidden group">
-  <Image
-    src={item.image || "/placeholder.svg"}
-    alt={item.name}
-    width={300} 
-    height={300}
-    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-  />
-  {item.chef && (
-    <div className="absolute top-4 left-0 bg-amber-700 text-amber-50 px-3 py-1 text-sm font-medium">
-      Chef&apos;s Special
-    </div>
-  )}
-</div>
+                <div className="w-1/3 relative overflow-hidden group">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={300}
+                    height={300}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {item.chef_special && (
+                    <div className="absolute top-4 left-0 bg-amber-700 text-amber-50 px-3 py-1 text-sm font-medium">
+                      Chef&apos;s Special
+                    </div>
+                  )}
+                </div>
                 <div className="w-2/3 p-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xl font-bold text-amber-900">{item.name}</h3>
-                    <span className="text-lg font-bold text-amber-700">{item.price}</span>
+                    <span className="text-lg font-bold text-amber-700">₹{item.price}</span>
                   </div>
                   <p className="text-gray-600 mb-4">{item.description}</p>
                   <Button variant="ghost" className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 p-0 h-auto">
@@ -449,7 +332,7 @@ export default function MenuPage() {
         </div>
       </section>
 
-     
+      {/* Customer Favorites */}
       <section className="py-20 bg-amber-900 text-white">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
@@ -524,6 +407,7 @@ export default function MenuPage() {
         </div>
       </section>
 
+
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-amber-800 to-amber-900 text-white">
         <div className="container px-4 mx-auto">
@@ -535,26 +419,23 @@ export default function MenuPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-  <Link href="/order" passHref>
-    <Button 
-      className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg"
-    >
-      Order Online
-    </Button>
-  </Link>
-  <Link href="/book" passHref>
-    <Button
-      variant="outline"
-      className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
-    >
-      Book a Table
-    </Button>
-  </Link>
-</div>
+              <Link href="/order" passHref>
+                <Button className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg">
+                  Order Online
+                </Button>
+              </Link>
+              <Link href="/book" passHref>
+                <Button
+                  variant="outline"
+                  className="text-amber-800 bg-white hover:bg-amber-50 hover:text-amber-900 border-amber-400 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 transform hover:scale-105"
+                >
+                  Book a Table
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }
-
