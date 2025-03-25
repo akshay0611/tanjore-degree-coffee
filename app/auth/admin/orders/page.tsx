@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -67,14 +66,13 @@ export default function OrdersPage() {
         setOrders([]);
         setFilteredOrders([]);
       } else {
-        // Map the Supabase data to the Order interface
         const mappedOrders: Order[] = data.map((order) => ({
           id: order.id,
           customer: order.name,
           date: format(new Date(order.created_at), "yyyy-MM-dd HH:mm"),
           amount: `₹${order.total_price.toLocaleString()}`,
           status: order.status,
-          items: order.items || [], // Ensure items is an array
+          items: order.items || [],
         }));
 
         setOrders(mappedOrders);
@@ -90,12 +88,10 @@ export default function OrdersPage() {
   useEffect(() => {
     let filtered = orders;
 
-    // Filter by status
     if (filterStatus !== "all") {
       filtered = filtered.filter((order) => order.status === filterStatus);
     }
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (order) =>
@@ -105,8 +101,33 @@ export default function OrdersPage() {
     }
 
     setFilteredOrders(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [filterStatus, searchQuery, orders]);
+
+  // Function to update order status in Supabase
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus })
+      .eq("id", orderId);
+
+    if (error) {
+      console.error("Error updating order status:", error);
+      alert("Failed to update status. Please try again.");
+      return;
+    }
+
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+    setFilteredOrders((prevFiltered) =>
+      prevFiltered.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+  };
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
@@ -139,7 +160,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-amber-900 custom-serif">
@@ -147,7 +168,6 @@ export default function OrdersPage() {
           </h1>
           <p className="text-amber-700">View and manage all customer orders</p>
         </div>
-
         <div className="flex items-center gap-2">
           <Button className="bg-amber-800 hover:bg-amber-700 text-white">
             <Download className="h-4 w-4 mr-2" />
@@ -168,7 +188,6 @@ export default function OrdersPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
         <div className="flex flex-wrap gap-4">
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-[180px] border-amber-200">
@@ -181,12 +200,10 @@ export default function OrdersPage() {
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
-
           <Button variant="outline" className="border-amber-200">
             <Filter className="h-4 w-4 mr-2" />
             More Filters
           </Button>
-
           <Button variant="ghost" className="text-amber-700" onClick={handleReset}>
             <RefreshCcw className="h-4 w-4 mr-2" />
             Reset
@@ -206,7 +223,7 @@ export default function OrdersPage() {
                 <TableHead>Items</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -225,9 +242,21 @@ export default function OrdersPage() {
                     <TableCell>{order.items.length} items</TableCell>
                     <TableCell>{order.amount}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(order.status)} variant="outline">
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </Badge>
+                      <Select
+                        value={order.status}
+                        onValueChange={(newStatus) => updateOrderStatus(order.id, newStatus)}
+                      >
+                        <SelectTrigger className={`w-[120px] ${getStatusColor(order.status)}`}>
+                          <SelectValue>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="delivered">Delivered</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" className="h-8 text-amber-700">
