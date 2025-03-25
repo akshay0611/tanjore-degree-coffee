@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import RecentOrders from "../RecentOrders";
 import PopularItems from "../PopularItems";
+import SalesChart from "../SalesChart"; // Import the new SalesChart component
 import { subDays, subWeeks, subMonths, subYears, startOfDay, startOfWeek, startOfMonth, startOfYear, format } from "date-fns";
 
 // Define the structure of the item details inside an OrderItem
@@ -52,6 +53,7 @@ interface DashboardStats {
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState("month");
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [startDate, setStartDate] = useState<Date>(startOfMonth(new Date())); // Initialize startDate
   const [loading, setLoading] = useState(true);
 
   // Calculate the date range for the current and previous periods
@@ -92,20 +94,23 @@ export default function DashboardPage() {
 
       const { startCurrent, startPrevious } = getDateRange(dateRange);
 
-      // Fetch orders for the current period (only delivered/completed orders)
+      // Update startDate for the SalesChart
+      setStartDate(startCurrent);
+
+      // Fetch orders for the current period (only delivered orders)
       const { data: currentOrders, error: currentError } = await supabase
         .from("orders")
         .select("id, name, created_at, total_price, status, items")
         .gte("created_at", startCurrent.toISOString())
-        .eq("status", "delivered"); // Only count delivered (completed) orders
+        .eq("status", "delivered");
 
-      // Fetch orders for the previous period (only delivered/completed orders)
+      // Fetch orders for the previous period (only delivered orders)
       const { data: previousOrders, error: previousError } = await supabase
         .from("orders")
         .select("id, name, created_at, total_price, status, items")
         .gte("created_at", startPrevious.toISOString())
         .lt("created_at", startCurrent.toISOString())
-        .eq("status", "delivered"); // Only count delivered (completed) orders
+        .eq("status", "delivered");
 
       if (currentError || previousError) {
         console.error("Error fetching orders:", currentError || previousError);
@@ -151,6 +156,7 @@ export default function DashboardPage() {
         customersChange,
         coffeeSoldChange,
       });
+
       setLoading(false);
     };
 
@@ -325,7 +331,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Sales Chart Placeholder */}
+      {/* Sales Chart */}
       <Card className="col-span-4">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -352,9 +358,7 @@ export default function DashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-64 flex items-center justify-center text-amber-600">
-            Sales Chart Placeholder (Implement with Chart.js or Recharts)
-          </div>
+          <SalesChart dateRange={dateRange} startDate={startDate} />
         </CardContent>
       </Card>
 
@@ -363,7 +367,9 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-amber-900">Recent Orders</CardTitle>
-            <CardDescription className="text-amber-600">Latest 10 orders from customers</CardDescription>
+            <CardDescription className="text-amber-600">
+              Latest 10 orders from customers 
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <RecentOrders />
