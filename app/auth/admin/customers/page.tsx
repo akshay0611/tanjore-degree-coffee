@@ -1,4 +1,3 @@
-// app/auth/admin/customers/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,21 +17,27 @@ import {
 } from "@/components/ui/pagination";
 import { Search, Filter, RefreshCcw, Download, Eye, Mail, Phone } from "lucide-react";
 import { format, subDays, isAfter } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-// Define the Customer interface
+// Define interfaces (unchanged)
 interface Customer {
-  id: string; // UUID from profiles
-  name: string; // full_name from profiles
-  email: string; // email from profiles
-  phone: string; // phone from profiles
-  orders: number; // Count of delivered orders from orders table
-  totalSpent: string; // Sum of total_price from delivered orders
-  lastOrder: string; // Most recent created_at from orders table
-  status: string; // "active" or "inactive" based on last order date
-  type: string; // "vip" or "regular" based on totalSpent
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  orders: number;
+  totalSpent: string;
+  lastOrder: string;
+  status: string;
+  type: string;
 }
 
-// Define the Profile interface (from profiles table)
 interface Profile {
   id: string;
   full_name: string;
@@ -40,7 +45,6 @@ interface Profile {
   phone: string;
 }
 
-// Define the OrderItem interface (for items in an order)
 interface OrderItem {
   item: {
     id: number;
@@ -53,14 +57,13 @@ interface OrderItem {
   quantity: number;
 }
 
-// Define the Order interface (from orders table)
 interface Order {
   id: string;
   name: string;
   created_at: string;
   total_price: number;
   status: string;
-  items: OrderItem[]; // Replaced 'any[]' with 'OrderItem[]'
+  items: OrderItem[];
 }
 
 export default function CustomersPage() {
@@ -71,124 +74,75 @@ export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
   const customersPerPage = 5;
 
-  // Fetch customers and orders, and set up real-time subscriptions
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  // Fetch customers and orders
+  const fetchData = async () => {
+    setLoading(true);
 
-      // Fetch all profiles
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, phone");
+    const { data: profilesData, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, phone");
 
-      if (profilesError) {
-        console.error("Error fetching profiles:", profilesError);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch all orders (only delivered)
-      const { data: ordersData, error: ordersError } = await supabase
-        .from("orders")
-        .select("id, name, created_at, total_price, status, items")
-        .eq("status", "delivered"); // Filter for delivered orders
-
-      if (ordersError) {
-        console.error("Error fetching orders:", ordersError);
-        setLoading(false);
-        return;
-      }
-
-      // Process data to create customers list
-      const customersList = processCustomers(profilesData || [], ordersData || []);
-      setCustomers(customersList);
-      setFilteredCustomers(customersList);
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
       setLoading(false);
-    };
+      return;
+    }
 
+    const { data: ordersData, error: ordersError } = await supabase
+      .from("orders")
+      .select("id, name, created_at, total_price, status, items")
+      .eq("status", "delivered");
+
+    if (ordersError) {
+      console.error("Error fetching orders:", ordersError);
+      setLoading(false);
+      return;
+    }
+
+    const customersList = processCustomers(profilesData || [], ordersData || []);
+    setCustomers(customersList);
+    setFilteredCustomers(customersList);
+    setOrders(ordersData || []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchData();
 
-    // Set up real-time subscription for profiles table
     const profilesSubscription = supabase
       .channel("profiles-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "profiles" },
-        async () => { // Removed unused 'payload' parameter
-          const { data: ordersData } = await supabase
-            .from("orders")
-            .select("id, name, created_at, total_price, status, items")
-            .eq("status", "delivered");
-
-          const { data: profilesData } = await supabase
-            .from("profiles")
-            .select("id, full_name, email, phone");
-
-          const updatedCustomers = processCustomers(profilesData || [], ordersData || []);
-          setCustomers(updatedCustomers);
-          setFilteredCustomers(updatedCustomers);
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, fetchData)
       .subscribe();
 
-    // Set up real-time subscription for orders table
     const ordersSubscription = supabase
       .channel("orders-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        async () => { // Removed unused 'payload' parameter
-          const { data: ordersData } = await supabase
-            .from("orders")
-            .select("id, name, created_at, total_price, status, items")
-            .eq("status", "delivered");
-
-          const { data: profilesData } = await supabase
-            .from("profiles")
-            .select("id, full_name, email, phone");
-
-          const updatedCustomers = processCustomers(profilesData || [], ordersData || []);
-          setCustomers(updatedCustomers);
-          setFilteredCustomers(updatedCustomers);
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchData)
       .subscribe();
 
-    // Cleanup subscriptions on unmount
     return () => {
       supabase.removeChannel(profilesSubscription);
       supabase.removeChannel(ordersSubscription);
     };
   }, []);
 
-  // Process profiles and orders to create the customers list
   const processCustomers = (profiles: Profile[], orders: Order[]): Customer[] => {
     return profiles.map((profile) => {
-      // Filter orders for this customer (match by name)
       const customerOrders = orders.filter((order) => order.name === profile.full_name);
-
-      // Calculate orders count (delivered orders only)
       const ordersCount = customerOrders.length;
-
-      // Calculate total spent (delivered orders only)
       const totalSpent = customerOrders.reduce((sum, order) => sum + order.total_price, 0);
-
-      // Determine last order date (from delivered orders)
       const lastOrderDate = customerOrders.length
         ? customerOrders.reduce((latest, order) =>
             new Date(order.created_at) > new Date(latest.created_at) ? order : latest
           ).created_at
         : null;
-
-      // Determine status (active if last order within 30 days)
       const status =
         lastOrderDate && isAfter(new Date(lastOrderDate), subDays(new Date(), 30))
           ? "active"
           : "inactive";
-
-      // Determine type (VIP if totalSpent > ₹5,000)
       const type = totalSpent > 5000 ? "vip" : "regular";
 
       return {
@@ -205,21 +159,17 @@ export default function CustomersPage() {
     });
   };
 
-  // Apply filters and search
   useEffect(() => {
     let filtered = customers;
 
-    // Filter by customer type
     if (filterType !== "all") {
       filtered = filtered.filter((customer) => customer.type === filterType);
     }
 
-    // Filter by status
     if (filterStatus !== "all") {
       filtered = filtered.filter((customer) => customer.status === filterStatus);
     }
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (customer) =>
@@ -229,10 +179,9 @@ export default function CustomersPage() {
     }
 
     setFilteredCustomers(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [filterType, filterStatus, searchQuery, customers]);
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
   const paginatedCustomers = filteredCustomers.slice(
     (currentPage - 1) * customersPerPage,
@@ -261,11 +210,47 @@ export default function CustomersPage() {
     }
   };
 
-  const handleReset = () => {
+  // Renamed and kept functional as a reset + refresh
+  const handleReset = async () => {
     setFilterType("all");
     setFilterStatus("all");
     setSearchQuery("");
     setCurrentPage(1);
+    await fetchData(); // Refetch data from Supabase
+  };
+
+  const handleExportCustomers = () => {
+    const headers = ["ID", "Name", "Email", "Phone", "Orders", "Total Spent", "Last Order", "Status", "Type"];
+    const csvRows = [
+      headers.join(","), // Header row
+      ...filteredCustomers.map((customer, index) =>
+        [
+          index + 1,
+          `"${customer.name}"`, // Wrap in quotes to handle commas
+          customer.email,
+          customer.phone,
+          customer.orders,
+          customer.totalSpent.replace("₹", ""), // Remove ₹ symbol
+          customer.lastOrder,
+          customer.status,
+          customer.type,
+        ].join(",")
+      ),
+    ];
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `customers_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleViewCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
   };
 
   if (loading) {
@@ -281,16 +266,17 @@ export default function CustomersPage() {
           </h1>
           <p className="text-amber-700">View and manage your customer database</p>
         </div>
-
         <div className="flex items-center gap-2">
-          <Button className="bg-amber-800 hover:bg-amber-700 text-white">
+          <Button
+            className="bg-amber-800 hover:bg-amber-700 text-white"
+            onClick={handleExportCustomers}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Customers
           </Button>
         </div>
       </div>
 
-      {/* Filters */}
       <div className="bg-white p-4 rounded-lg border border-amber-200 flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
@@ -302,7 +288,6 @@ export default function CustomersPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
         <div className="flex flex-wrap gap-4">
           <Select value={filterType} onValueChange={setFilterType}>
             <SelectTrigger className="w-[180px] border-amber-200">
@@ -314,7 +299,6 @@ export default function CustomersPage() {
               <SelectItem value="regular">Regular</SelectItem>
             </SelectContent>
           </Select>
-
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-[180px] border-amber-200">
               <SelectValue placeholder="Status" />
@@ -325,12 +309,10 @@ export default function CustomersPage() {
               <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
-
           <Button variant="outline" className="border-amber-200">
             <Filter className="h-4 w-4 mr-2" />
             More Filters
           </Button>
-
           <Button variant="ghost" className="text-amber-700" onClick={handleReset}>
             <RefreshCcw className="h-4 w-4 mr-2" />
             Reset
@@ -338,7 +320,6 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Customers Table */}
       <div className="bg-white rounded-lg border border-amber-200 overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
@@ -393,10 +374,72 @@ export default function CustomersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="h-8 text-amber-700">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-amber-700"
+                            onClick={() => handleViewCustomer(customer)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </DialogTrigger>
+                        {selectedCustomer && selectedCustomer.id === customer.id && (
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>{selectedCustomer.name} - Details</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Email:</span>
+                                <span className="col-span-3">{selectedCustomer.email}</span>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Phone:</span>
+                                <span className="col-span-3">{selectedCustomer.phone}</span>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Orders:</span>
+                                <span className="col-span-3">{selectedCustomer.orders}</span>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Total Spent:</span>
+                                <span className="col-span-3">{selectedCustomer.totalSpent}</span>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Last Order:</span>
+                                <span className="col-span-3">{selectedCustomer.lastOrder}</span>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Status:</span>
+                                <span className="col-span-3">{selectedCustomer.status}</span>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <span className="col-span-1 font-medium">Type:</span>
+                                <span className="col-span-3">{selectedCustomer.type}</span>
+                              </div>
+                              <div className="mt-4">
+                                <h3 className="font-semibold">Recent Orders</h3>
+                                <ul className="mt-2 space-y-2">
+                                  {orders
+                                    .filter((order) => order.name === selectedCustomer.name)
+                                    .slice(0, 3)
+                                    .map((order) => (
+                                      <li key={order.id} className="text-sm">
+                                        <span>
+                                          {format(new Date(order.created_at), "yyyy-MM-dd")} - ₹
+                                          {order.total_price} ({order.items.length} items)
+                                        </span>
+                                      </li>
+                                    ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        )}
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 ))
@@ -405,7 +448,6 @@ export default function CustomersPage() {
           </Table>
         </div>
 
-        {/* Pagination */}
         <div className="p-4 border-t border-amber-200">
           <Pagination>
             <PaginationContent>
