@@ -67,6 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.includes("menu")) return "menu";
     if (pathname.includes("customers")) return "customers";
     if (pathname.includes("/sales")) return "sales";
+    if (pathname.includes("/contact")) return "contact";
     if (pathname.includes("settings")) return "settings";
     return "dashboard";
   };
