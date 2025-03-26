@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
+  BarChart,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ export default function AdminSidebar({ activeSection }: AdminSidebarProps) {
     { id: "orders", label: "Orders", icon: <ShoppingBag className="h-5 w-5" />, href: "/auth/admin/orders" },
     { id: "menu", label: "Menu Items", icon: <Coffee className="h-5 w-5" />, href: "/auth/admin/menu" },
     { id: "customers", label: "Customers", icon: <Users className="h-5 w-5" />, href: "/auth/admin/customers" },
+    { id: "sales", label: "Sales", icon: <BarChart className="h-5 w-5" />, href: "/auth/admin/sales" },
     { id: "settings", label: "Settings", icon: <Settings className="h-5 w-5" />, href: "/auth/admin/settings" },
   ];
 
