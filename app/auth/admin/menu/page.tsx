@@ -1,4 +1,3 @@
-// app/auth/admin/menu/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,21 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Pencil, Trash2, Plus, Search, Filter, RefreshCcw } from "lucide-react";
-
-// Define the MenuItem interface (status removed)
-interface MenuItem {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  popular: boolean;
-  new: boolean;
-  chef_special: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { MenuItem } from "../../components/types"; // Import from shared types
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -42,8 +27,8 @@ export default function MenuPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // State for Add dialog
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for Edit dialog
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newItem, setNewItem] = useState({
     name: "",
     category: "",
@@ -56,73 +41,70 @@ export default function MenuPage() {
   });
   const [editItem, setEditItem] = useState<MenuItem | null>(null);
 
-  // Fetch menu items and set up real-time subscription
+  // Sort items by id to maintain consistent order
+  const sortItems = (items: MenuItem[]) => items.sort((a, b) => a.id - b.id);
+
   useEffect(() => {
     const fetchMenuItems = async () => {
       setLoading(true);
-
       const { data, error } = await supabase
         .from("menu_items")
-        .select("id, name, description, price, image, category, popular, new, chef_special, created_at, updated_at");
+        .select("id, name, description, price, image, category, popular, new, chef_special, created_at, updated_at")
+        .order("id", { ascending: true }); // Ensure initial fetch is sorted
 
       if (error) {
         console.error("Error fetching menu items:", error);
-        setLoading(false);
-        return;
+      } else {
+        const sortedItems = sortItems(data as MenuItem[]);
+        setMenuItems(sortedItems);
+        setFilteredItems(sortedItems);
       }
-
-      setMenuItems(data);
-      setFilteredItems(data);
       setLoading(false);
     };
 
     fetchMenuItems();
 
-    // Set up real-time subscription
     const subscription = supabase
       .channel("menu-items-channel")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "menu_items" },
-        async () => {
-          const { data } = await supabase
-            .from("menu_items")
-            .select("id, name, description, price, image, category, popular, new, chef_special, created_at, updated_at");
-
-          // Check if data exists before processing
-          if (!data) {
-            console.error("No data returned from Supabase");
-            return;
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setMenuItems((prev) => sortItems([...prev, {
+              ...payload.new,
+              chefSpecial: payload.new.chef_special,
+            } as MenuItem]));
+          } else if (payload.eventType === "UPDATE") {
+            setMenuItems((prev) =>
+              sortItems(prev.map((item) =>
+                item.id === payload.new.id
+                  ? { ...payload.new, chefSpecial: payload.new.chef_special } as MenuItem
+                  : item
+              ))
+            );
+          } else if (payload.eventType === "DELETE") {
+            setMenuItems((prev) => sortItems(prev.filter((item) => item.id !== payload.old.id)));
           }
-
-          setMenuItems(data);
-          setFilteredItems(data);
         }
       )
       .subscribe();
 
-    // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(subscription);
     };
   }, []);
 
-  // Apply filters and search
   useEffect(() => {
     let filtered = menuItems;
-
-    // Filter by category
     if (filterCategory !== "all") {
       filtered = filtered.filter((item) => item.category === filterCategory);
     }
-
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-
     setFilteredItems(filtered);
   }, [filterCategory, searchQuery, menuItems]);
 
@@ -133,13 +115,11 @@ export default function MenuPage() {
 
   const handleAddItem = async () => {
     const { name, category, price, description, image, popular, new: isNew, chef_special } = newItem;
-  
-    // Validation
     if (!name || !category || isNaN(parseInt(price)) || !description) {
       alert("Please fill in all required fields (Name, Category, Price, Description) with valid values.");
       return false;
     }
-  
+
     try {
       const payload = {
         name,
@@ -151,17 +131,12 @@ export default function MenuPage() {
         new: isNew,
         chef_special,
       };
-      console.log("Insert payload:", payload); // Debug payload
-  
       const { error } = await supabase.from("menu_items").insert(payload);
-  
       if (error) {
-        console.error("Error adding menu item:", error.message, error.details, error.hint);
+        console.error("Error adding menu item:", error.message);
         alert(`Failed to add menu item: ${error.message}`);
         return false;
       }
-  
-      // Reset the form
       setNewItem({
         name: "",
         category: "",
@@ -172,7 +147,6 @@ export default function MenuPage() {
         new: false,
         chef_special: false,
       });
-  
       alert("Menu item added successfully!");
       return true;
     } catch (err) {
@@ -182,13 +156,9 @@ export default function MenuPage() {
     }
   };
 
-  // Handle editing an item
   const handleEditItem = async () => {
     if (!editItem) return false;
-
-    const { id, name, category, price, description, image, popular, new: isNew, chef_special } = editItem;
-
-    // Validation
+    const { id, name, category, price, description, image, popular, new: isNew, chefSpecial } = editItem;
     if (!name || !category || !price || !description) {
       alert("Please fill in all required fields (Name, Category, Price, Description).");
       return false;
@@ -204,7 +174,7 @@ export default function MenuPage() {
         image,
         popular,
         new: isNew,
-        chef_special,
+        chefSpecial,
       })
       .eq("id", id);
 
@@ -213,18 +183,12 @@ export default function MenuPage() {
       alert("Failed to update menu item. Please try again.");
       return false;
     }
-
     setEditItem(null);
     return true;
   };
 
-  // Handle deleting an item
   const handleDeleteItem = async (id: number) => {
-    const { error } = await supabase
-      .from("menu_items")
-      .delete()
-      .eq("id", id);
-
+    const { error } = await supabase.from("menu_items").delete().eq("id", id);
     if (error) {
       console.error("Error deleting menu item:", error);
       alert("Failed to delete menu item. Please try again.");
@@ -261,9 +225,7 @@ export default function MenuPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
+                <Label htmlFor="name" className="text-right">Name</Label>
                 <Input
                   id="name"
                   placeholder="Item name"
@@ -273,9 +235,7 @@ export default function MenuPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category
-                </Label>
+                <Label htmlFor="category" className="text-right">Category</Label>
                 <Select
                   value={newItem.category}
                   onValueChange={(value) => setNewItem({ ...newItem, category: value })}
@@ -293,9 +253,7 @@ export default function MenuPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">
-                  Price (₹)
-                </Label>
+                <Label htmlFor="price" className="text-right">Price (₹)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -306,9 +264,7 @@ export default function MenuPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="description" className="text-right pt-2">
-                  Description
-                </Label>
+                <Label htmlFor="description" className="text-right pt-2">Description</Label>
                 <Textarea
                   id="description"
                   placeholder="Item description"
@@ -318,9 +274,7 @@ export default function MenuPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="image" className="text-right">
-                  Image
-                </Label>
+                <Label htmlFor="image" className="text-right">Image</Label>
                 <Input
                   id="image"
                   placeholder="/path/to/image.jpeg"
@@ -330,9 +284,7 @@ export default function MenuPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="popular" className="text-right">
-                  Popular
-                </Label>
+                <Label htmlFor="popular" className="text-right">Popular</Label>
                 <Select
                   value={newItem.popular ? "true" : "false"}
                   onValueChange={(value) => setNewItem({ ...newItem, popular: value === "true" })}
@@ -347,9 +299,7 @@ export default function MenuPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="new" className="text-right">
-                  New
-                </Label>
+                <Label htmlFor="new" className="text-right">New</Label>
                 <Select
                   value={newItem.new ? "true" : "false"}
                   onValueChange={(value) => setNewItem({ ...newItem, new: value === "true" })}
@@ -364,9 +314,7 @@ export default function MenuPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="chef_special" className="text-right">
-                  Chef Special
-                </Label>
+                <Label htmlFor="chef_special" className="text-right">Chef Special</Label>
                 <Select
                   value={newItem.chef_special ? "true" : "false"}
                   onValueChange={(value) => setNewItem({ ...newItem, chef_special: value === "true" })}
@@ -416,7 +364,6 @@ export default function MenuPage() {
         </Dialog>
       </div>
 
-      {/* Filters */}
       <div className="bg-white p-4 rounded-lg border border-amber-200 flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-500" />
@@ -428,7 +375,6 @@ export default function MenuPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
         <div className="flex flex-wrap gap-4">
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="w-[180px] border-amber-200">
@@ -443,12 +389,10 @@ export default function MenuPage() {
               <SelectItem value="desserts">Desserts</SelectItem>
             </SelectContent>
           </Select>
-
           <Button variant="outline" className="border-amber-200">
             <Filter className="h-4 w-4 mr-2" />
             More Filters
           </Button>
-
           <Button variant="ghost" className="text-amber-700" onClick={handleReset}>
             <RefreshCcw className="h-4 w-4 mr-2" />
             Reset
@@ -456,7 +400,6 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* Menu Items Table */}
       <div className="bg-white rounded-lg border border-amber-200 overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
@@ -488,35 +431,23 @@ export default function MenuPage() {
                     <TableCell>₹{item.price}</TableCell>
                     <TableCell>
                       {item.popular ? (
-                        <Badge className="bg-amber-100 text-amber-800" variant="outline">
-                          Popular
-                        </Badge>
+                        <Badge className="bg-amber-100 text-amber-800" variant="outline">Popular</Badge>
                       ) : (
-                        <Badge className="bg-gray-100 text-gray-800" variant="outline">
-                          Regular
-                        </Badge>
+                        <Badge className="bg-gray-100 text-gray-800" variant="outline">Regular</Badge>
                       )}
                     </TableCell>
                     <TableCell>
                       {item.new ? (
-                        <Badge className="bg-blue-100 text-blue-800" variant="outline">
-                          New
-                        </Badge>
+                        <Badge className="bg-blue-100 text-blue-800" variant="outline">New</Badge>
                       ) : (
-                        <Badge className="bg-gray-100 text-gray-800" variant="outline">
-                          Regular
-                        </Badge>
+                        <Badge className="bg-gray-100 text-gray-800" variant="outline">Regular</Badge>
                       )}
                     </TableCell>
                     <TableCell>
-                      {item.chef_special ? (
-                        <Badge className="bg-red-100 text-red-800" variant="outline">
-                          Chef Special
-                        </Badge>
+                      {item.chefSpecial ? (
+                        <Badge className="bg-red-100 text-red-800" variant="outline">Chef Special</Badge>
                       ) : (
-                        <Badge className="bg-gray-100 text-gray-800" variant="outline">
-                          Regular
-                        </Badge>
+                        <Badge className="bg-gray-100 text-gray-800" variant="outline">Regular</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -545,27 +476,19 @@ export default function MenuPage() {
                             {editItem && (
                               <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-name" className="text-right">
-                                    Name
-                                  </Label>
+                                  <Label htmlFor="edit-name" className="text-right">Name</Label>
                                   <Input
                                     id="edit-name"
                                     value={editItem.name}
-                                    onChange={(e) =>
-                                      setEditItem({ ...editItem, name: e.target.value })
-                                    }
+                                    onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
                                     className="col-span-3"
                                   />
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-category" className="text-right">
-                                    Category
-                                  </Label>
+                                  <Label htmlFor="edit-category" className="text-right">Category</Label>
                                   <Select
                                     value={editItem.category}
-                                    onValueChange={(value) =>
-                                      setEditItem({ ...editItem, category: value })
-                                    }
+                                    onValueChange={(value) => setEditItem({ ...editItem, category: value })}
                                   >
                                     <SelectTrigger className="col-span-3">
                                       <SelectValue placeholder="Select category" />
@@ -580,54 +503,38 @@ export default function MenuPage() {
                                   </Select>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-price" className="text-right">
-                                    Price (₹)
-                                  </Label>
+                                  <Label htmlFor="edit-price" className="text-right">Price (₹)</Label>
                                   <Input
                                     id="edit-price"
                                     type="number"
                                     value={editItem.price}
-                                    onChange={(e) =>
-                                      setEditItem({ ...editItem, price: parseInt(e.target.value) })
-                                    }
+                                    onChange={(e) => setEditItem({ ...editItem, price: parseInt(e.target.value) || 0 })}
                                     className="col-span-3"
                                   />
                                 </div>
                                 <div className="grid grid-cols-4 items-start gap-4">
-                                  <Label htmlFor="edit-description" className="text-right pt-2">
-                                    Description
-                                  </Label>
+                                  <Label htmlFor="edit-description" className="text-right pt-2">Description</Label>
                                   <Textarea
                                     id="edit-description"
                                     value={editItem.description}
-                                    onChange={(e) =>
-                                      setEditItem({ ...editItem, description: e.target.value })
-                                    }
+                                    onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
                                     className="col-span-3"
                                   />
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-image" className="text-right">
-                                    Image
-                                  </Label>
+                                  <Label htmlFor="edit-image" className="text-right">Image</Label>
                                   <Input
                                     id="edit-image"
                                     value={editItem.image}
-                                    onChange={(e) =>
-                                      setEditItem({ ...editItem, image: e.target.value })
-                                    }
+                                    onChange={(e) => setEditItem({ ...editItem, image: e.target.value })}
                                     className="col-span-3"
                                   />
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-popular" className="text-right">
-                                    Popular
-                                  </Label>
+                                  <Label htmlFor="edit-popular" className="text-right">Popular</Label>
                                   <Select
                                     value={editItem.popular ? "true" : "false"}
-                                    onValueChange={(value) =>
-                                      setEditItem({ ...editItem, popular: value === "true" })
-                                    }
+                                    onValueChange={(value) => setEditItem({ ...editItem, popular: value === "true" })}
                                   >
                                     <SelectTrigger className="col-span-3">
                                       <SelectValue placeholder="Is popular?" />
@@ -639,14 +546,10 @@ export default function MenuPage() {
                                   </Select>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-new" className="text-right">
-                                    New
-                                  </Label>
+                                  <Label htmlFor="edit-new" className="text-right">New</Label>
                                   <Select
                                     value={editItem.new ? "true" : "false"}
-                                    onValueChange={(value) =>
-                                      setEditItem({ ...editItem, new: value === "true" })
-                                    }
+                                    onValueChange={(value) => setEditItem({ ...editItem, new: value === "true" })}
                                   >
                                     <SelectTrigger className="col-span-3">
                                       <SelectValue placeholder="Is new?" />
@@ -658,14 +561,10 @@ export default function MenuPage() {
                                   </Select>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="edit-chef_special" className="text-right">
-                                    Chef Special
-                                  </Label>
+                                  <Label htmlFor="edit-chef_special" className="text-right">Chef Special</Label>
                                   <Select
-                                    value={editItem.chef_special ? "true" : "false"}
-                                    onValueChange={(value) =>
-                                      setEditItem({ ...editItem, chef_special: value === "true" })
-                                    }
+                                    value={editItem.chefSpecial ? "true" : "false"}
+                                    onValueChange={(value) => setEditItem({ ...editItem, chefSpecial: value === "true" })}
                                   >
                                     <SelectTrigger className="col-span-3">
                                       <SelectValue placeholder="Is chef special?" />

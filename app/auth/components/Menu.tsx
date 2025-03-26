@@ -103,7 +103,7 @@ export default function Menu() {
             chefSpecial: item.chefSpecial, // Map chef_special to chefSpecial
             created_at: item.created_at,
             updated_at: item.updated_at,
-          }))
+          })) .sort((a, b) => a.id - b.id)
         );
       } catch (error) {
         console.error("Error fetching profile or menu items:", error);
