@@ -15,6 +15,7 @@ Tanjore Degree Coffee is a Next.js-based web application that brings the authent
 - **Order Online**: Place orders directly from the homepage with a streamlined checkout process. 🛒
 - **Responsive Design**: Optimized for both desktop and mobile devices. 📱💻
 - **WhatsApp Support**: Integrated support link for customer assistance. 📞
+- **Emails**: Resend is used for emails. ✉️
 
 ## User Flow 👤
 
