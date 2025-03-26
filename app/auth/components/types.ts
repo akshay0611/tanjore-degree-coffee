@@ -9,6 +9,8 @@ export type MenuItem = {
   vegan?: boolean;
   new?: boolean;
   chefSpecial?: boolean;
+  created_at: string; // Assuming timestamp is returned as string
+  updated_at: string; // Assuming timestamp is returned as string
 };
 
 export type Address = {

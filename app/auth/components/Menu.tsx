@@ -1,4 +1,3 @@
-// app/auth/components/Menu.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -21,9 +20,8 @@ import Cart from "./Cart";
 import CheckoutForm from "./CheckoutForm";
 import OrderConfirmation from "./OrderConfirmation";
 import MenuItemCard from "./MenuItemCard";
-import menuItems from "./data/menuItems.json";
 import { supabase } from "@/lib/supabase/client";
-import { MenuItem, Profile, CartItem } from "./types";
+import { MenuItem, Profile, CartItem } from "./types"; // Use MenuItem directly
 import {
   addToCart,
   reduceFromCart,
@@ -51,8 +49,8 @@ export default function Menu() {
   const [loading, setLoading] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, Infinity]);
   const [sortOption, setSortOption] = useState<string>("default");
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
-  // Sync cart with Supabase when cartItems change
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
     if (profile) {
@@ -60,9 +58,8 @@ export default function Menu() {
     }
   }, [cartItems, profile]);
 
-  // Fetch profile and saved cart on mount
   useEffect(() => {
-    const fetchProfileAndCart = async () => {
+    const fetchProfileAndData = async () => {
       try {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
@@ -84,14 +81,88 @@ export default function Menu() {
 
           await fetchSavedCart(user.id, setCartItems);
         }
+
+        // Fetch initial menu items
+        const { data: menuData, error: menuError } = await supabase
+          .from("menu_items")
+          .select("*");
+
+        if (menuError) throw menuError;
+
+        setMenuItems(
+          menuData.map((item: MenuItem) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            image: item.image,
+            category: item.category,
+            popular: item.popular,
+            vegan: item.vegan, // Will be undefined unless added to Supabase table
+            new: item.new,
+            chefSpecial: item.chefSpecial, // Map chef_special to chefSpecial
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+          }))
+        );
       } catch (error) {
-        console.error("Error fetching profile or cart:", error);
+        console.error("Error fetching profile or menu items:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfileAndCart();
+    fetchProfileAndData();
+
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel("menu_items_channel")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "menu_items" },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const newItem = payload.new as MenuItem;
+            setMenuItems((prev) => [
+              ...prev,
+              {
+                id: newItem.id,
+                name: newItem.name,
+                description: newItem.description,
+                price: newItem.price,
+                image: newItem.image,
+                category: newItem.category,
+                popular: newItem.popular,
+                vegan: newItem.vegan, // Will be undefined unless added to Supabase
+                new: newItem.new,
+                chefSpecial: newItem.chefSpecial,
+                created_at: newItem.created_at,
+                updated_at: newItem.updated_at,
+              },
+            ]);
+          } else if (payload.eventType === "UPDATE") {
+            const updatedItem = payload.new as MenuItem;
+            setMenuItems((prev) =>
+              prev.map((item) =>
+                item.id === updatedItem.id
+                  ? {
+                      ...item,
+                      ...updatedItem,
+                      chefSpecial: updatedItem.chefSpecial, // Map chef_special to chefSpecial
+                    }
+                  : item
+              )
+            );
+          } else if (payload.eventType === "DELETE") {
+            setMenuItems((prev) => prev.filter((item) => item.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, []);
 
   const filterAndSortItems = (items: MenuItem[]) => {
@@ -330,12 +401,6 @@ export default function Menu() {
               </div>
 
               <p className="text-amber-700">{selectedItem.description}</p>
-
-              {selectedItem.vegan && (
-                <Badge variant="outline" className="w-fit border-green-500 text-green-600">
-                  Vegan
-                </Badge>
-              )}
 
               <div className="flex justify-between items-center">
                 <span className="text-xl font-bold text-amber-900">₹{selectedItem.price}</span>
