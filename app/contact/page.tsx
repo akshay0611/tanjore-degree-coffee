@@ -4,10 +4,8 @@ import { Coffee, MapPin, Clock, Phone, Mail, MessageSquare, ChevronDown, Train, 
 import { Button } from "@/components/ui/button";
 import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 import { useState } from 'react';
-import { supabase } from "@/lib/supabase/client";
 
-
-// FAQ Section Component
+// FAQ Section Component (unchanged)
 function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   
@@ -87,7 +85,6 @@ function FAQSection() {
   );
 }
 
-// Contact Form Component
 function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
@@ -98,6 +95,7 @@ function ContactForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -107,24 +105,33 @@ function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus('idle');
+    setEmailError(null);
 
     try {
-      const { error } = await supabase
-        .from('contacts')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.subject,
-          message: formData.message,
-        });
+      console.log('Submitting form:', formData);
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('API response error:', result);
+        throw new Error(result.error || 'Failed to submit form');
+      }
+
+      if (result.error) {
+        setEmailError(result.details || 'Failed to send confirmation email');
+      } else {
+        console.log('API success:', result);
+      }
 
       setSubmitStatus('success');
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Submission error:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -231,10 +238,13 @@ function ContactForm() {
         </Button>
 
         {submitStatus === 'success' && (
-          <p className="mt-4 text-green-600 text-center">Message sent successfully!</p>
+          <p className="mt-4 text-green-600 text-center">Message sent successfully! Check your email for confirmation.</p>
         )}
         {submitStatus === 'error' && (
           <p className="mt-4 text-red-600 text-center">Error sending message. Please try again.</p>
+        )}
+        {emailError && (
+          <p className="mt-4 text-yellow-600 text-center">{emailError}</p>
         )}
       </form>
     </div>
