@@ -214,7 +214,9 @@ export default function OrdersPage() {
   // Helper to get item names for display in the table
   const getItemNames = (items: OrderItem[]) => {
     if (items.length === 0) return "No items";
-    const names = items.map((orderItem) => orderItem.item.name).join(", ");
+    const names = items
+      .map((orderItem) => (orderItem.item && orderItem.item.name ? orderItem.item.name : "Unknown Item"))
+      .join(", ");
     return names.length > 50 ? `${names.slice(0, 50)}...` : names;
   };
 
