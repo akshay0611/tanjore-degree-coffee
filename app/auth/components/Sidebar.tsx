@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeft, Coffee, LogOut, Home, Package, Settings, User } from "lucide-react";
+// 1. Import ChevronRight icon
+import { ChevronLeft, ChevronRight, Coffee, LogOut, Home, Package, Settings, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
@@ -16,11 +17,10 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiveItem }: SidebarProps) {
   const [fullName, setFullName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null); // Added state for avatar URL
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user full name, email, and avatar URL
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -32,7 +32,6 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
           return;
         }
 
-        // Fetch full_name, email, and avatar_url from the `profiles` table
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("full_name, email, avatar_url")
@@ -43,11 +42,11 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
           setError("No profile found. Using authenticated email.");
           setFullName(null);
           setEmail(userData.user.email || null);
-          setAvatarUrl(null); // No avatar if profile not found
+          setAvatarUrl(null);
         } else {
           setFullName(profileData.full_name || null);
           setEmail(profileData.email || null);
-          setAvatarUrl(profileData.avatar_url || null); // Set avatar URL
+          setAvatarUrl(profileData.avatar_url || null);
         }
 
         setLoading(false);
@@ -61,9 +60,8 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
     fetchProfileData();
   }, []);
 
-  // Get first two letters of fullName for AvatarFallback
   const getInitials = () => {
-    if (loading || error || !fullName) return "JD"; // Fallback to "JD" during loading, error, or if no fullName
+    if (loading || error || !fullName) return "JD";
     return fullName.slice(0, 2).toUpperCase();
   };
 
@@ -82,18 +80,27 @@ export default function Sidebar({ collapsed, toggleSidebar, activeItem, setActiv
         collapsed ? "w-20" : "w-64"
       }`}
     >
-      <div className="flex items-center justify-between p-4 border-b border-amber-800">
-        <div className={`flex items-center gap-2 ${collapsed ? "justify-center w-full" : ""}`}>
+      {/* 2. Modify the header section */}
+      <div 
+        className={`flex items-center justify-between border-b border-amber-800 transition-all duration-300 ${
+          collapsed ? "p-2" : "p-4" // Adjust padding when collapsed
+        }`}
+      >
+        {/* Logo and Title part */}
+        <div className="flex items-center gap-2"> {/* Simplified classes for the logo container */}
           <Coffee className="h-6 w-6 flex-shrink-0" />
           {!collapsed && <span className="font-bold">Tanjore Coffee</span>}
         </div>
+        
+        {/* Toggle Button part - always visible and icon changes */}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className={`text-amber-50 ${collapsed ? "hidden" : ""}`}
+          className="text-amber-50 flex-shrink-0" // Always visible, added flex-shrink-0
         >
-          <ChevronLeft className="h-5 w-5" />
+          {/* Conditionally render ChevronRight or ChevronLeft */}
+          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </Button>
       </div>
 

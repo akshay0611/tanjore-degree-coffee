@@ -96,6 +96,7 @@ export default function OrdersView() {
     }
     if (dateTo) {
       const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999); // Include the whole 'to' day
       filtered = filtered.filter((order) => new Date(order.created_at) <= toDate);
     }
     if (statusFilter !== "all") {
@@ -195,7 +196,7 @@ export default function OrdersView() {
       }
 
       showNotification("success", "New order created successfully!");
-      fetchOrders();
+      fetchOrders(); // Re-fetch orders to include the new one immediately
     } catch (e) {
       console.error("Unexpected error during reorder:", e);
       showNotification("error", "An unexpected error occurred. Please try again.");
@@ -215,7 +216,6 @@ export default function OrdersView() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Check if order is cancellable (within 10 minutes of creation)
   const isOrderCancellable = (order: Order) => {
     const createdAt = new Date(order.created_at);
     const now = new Date();
@@ -223,40 +223,47 @@ export default function OrdersView() {
     return diffInMinutes <= 10 && order.status !== "cancelled" && order.status !== "delivered";
   };
 
-  // Handle order cancellation
   const handleCancelOrder = async (orderId: string) => {
     try {
       await cancelOrder(orderId);
       showNotification("success", "Order cancelled successfully!");
-      // Real-time subscription will update the UI
+      // Real-time subscription will update the UI, or uncomment fetchOrders if needed
+      // fetchOrders(); 
     } catch (error) {
       console.error("Error cancelling order:", error);
       showNotification("error", "Failed to cancel order. Please try again.");
     }
   };
 
+  const getStatusText = (status: string) => {
+    if (status === "pending") return "Processing";
+    if (status === "delivered") return "Delivered";
+    if (status === "cancelled") return "Cancelled";
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
   if (loading) {
-    return <p className="text-amber-900">Loading orders...</p>;
+    return <p className="text-amber-900 p-4 text-center">Loading orders...</p>;
   }
 
   if (error) {
-    return <p className="text-red-500">Error: {error}</p>;
+    return <p className="text-red-500 p-4 text-center">Error: {error}</p>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-2 sm:p-4 bg-amber-50 ">
       {notification.show && (
         <div
-          className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-lg shadow-lg ${
+          className={`fixed top-4 right-4 left-4 sm:left-auto z-50 flex items-center p-4 rounded-lg shadow-lg ${
             notification.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
           }`}
         >
           {notification.type === "success" ? (
-            <CheckCircle className="h-5 w-5 mr-2" />
+            <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
           ) : (
-            <AlertCircle className="h-5 w-5 mr-2" />
+            <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
           )}
-          <p>{notification.message}</p>
+          <p className="flex-grow">{notification.message}</p>
         </div>
       )}
 
@@ -267,10 +274,11 @@ export default function OrdersView() {
           <CardTitle className="text-amber-900">Filter Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <Label className="text-amber-700">From Date</Label>
+              <Label htmlFor="dateFrom" className="text-amber-700">From Date</Label>
               <Input
+                id="dateFrom"
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
@@ -278,8 +286,9 @@ export default function OrdersView() {
               />
             </div>
             <div>
-              <Label className="text-amber-700">To Date</Label>
+              <Label htmlFor="dateTo" className="text-amber-700">To Date</Label>
               <Input
+                id="dateTo"
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
@@ -287,23 +296,24 @@ export default function OrdersView() {
               />
             </div>
             <div>
-              <Label className="text-amber-700">Status</Label>
+              <Label htmlFor="statusFilter" className="text-amber-700">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="mt-1 border-amber-200 bg-amber-50">
+                <SelectTrigger id="statusFilter" className="mt-1 border-amber-200 bg-amber-50">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="pending">Processing</SelectItem>
                   <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem> {/* Added */}
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <Label className="text-amber-700">Min Price</Label>
+                <Label htmlFor="minPrice" className="text-amber-700">Min Price</Label>
                 <Input
+                  id="minPrice"
                   type="number"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
@@ -312,8 +322,9 @@ export default function OrdersView() {
                 />
               </div>
               <div>
-                <Label className="text-amber-700">Max Price</Label>
+                <Label htmlFor="maxPrice" className="text-amber-700">Max Price</Label>
                 <Input
+                  id="maxPrice"
                   type="number"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
@@ -324,9 +335,9 @@ export default function OrdersView() {
             </div>
           </div>
           <div className="mt-4">
-            <Label className="text-amber-700">Sort By</Label>
+            <Label htmlFor="sortOption" className="text-amber-700">Sort By</Label>
             <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="mt-1 border-amber-200 bg-amber-50 w-full md:w-48">
+              <SelectTrigger id="sortOption" className="mt-1 border-amber-200 bg-amber-50 w-full md:w-48">
                 <SelectValue placeholder="Select sorting" />
               </SelectTrigger>
               <SelectContent>
@@ -355,18 +366,20 @@ export default function OrdersView() {
                 return (
                   <Card key={order.id} className="bg-amber-50 border-amber-200">
                     <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-amber-900 text-base">Order #{order.id.slice(0, 8)}</CardTitle>
+                      <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <CardTitle className="text-amber-900 text-base break-all sm:break-normal">Order #{order.id.slice(0, 8)}</CardTitle>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
                             order.status === "pending"
                               ? "bg-amber-200 text-amber-800"
                               : order.status === "delivered"
                               ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800" // Added for cancelled
+                              : order.status === "cancelled"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800" // Default for other statuses
                           }`}
                         >
-                          {order.status === "pending" ? "Processing" : order.status === "delivered" ? "Delivered" : "Cancelled"}
+                          {getStatusText(order.status)}
                         </span>
                       </div>
                       <CardDescription>
@@ -391,7 +404,7 @@ export default function OrdersView() {
                           <span className="font-bold text-amber-900">₹{order.total_price}</span>
                         </div>
                       </div>
-                      <div className="flex gap-2 mt-4">
+                      <div className="flex flex-col sm:flex-row gap-2 mt-4">
                         <Button
                           variant="outline"
                           className="text-amber-700 border-amber-300 text-xs"
@@ -403,7 +416,7 @@ export default function OrdersView() {
                           variant="outline"
                           className="text-amber-700 border-amber-300 text-xs"
                           onClick={() => handleReorder(order)}
-                          disabled={reorderLoading || order.status === "cancelled"} // Disable if cancelled
+                          disabled={reorderLoading || order.status === "cancelled"}
                         >
                           {reorderLoading ? "Processing..." : "Reorder"}
                         </Button>
@@ -460,7 +473,7 @@ export default function OrdersView() {
                   <strong>Name:</strong> {selectedOrder.name}
                 </p>
                 <p className="text-sm text-amber-700">
-                  <strong>Email:</strong> {selectedOrder.email}
+                  <strong>Email:</strong> <span className="break-all">{selectedOrder.email}</span>
                 </p>
                 <p className="text-sm text-amber-700">
                   <strong>Address:</strong> {selectedOrder.delivery_address}
@@ -476,26 +489,24 @@ export default function OrdersView() {
                         ? "bg-amber-200 text-amber-800"
                         : selectedOrder.status === "delivered"
                         ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800" // Added for cancelled
+                        : selectedOrder.status === "cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800" // Default for other statuses
                     }`}
                   >
-                    {selectedOrder.status === "pending"
-                      ? "Processing"
-                      : selectedOrder.status === "delivered"
-                      ? "Delivered"
-                      : "Cancelled"}
+                    {getStatusText(selectedOrder.status)}
                   </span>
                 </p>
               </div>
             </div>
           )}
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button
               variant="outline"
               className="text-amber-700 border-amber-300"
-              onClick={() => handleReorder(selectedOrder!)}
-              disabled={reorderLoading || !selectedOrder || selectedOrder?.status === "cancelled"} // Disable if cancelled
+              onClick={() => selectedOrder && handleReorder(selectedOrder)}
+              disabled={reorderLoading || !selectedOrder || selectedOrder?.status === "cancelled"}
             >
               {reorderLoading ? "Processing..." : "Reorder"}
             </Button>
@@ -503,7 +514,7 @@ export default function OrdersView() {
               <Button
                 variant="outline"
                 className="text-red-600 border-red-300 hover:text-red-800"
-                onClick={() => handleCancelOrder(selectedOrder.id)}
+                onClick={() => selectedOrder && handleCancelOrder(selectedOrder.id)}
               >
                 Cancel Order
               </Button>

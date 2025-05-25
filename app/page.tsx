@@ -231,6 +231,11 @@ export default function Home() {
             Send Message
           </Button>
         </form>
+        <p className="mt-16 sm:mt-20 lg:mt-34 flex items-center justify-center text-sm text-amber-700">
+  <Coffee className="w-4 h-4 mr-2" />
+  We&apos;ll get back to you within 24 hours.
+</p>
+
       </div>
     </div>
   </div>
