@@ -1,6 +1,5 @@
 # Tanjore Degree Coffee ☕
 
-![Tanjore Degree Coffee Homepage](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee+Homepage)  
 *A modern e-commerce platform for authentic South Indian coffee and snacks, brewed to perfection since 1942.* 🌟
 
 ## Overview 📖
@@ -80,12 +79,12 @@ Tanjore Degree Coffee is a Next.js-based web application that brings the authent
 ## Screenshots 📸
 
 ### Homepage
-![Homepage](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee+Homepage)  
+![Homepage](public/homepage.png) 
 *The homepage welcomes users with a call to "View Menu" or learn "Our Story," with an "Order Online" button to start the ordering process.*
 
 ### Dashboard
-![Dashboard](https://via.placeholder.com/1200x400.png?text=Tanjore+Degree+Coffee+Dashboard)  
-*The dashboard provides a personalized overview with loyalty points, recent orders, saved addresses, and favorite coffees.*
+![Dashboard](public/dashboard.png)
+*The dashboard provides a personalized overview with recent orders, saved addresses and favorite coffees.*
 
 ## Contributing 🤝
 
