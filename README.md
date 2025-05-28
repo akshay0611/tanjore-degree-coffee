@@ -4,7 +4,7 @@
 
 ## Overview 📖
 
-Tanjore Degree Coffee is a Next.js-based web application that brings the authentic taste of traditional South Indian coffee to your doorstep. With a rich history dating back to 1942, this platform offers a seamless experience for browsing menus, managing orders, and enjoying a personalized dashboard for authenticated users. Built with TypeScript, Supabase for backend services, and a clean UI, Tanjore Degree Coffee combines tradition with modern technology. 🚀 
+Tanjore Degree Coffee is a Next.js-based web application that brings the authentic taste of traditional South Indian coffee to your doorstep. With a rich history dating back to 1942, this platform offers a seamless experience for browsing menus, managing orders, and enjoying a personalized dashboard for authenticated users. Built with TypeScript, Supabase for backend services, and a clean UI, Tanjore Degree Coffee combines tradition with modern technology. 🚀  
 
 ## Features ✨
 
@@ -14,7 +14,7 @@ Tanjore Degree Coffee is a Next.js-based web application that brings the authent
 - **Order Online**: Place orders directly from the homepage with a streamlined checkout process. 🛒
 - **Responsive Design**: Optimized for both desktop and mobile devices. 📱💻
 - **WhatsApp Support**: Integrated support link for customer assistance. 📞
-- **Emails**: Resend is used for emails. ✉️
+- **Emails**: Resend is used for emails. ✉️ 
 
 ## User Flow 👤
 
@@ -22,7 +22,7 @@ Tanjore Degree Coffee is a Next.js-based web application that brings the authent
 2. **Order Online**: Click the "Order Online" button in the top-right corner to begin your ordering journey. 🛒
 3. **Login**: You'll be prompted to log in to proceed with your order. 🔑
 4. **Dashboard**: Upon successful login, you're redirected to a personalized dashboard showing:
-   - Recent orders 📦
+   - Recent orders 📦 
 5. **Menu & Ordering**: Navigate to the menu to browse items, add them to your cart, and complete your order. 🍽️
 
 ## Tech Stack 🛠️
