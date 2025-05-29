@@ -27,13 +27,13 @@ Tanjore Degree Coffee is a Next.js-based web application that brings the authent
 
 ## Tech Stack 🛠️
 
-- **Framework**: [Next.js](https://nextjs.org/) (React framework with server-side rendering) ⚛️
-- **Language**: [TypeScript](https://www.typescriptlang.org/) 📜
-- **Database/Auth**: [Supabase](https://supabase.com/) (PostgreSQL-based backend-as-a-service) 🗄️
-- **Styling**: Tailwind CSS via custom `globals.css` and PostCSS 🎨
-- **UI Components**: Shadcn components (e.g., Button, Card, Dialog) 🧩
-- **Icons**: [Lucide React](https://lucide.dev/) 🖼️
-- **Linting**: ESLint with TypeScript support ✅
+- **Framework**: [Next.js](https://nextjs.org/) (React framework with server-side rendering) ⚛️ 
+- **Language**: [TypeScript](https://www.typescriptlang.org/) 📜 
+- **Database/Auth**: [Supabase](https://supabase.com/) (PostgreSQL-based backend-as-a-service) 🗄️ 
+- **Styling**: Tailwind CSS via custom `globals.css` and PostCSS 🎨 
+- **UI Components**: Shadcn components (e.g., Button, Card, Dialog) 🧩 
+- **Icons**: [Lucide React](https://lucide.dev/) 🖼️ 
+- **Linting**: ESLint with TypeScript support ✅ 
 
 ## Getting Started 🚀
 
