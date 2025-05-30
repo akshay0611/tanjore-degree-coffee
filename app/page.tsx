@@ -6,7 +6,6 @@ import AboutSection from "@/components/AboutSection";
 import MenuSection from "@/components/MenuSection";
 import GallerySection from '@/components/GallerySection'; // Adjust path based on your folder structure
 
-
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
