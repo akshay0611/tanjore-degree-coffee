@@ -44,7 +44,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                text: "The most authentic degree coffee I&apos;ve had outside of Thanjavur. The aroma and taste take me back to my childhood.",
+                text: "The most authentic degree coffee I've had outside Thanjavur. The aroma and taste take me back to my childhood.",
                 name: "Ramesh Kumar",
                 location: "Chennai",
                 image: "/test1.jpeg",
