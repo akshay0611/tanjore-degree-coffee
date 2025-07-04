@@ -4,7 +4,7 @@
 
 ## Overview 📖
 
-Tanjore Degree Coffee is a Next.js-based web application that brings the authentic taste of traditional South Indian coffee to your doorstep. With a rich history dating back to 1942, this platform offers a seamless experience for browsing menus, managing orders, and enjoying a personalized dashboard for authenticated users. Built with TypeScript, Supabase for backend services, and a clean UI, Tanjore Degree Coffee combines tradition with modern technology. 🚀
+Tanjore Degree Coffee is a Next.js-based web application that brings the authentic taste of traditional South Indian coffee to your doorstep. With a rich history dating back to 1942, this platform offers a seamless experience for browsing menus, managing orders, and enjoying a personalized dashboard for authenticated users. Built with TypeScript, Supabase for backend services, and a clean UI, Tanjore Degree Coffee combines tradition with modern technology. 🚀 
 
 ## Features ✨
 
@@ -98,9 +98,9 @@ Contributions are welcome! Please follow these steps:
 
 ## License 📜
 
-This project is licensed under the [MIT License](LICENSE). ✅
+This project is licensed under the [MIT License](LICENSE). ✅ 
 
-## Acknowledgments 🌟
+## Acknowledgments 🌟 
 
-- Built with ❤️ by [Akshay](https://github.com/akshay0611)
-- Inspired by the rich tradition of South Indian coffee culture since 1942 ☕ 
+- Built with ❤️ by [Akshay](https://github.com/akshay0611) 
+- Inspired by the rich tradition of South Indian coffee culture since 1942 ☕  
