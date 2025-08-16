@@ -1,6 +1,6 @@
 # Tanjore Degree Coffee ☕
 
-*A modern e-commerce platform for authentic South Indian coffee and snacks, brewed to perfection since 1942.* 🌟
+*A modern e-commerce platform for authentic South Indian coffee and snacks, brewed to perfection since 1942.* 🌟 
 
 ## Overview 📖
 
@@ -103,4 +103,4 @@ This project is licensed under the [MIT License](LICENSE). ✅
 ## Acknowledgments 🌟
 
 - Built with ❤️ by [Akshay](https://github.com/akshay0611)
-- Inspired by the rich tradition of South Indian coffee culture since 1942 ☕
+- Inspired by the rich tradition of South Indian coffee culture since 1942 ☕ 
