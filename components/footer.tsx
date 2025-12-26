@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Coffee, ChevronRight, MapPin, Phone, Mail, Clock, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Coffee, ChevronRight, MapPin, Phone, Mail, Clock, Facebook, Twitter, Instagram, Youtube, Heart } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -147,6 +147,12 @@ const Footer = () => {
               Terms of Service
             </Link>
           </div>
+        </div>
+
+        <div className="mt-6 text-center">
+          <Link href="/developer" className="text-amber-300/70 flex items-center justify-center gap-1 hover:text-amber-200 transition-colors">
+            Made with <Heart className="h-4 w-4 text-red-500 fill-red-500" /> by Akshay
+          </Link>
         </div>
       </div>
     </footer>

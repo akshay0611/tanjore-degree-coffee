@@ -25,6 +25,7 @@ export default function Header() {
       { name: "Menu", href: "/menu" },
       { name: "Gallery", href: "/gallery" },
       { name: "Contact", href: "/contact" },
+      { name: "Developer", href: "/developer" },
     ],
     []
   );
