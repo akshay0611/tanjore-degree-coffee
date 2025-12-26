@@ -13,16 +13,6 @@ export default function DeveloperPage() {
     { name: "Gemini AI", category: "AI Integration" },
   ];
 
-  const projects = [
-    {
-      title: "Tanjore Degree Coffee",
-      description: "A modern website for a traditional South Indian coffee shop with AI-powered chatbot.",
-      tech: ["Next.js", "Tailwind", "Supabase", "Gemini AI"],
-      current: true,
-    },
-    // Add more projects here as needed
-  ];
-
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -86,7 +76,7 @@ export default function DeveloperPage() {
               {/* Social Links */}
               <div className="flex flex-wrap gap-4">
                 <a
-                  href="https://github.com/akshay0611"
+                  href="https://github.com/yourusername"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-amber-900 text-white px-6 py-3 rounded-full hover:bg-amber-800 transition-all duration-300"
@@ -95,7 +85,7 @@ export default function DeveloperPage() {
                   GitHub
                 </a>
                 <a
-                  href="https://www.linkedin.com/in/akshaykumar0611/"
+                  href="https://linkedin.com/in/yourusername"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-all duration-300"
@@ -104,7 +94,7 @@ export default function DeveloperPage() {
                   LinkedIn
                 </a>
                 <a
-                  href="mailto:akshay.allen26200@gmail.com"
+                  href="mailto:your.email@example.com"
                   className="inline-flex items-center gap-2 bg-amber-100 text-amber-900 px-6 py-3 rounded-full hover:bg-amber-200 transition-all duration-300"
                 >
                   <Mail className="h-5 w-5" />
@@ -210,7 +200,7 @@ export default function DeveloperPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href="mailto:akshay.allen26200@gmail.com">
+              <a href="mailto:your.email@example.com">
                 <Button className="bg-amber-50 text-amber-900 hover:bg-amber-100 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg">
                   Get in Touch
                 </Button>
