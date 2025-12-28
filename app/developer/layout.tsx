@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Developer | Akshay - Full Stack Developer",
+  title: "Full-Stack Developer – Tanjore Degree Coffee | Akshay Kumar",
   description:
     "Meet Akshay, the developer behind Tanjore Degree Coffee website. Full stack developer specializing in Next.js, React, TypeScript, and modern web technologies.",
   keywords: [
@@ -15,22 +15,18 @@ export const metadata: Metadata = {
     "Supabase",
     "Portfolio",
   ],
-  authors: [{ name: "Akshay" }],
+  authors: [{ name: "Akshay", url: "https://www.linkedin.com/in/akshaykumar0611/" }],
   creator: "Akshay",
+  alternates: {
+    canonical: "https://tanjore-degree-coffee.vercel.app/developer",
+  },
   openGraph: {
-    title: "Akshay | Full Stack Developer",
+    title: "Full-Stack Developer – Tanjore Degree Coffee | Akshay Kumar",
     description:
       "Meet Akshay, the developer behind Tanjore Degree Coffee website. Specializing in modern web development with Next.js, React, and TypeScript.",
     type: "profile",
     locale: "en_US",
     siteName: "Tanjore Degree Coffee",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Akshay | Full Stack Developer",
-    description:
-      "Meet Akshay, the developer behind Tanjore Degree Coffee website.",
-    creator: "@akshaykumar0611",
   },
   robots: {
     index: true,
