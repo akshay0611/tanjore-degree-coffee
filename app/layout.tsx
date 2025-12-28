@@ -29,6 +29,14 @@ export const metadata: Metadata = {
   authors: [{ name: "Akshay", url: "https://www.linkedin.com/in/akshaykumar0611/" }],
   creator: "Akshay",
   publisher: "Tanjore Degree Coffee",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
