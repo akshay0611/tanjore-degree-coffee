@@ -10,7 +10,7 @@ export default function MenuSection() {
       name: "Classic Degree Coffee",
       description: "Traditional decoction with farm-fresh milk",
       price: "₹60",
-      image: "/menu1.jpeg", 
+      image: "/menu1.jpeg",
       popular: true,
     },
     {
@@ -48,7 +48,7 @@ export default function MenuSection() {
 
   return (
     <section className="py-24 bg-amber-950 text-amber-50 relative overflow-hidden">
-   
+
       <div className="absolute inset-0 bg-[url('/coffee-pattern.svg')] bg-repeat opacity-10"></div>
 
       <div className="container px-4 mx-auto relative z-10">
@@ -70,18 +70,18 @@ export default function MenuSection() {
               key={index}
               className="group bg-amber-900/50 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-amber-900/50 hover:-translate-y-1 relative"
             >
-             
+
               {item.popular && (
                 <div className="absolute top-4 right-4 bg-amber-600 text-amber-50 px-3 py-1 rounded-full text-sm font-medium z-20">
                   Popular
                 </div>
               )}
 
-             
+
               <div className="relative h-56 overflow-hidden">
                 <Image
                   src={item.image}
-                  alt={item.name}
+                  alt={`${item.name} at Tanjore Degree Coffee – developed by Akshay Kumar`}
                   width={400}
                   height={224}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -89,7 +89,7 @@ export default function MenuSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-amber-950/70 to-transparent"></div>
               </div>
 
-             
+
               <div className="p-6 relative">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-xl font-semibold text-amber-100">{item.name}</h3>
@@ -108,20 +108,20 @@ export default function MenuSection() {
           ))}
         </div>
 
-      
+
         <div className="text-center mt-16">
-  <Link href="/menu" passHref>
-    <Button
-      size="lg"
-      className="bg-amber-700 hover:bg-amber-800 text-amber-50 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 animate-pulse"
-    >
-      View Full Menu
-    </Button>
-  </Link>
-</div>
+          <Link href="/menu" passHref>
+            <Button
+              size="lg"
+              className="bg-amber-700 hover:bg-amber-800 text-amber-50 px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-amber-900/20 animate-pulse"
+            >
+              View Full Menu
+            </Button>
+          </Link>
+        </div>
       </div>
 
-     
+
       <style jsx global>{`
         @keyframes float {
           0%, 100% {

@@ -11,11 +11,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL("https://tanjore-degree-coffee.vercel.app"),
   title: {
-    default: "Tanjore Degree Coffee | Authentic South Indian Coffee",
+    default: "Tanjore Degree Coffee | Built by Akshay Kumar",
     template: "%s | Tanjore Degree Coffee",
   },
   description:
-    "Experience the authentic taste of traditional South Indian filter coffee. Crafted with care using premium beans from the Western Ghats since 1942.",
+    "Experience authentic South Indian Filter Coffee. A high-performance FoodTech project architected and developed by Akshay Kumar using Next.js.",
   keywords: [
     "Tanjore Degree Coffee",
     "South Indian Coffee",
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
     "Indian Coffee",
     "Degree Coffee",
   ],
-  authors: [{ name: "Akshay", url: "https://www.linkedin.com/in/akshaykumar0611/" }],
-  creator: "Akshay",
+  authors: [{ name: "Akshay Kumar", url: "https://connectwithakshay.netlify.app" }],
+  creator: "Akshay Kumar",
   publisher: "Tanjore Degree Coffee",
   icons: {
     icon: [
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://tanjore-degree-coffee.vercel.app",
     siteName: "Tanjore Degree Coffee",
-    title: "Tanjore Degree Coffee | Authentic South Indian Coffee",
+    title: "Tanjore Degree Coffee | Built by Akshay Kumar",
     description:
-      "Experience the authentic taste of traditional South Indian filter coffee. Crafted with care since 1942.",
+      "Experience authentic South Indian Filter Coffee. A high-performance FoodTech project architected and developed by Akshay Kumar using Next.js.",
     images: [
       {
         url: "/coffee.jpg",
@@ -77,6 +77,38 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Person",
+                  "@id": "https://connectwithakshay.netlify.app/#person",
+                  "name": "Akshay Kumar",
+                  "jobTitle": "Lead Developer",
+                  "url": "https://connectwithakshay.netlify.app",
+                  "sameAs": [
+                    "https://www.linkedin.com/in/akshaykumar0611/",
+                    "https://github.com/akshay0611/"
+                  ],
+                  "knowsAbout": ["Next.js", "AI Integrations", "System Architecture"]
+                },
+                {
+                  "@type": "SoftwareApplication",
+                  "name": "Tanjore Degree Coffee",
+                  "applicationCategory": "BusinessApplication",
+                  "operatingSystem": "Web",
+                  "keywords": "FoodTech, Digital Coffee Experience",
+                  "author": { "@id": "https://connectwithakshay.netlify.app/#person" }
+                }
+              ]
+            })
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <LayoutWrapper>{children}</LayoutWrapper>
         <Chatbot />

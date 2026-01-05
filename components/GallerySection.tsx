@@ -4,7 +4,7 @@ import { Coffee, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 const GallerySection = () => {
- 
+
   const images = [
     '/cg1.jpeg',
     '/cg2.jpeg',
@@ -40,7 +40,7 @@ const GallerySection = () => {
     setCurrentIndex(newIndex);
   };
 
- 
+
   const goToNext = () => {
     const newIndex = (currentIndex + 1) % images.length;
     setSelectedImage(images[newIndex]);
@@ -69,14 +69,13 @@ const GallerySection = () => {
           {images.map((src, index) => (
             <div
               key={index}
-              className={`relative overflow-hidden rounded-xl shadow-lg group ${
-                index === 0 || index === 7 ? 'col-span-2 row-span-2' : ''
-              } transition-all duration-700 ease-out cursor-pointer`}
+              className={`relative overflow-hidden rounded-xl shadow-lg group ${index === 0 || index === 7 ? 'col-span-2 row-span-2' : ''
+                } transition-all duration-700 ease-out cursor-pointer`}
               onClick={() => openModal(src, index)}
             >
               <Image
                 src={src}
-                alt={`Gallery image ${index + 1}`}
+                alt={`Coffee Gallery - Tanjore Degree Coffee by Akshay Kumar - Image ${index + 1}`}
                 width={index === 0 || index === 7 ? 600 : 300}
                 height={index === 0 || index === 7 ? 600 : 300}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -120,7 +119,7 @@ const GallerySection = () => {
               {/* Selected Image */}
               <Image
                 src={selectedImage}
-                alt="Selected Gallery Image"
+                alt="Selected Coffee Gallery Image - Tanjore Degree Coffee by Akshay Kumar"
                 width={800}
                 height={600}
                 className="w-full h-full object-contain"

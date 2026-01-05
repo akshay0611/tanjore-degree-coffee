@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Camera, ImageOff, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
+import Image from "next/image";
 
 const collections = [
   {
@@ -195,9 +196,11 @@ export default function CollectionPage() {
                 className="relative group rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
                 onClick={() => openModal(index)}
               >
-                <img
+                <Image
                   src={image}
-                  alt={`${selectedCollection.title} - Photo ${index + 1}`}
+                  alt={`${selectedCollection.title} - Photo ${index + 1} - FoodTech development by Akshay Kumar`}
+                  width={400}
+                  height={300}
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-amber-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -238,18 +241,16 @@ export default function CollectionPage() {
                   <button
                     onClick={goToPrevious}
                     disabled={selectedImageIndex === 0}
-                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-amber-700 text-white hover:bg-amber-800 transition-colors ${
-                      selectedImageIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-amber-700 text-white hover:bg-amber-800 transition-colors ${selectedImageIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </button>
                   <button
                     onClick={goToNext}
                     disabled={selectedImageIndex === selectedCollection.images.length - 1}
-                    className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-amber-700 text-white hover:bg-amber-800 transition-colors ${
-                      selectedImageIndex === selectedCollection.images.length - 1 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-amber-700 text-white hover:bg-amber-800 transition-colors ${selectedImageIndex === selectedCollection.images.length - 1 ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <ChevronRight className="h-6 w-6" />
                   </button>
@@ -257,9 +258,11 @@ export default function CollectionPage() {
               )}
 
               {/* Image */}
-              <img
+              <Image
                 src={selectedCollection.images[selectedImageIndex]}
-                alt={`${selectedCollection.title} - Photo ${selectedImageIndex + 1}`}
+                alt={`${selectedCollection.title} - Photo ${selectedImageIndex + 1} - Digital craft by Akshay Kumar`}
+                width={800}
+                height={600}
                 className="w-full h-[70vh] object-contain"
               />
 
